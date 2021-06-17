@@ -1,3 +1,6 @@
+*.bat
+/content
+
 # Logs
 logs
 *.log
