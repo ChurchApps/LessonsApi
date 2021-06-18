@@ -1,4 +1,4 @@
-# AccessApi
+# LessonsApi
 A Node.js API providing the backend for Lessons.church
 
 ### Dev Setup Instructions
