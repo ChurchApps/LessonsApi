@@ -23,8 +23,12 @@ export class ProviderRepository {
         return provider;
     }
 
-    public loadById(id: string): Promise<Provider> {
+    public load(id: string): Promise<Provider> {
         return DB.queryOne("SELECT * FROM providers WHERE id=?", [id]);
+    }
+
+    public loadAll(churchId: string): Promise<Provider> {
+        return DB.queryOne("SELECT * FROM providers WHERE churchId=?", [churchId]);
     }
 
     public delete(churchId: string, id: string): Promise<Provider> {

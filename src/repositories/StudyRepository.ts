@@ -27,7 +27,7 @@ export class StudyRepository {
         return DB.query("SELECT * FROM studies WHERE providerId=?", [providerId]);
     }
 
-    public loadById(id: string): Promise<Study> {
+    public load(id: string): Promise<Study> {
         return DB.queryOne("SELECT * FROM studies WHERE id=?", [id]);
     }
 

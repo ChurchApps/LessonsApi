@@ -23,8 +23,12 @@ export class FileRepository {
         return file;
     }
 
-    public loadById(id: string): Promise<File> {
-        return DB.queryOne("SELECT * FROM files WHERE id=? AND churchId=?", [id]);
+    public load(id: string): Promise<File> {
+        return DB.queryOne("SELECT * FROM files WHERE id=?", [id]);
+    }
+
+    public loadAll(churchId: string): Promise<File> {
+        return DB.queryOne("SELECT * FROM files WHERE churchId=?", [churchId]);
     }
 
     public delete(churchId: string, id: string): Promise<File> {

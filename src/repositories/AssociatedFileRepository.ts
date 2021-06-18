@@ -31,7 +31,7 @@ export class AssociatedFileRepository {
         return DB.query("SELECT * FROM associatedFiles WHERE contentType=? AND contentId=?", [contentType, contentId]);
     }
 
-    public loadById(id: string): Promise<AssociatedFile> {
+    public load(id: string): Promise<AssociatedFile> {
         return DB.queryOne("SELECT * FROM associatedFiles WHERE id=?", [id]);
     }
 

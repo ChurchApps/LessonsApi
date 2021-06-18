@@ -27,7 +27,7 @@ export class LessonRepository {
         return DB.query("SELECT * FROM lessons WHERE AND studyId=? ORDER BY sort", [studyId]);
     }
 
-    public loadById(id: string): Promise<Lesson> {
+    public load(id: string): Promise<Lesson> {
         return DB.queryOne("SELECT * FROM lessons WHERE id=?", [id]);
     }
 
