@@ -14,10 +14,10 @@ export class StudyController extends LessonsBaseController {
         });
     }
 
-    @httpGet("/provider/:providerId")
-    public async getForProvider(@requestParam("providerId") providerId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
+    @httpGet("/program/:programId")
+    public async getForProgram(@requestParam("programId") programId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
         return this.actionWrapperAnon(req, res, async () => {
-            return await this.repositories.study.loadByProviderId(providerId);
+            return await this.repositories.study.loadByProgramId(programId);
         });
     }
 

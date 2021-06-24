@@ -10,8 +10,8 @@ export class StudyRepository {
 
     public async create(study: Study) {
         study.id = UniqueIdHelper.shortId();
-        const sql = "INSERT INTO studies (id, churchId, providerId, name) VALUES (?, ?, ?, ?);";
-        const params = [study.id, study.churchId, study.providerId, study.name];
+        const sql = "INSERT INTO studies (id, churchId, programId, name) VALUES (?, ?, ?, ?);";
+        const params = [study.id, study.churchId, study.programId, study.name];
         await DB.query(sql, params);
         return study;
     }
@@ -23,8 +23,8 @@ export class StudyRepository {
         return study;
     }
 
-    public loadByProviderId(providerId: string): Promise<Study[]> {
-        return DB.query("SELECT * FROM studies WHERE providerId=?", [providerId]);
+    public loadByProgramId(programId: string): Promise<Study[]> {
+        return DB.query("SELECT * FROM studies WHERE programId=?", [programId]);
     }
 
     public load(id: string): Promise<Study> {
