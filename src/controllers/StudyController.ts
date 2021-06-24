@@ -3,6 +3,7 @@ import express from "express";
 import { LessonsBaseController } from "./LessonsBaseController"
 import { Study } from "../models"
 import { Permissions } from '../helpers/Permissions'
+import { FileHelper } from "../helpers"
 
 @controller("/studies")
 export class StudyController extends LessonsBaseController {
@@ -27,12 +28,30 @@ export class StudyController extends LessonsBaseController {
       // if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
       // else {
       const promises: Promise<Study>[] = [];
-      req.body.forEach(study => { study.churchId = au.churchId; promises.push(this.repositories.study.save(study)); });
+      req.body.forEach(study => {
+        study.churchId = au.churchId;
+        const s = study;
+        const saveFunction = async () => {
+          if (s.image && s.image.startsWith("data:image/png;base64,")) await this.saveImage(s);
+          return await this.repositories.study.save(study);
+        }
+        promises.push(saveFunction());
+      });
       const result = await Promise.all(promises);
       return result;
       // }
     });
   }
+
+  private async saveImage(study: Study) {
+    const base64 = study.image.split(',')[1];
+    const key = "/studies/" + study.id + ".png";
+    return FileHelper.store(key, "image/png", Buffer.from(base64, 'base64')).then(async () => {
+      const photoUpdated = new Date();
+      study.image = key + "?dt=" + photoUpdated.getTime().toString();
+    });
+  }
+
 
   @httpDelete("/:id")
   public async delete(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {

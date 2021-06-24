@@ -3,4 +3,5 @@ export class Study {
     public churchId?: string;
     public programId?: string;
     public name?: string;
+    public image?: string;
 }
