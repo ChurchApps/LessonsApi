@@ -16,16 +16,25 @@ export class LessonController extends LessonsBaseController {
   }
 
   @httpGet("/public/study/:studyId")
-  public async getForStudy(@requestParam("studyId") studyId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
+  public async getPublicForStudy(@requestParam("studyId") studyId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
     return this.actionWrapperAnon(req, res, async () => {
       return await this.repositories.lesson.loadPublicByStudyId(studyId);
+    });
+  }
+
+  @httpGet("/study/:studyId")
+  public async getForStudy(@requestParam("studyId") studyId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
+    return this.actionWrapper(req, res, async (au) => {
+      if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
+      else return await this.repositories.lesson.loadByStudyId(au.churchId, studyId);
     });
   }
 
   @httpGet("/")
   public async getAll(req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
     return this.actionWrapper(req, res, async (au) => {
-      return await this.repositories.lesson.loadAll(au.churchId);
+      if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
+      else return await this.repositories.lesson.loadAll(au.churchId);
     });
   }
 
@@ -33,24 +42,21 @@ export class LessonController extends LessonsBaseController {
   @httpPost("/")
   public async save(req: express.Request<{}, {}, Lesson[]>, res: express.Response): Promise<interfaces.IHttpActionResult> {
     return this.actionWrapper(req, res, async (au) => {
-      // if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
-      // else {
-      const promises: Promise<Lesson>[] = [];
-      req.body.forEach(lesson => {
-        lesson.churchId = au.churchId;
-        const l = lesson;
-        const saveFunction = async () => {
-          if (l.image && l.image.startsWith("data:image/png;base64,")) await this.saveImage(l);
-          return await this.repositories.lesson.save(lesson);
-        }
-        promises.push(saveFunction());
-      });
-
-
-
-      const result = await Promise.all(promises);
-      return result;
-      // }
+      if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
+      else {
+        const promises: Promise<Lesson>[] = [];
+        req.body.forEach(lesson => {
+          lesson.churchId = au.churchId;
+          const l = lesson;
+          const saveFunction = async () => {
+            if (l.image && l.image.startsWith("data:image/png;base64,")) await this.saveImage(l);
+            return await this.repositories.lesson.save(lesson);
+          }
+          promises.push(saveFunction());
+        });
+        const result = await Promise.all(promises);
+        return result;
+      }
     });
   }
 

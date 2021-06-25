@@ -23,11 +23,19 @@ export class StudyRepository {
     return study;
   }
 
-  public loadByProgramId(programId: string): Promise<Study[]> {
+  public loadByProgramId(churchId: string, programId: string): Promise<Study[]> {
+    return DB.query("SELECT * FROM studies WHERE churchId=? AND programId=?", [churchId, programId]);
+  }
+
+  public loadPublicByProgramId(programId: string): Promise<Study[]> {
     return DB.query("SELECT * FROM studies WHERE programId=?", [programId]);
   }
 
-  public load(id: string): Promise<Study> {
+  public load(churchId: string, id: string): Promise<Study> {
+    return DB.queryOne("SELECT * FROM studies WHERE id=? AND churchId=?", [id, churchId]);
+  }
+
+  public loadPublic(id: string): Promise<Study> {
     return DB.queryOne("SELECT * FROM studies WHERE id=?", [id]);
   }
 

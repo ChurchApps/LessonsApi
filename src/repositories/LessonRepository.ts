@@ -23,6 +23,10 @@ export class LessonRepository {
     return lesson;
   }
 
+  public loadByStudyId(churchId: string, studyId: string): Promise<Lesson[]> {
+    return DB.query("SELECT * FROM lessons WHERE churchId=? AND studyId=? ORDER BY sort", [churchId, studyId]);
+  }
+
   public loadPublicByStudyId(studyId: string): Promise<Lesson[]> {
     return DB.query("SELECT * FROM lessons WHERE studyId=? AND live=1 ORDER BY sort", [studyId]);
   }

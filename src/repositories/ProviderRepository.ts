@@ -23,15 +23,19 @@ export class ProviderRepository {
     return provider;
   }
 
-  public load(id: string): Promise<Provider> {
+  public loadPublic(id: string): Promise<Provider> {
     return DB.queryOne("SELECT * FROM providers WHERE id=?", [id]);
+  }
+
+  public load(churchId: string, id: string): Promise<Provider> {
+    return DB.queryOne("SELECT * FROM providers WHERE id=? AND churchId=?", [id, churchId]);
   }
 
   public loadAll(churchId: string): Promise<Provider[]> {
     return DB.query("SELECT * FROM providers WHERE churchId=?", [churchId]);
   }
 
-  public loadPublic(): Promise<Provider[]> {
+  public loadPublicAll(): Promise<Provider[]> {
     return DB.query("SELECT * FROM providers", []);
   }
 

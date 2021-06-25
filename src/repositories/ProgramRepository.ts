@@ -23,12 +23,21 @@ export class ProgramRepository {
     return program;
   }
 
-  public loadByProviderId(providerId: string): Promise<Program[]> {
-    return DB.query("SELECT * FROM programs WHERE providerId=?", [providerId]);
+  public loadByProviderId(churchId: string, providerId: string): Promise<Program[]> {
+    return DB.query("SELECT * FROM programs WHERE churchId=? AND providerId=?", [churchId, providerId]);
   }
 
-  public load(id: string): Promise<Program> {
+  public load(churchId: string, id: string): Promise<Program> {
+    return DB.queryOne("SELECT * FROM programs WHERE id=? and churchId=?", [id, churchId]);
+  }
+
+
+  public loadPublic(id: string): Promise<Program> {
     return DB.queryOne("SELECT * FROM programs WHERE id=?", [id]);
+  }
+
+  public loadPublicAll(): Promise<Program> {
+    return DB.query("SELECT * FROM programs", []);
   }
 
   public loadAll(): Promise<Program> {

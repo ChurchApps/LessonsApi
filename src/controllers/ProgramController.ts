@@ -8,47 +8,65 @@ import { FileHelper } from "../helpers"
 @controller("/programs")
 export class ProgramController extends LessonsBaseController {
 
+  @httpGet("/public/:id")
+  public async getPublic(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
+    return this.actionWrapperAnon(req, res, async () => {
+      return await this.repositories.program.loadPublic(id)
+    });
+  }
+
+
+  @httpGet("/public")
+  public async getPublicAll(req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
+    return this.actionWrapperAnon(req, res, async () => {
+      return await this.repositories.program.loadPublicAll();
+    });
+  }
+
   @httpGet("/:id")
   public async get(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
-    return this.actionWrapperAnon(req, res, async () => {
-      return await this.repositories.program.load(id)
+    return this.actionWrapper(req, res, async (au) => {
+      return await this.repositories.program.load(au.churchId, id)
     });
   }
 
   @httpGet("/provider/:providerId")
   public async getForProvider(@requestParam("providerId") providerId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
-    return this.actionWrapperAnon(req, res, async () => {
-      return await this.repositories.program.loadByProviderId(providerId);
+    return this.actionWrapper(req, res, async (au) => {
+      if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
+      else return await this.repositories.program.loadByProviderId(au.churchId, providerId);
     });
   }
 
+
   @httpGet("/")
-  public async getForAll(req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
-    return this.actionWrapperAnon(req, res, async () => {
-      return await this.repositories.program.loadAll();
+  public async getAll(req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
+    return this.actionWrapper(req, res, async (au) => {
+      if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
+      else return await this.repositories.program.loadAll();
     });
   }
 
   @httpPost("/")
   public async save(req: express.Request<{}, {}, Program[]>, res: express.Response): Promise<interfaces.IHttpActionResult> {
     return this.actionWrapper(req, res, async (au) => {
-      // if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
-      // else {
-      const promises: Promise<Program>[] = [];
-      // req.body.forEach(program => { program.churchId = au.churchId; promises.push(this.repositories.program.save(program)); });
-      req.body.forEach(program => {
-        program.churchId = au.churchId;
-        const p = program;
-        const saveFunction = async () => {
-          if (p.image && p.image.startsWith("data:image/png;base64,")) await this.saveImage(p);
-          return await this.repositories.program.save(program);
-        }
-        promises.push(saveFunction());
-      });
+      if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
+      else {
+        const promises: Promise<Program>[] = [];
+        // req.body.forEach(program => { program.churchId = au.churchId; promises.push(this.repositories.program.save(program)); });
+        req.body.forEach(program => {
+          program.churchId = au.churchId;
+          const p = program;
+          const saveFunction = async () => {
+            if (p.image && p.image.startsWith("data:image/png;base64,")) await this.saveImage(p);
+            return await this.repositories.program.save(program);
+          }
+          promises.push(saveFunction());
+        });
 
-      const result = await Promise.all(promises);
-      return result;
-      // }
+        const result = await Promise.all(promises);
+        return result;
+      }
     });
   }
 
