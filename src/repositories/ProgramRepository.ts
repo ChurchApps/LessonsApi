@@ -10,15 +10,15 @@ export class ProgramRepository {
 
   public async create(program: Program) {
     program.id = UniqueIdHelper.shortId();
-    const sql = "INSERT INTO programs (id, churchId, providerId, name, image) VALUES (?, ?, ?, ?, ?);";
-    const params = [program.id, program.churchId, program.providerId, program.name];
+    const sql = "INSERT INTO programs (id, churchId, providerId, name, image, shortDescription, description, videoEmbedUrl) VALUES (?, ?, ?, ?, ?, ?, ?, ?);";
+    const params = [program.id, program.churchId, program.providerId, program.name, program.shortDescription, program.description, program.videoEmbedUrl];
     await DB.query(sql, params);
     return program;
   }
 
   public async update(program: Program) {
-    const sql = "UPDATE programs SET name=?, image=? WHERE id=? AND churchId=?";
-    const params = [program.name, program.image, program.id, program.churchId];
+    const sql = "UPDATE programs SET name=?, image=?, shortDescription=?, description=?, videoEmbedUrl=? WHERE id=? AND churchId=?";
+    const params = [program.name, program.image, program.shortDescription, program.description, program.videoEmbedUrl, program.id, program.churchId];
     await DB.query(sql, params);
     return program;
   }
@@ -29,6 +29,10 @@ export class ProgramRepository {
 
   public load(id: string): Promise<Program> {
     return DB.queryOne("SELECT * FROM programs WHERE id=?", [id]);
+  }
+
+  public loadAll(): Promise<Program> {
+    return DB.query("SELECT * FROM programs", []);
   }
 
   public delete(churchId: string, id: string): Promise<Program> {

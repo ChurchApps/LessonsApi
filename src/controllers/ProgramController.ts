@@ -22,6 +22,13 @@ export class ProgramController extends LessonsBaseController {
     });
   }
 
+  @httpGet("/")
+  public async getForAll(req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
+    return this.actionWrapperAnon(req, res, async () => {
+      return await this.repositories.program.loadAll();
+    });
+  }
+
   @httpPost("/")
   public async save(req: express.Request<{}, {}, Program[]>, res: express.Response): Promise<interfaces.IHttpActionResult> {
     return this.actionWrapper(req, res, async (au) => {
