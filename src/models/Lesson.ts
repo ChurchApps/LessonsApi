@@ -6,4 +6,6 @@ export class Lesson {
   public title?: string;
   public sort?: number;
   public image?: string;
+  public live?: boolean;
+  public description?: string;
 }

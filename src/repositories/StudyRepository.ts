@@ -31,6 +31,10 @@ export class StudyRepository {
     return DB.queryOne("SELECT * FROM studies WHERE id=?", [id]);
   }
 
+  public loadAll(churchId: string): Promise<Study[]> {
+    return DB.query("SELECT * FROM studies WHERE churchId=?", [churchId]);
+  }
+
   public delete(churchId: string, id: string): Promise<Study> {
     return DB.query("DELETE FROM studies WHERE id=? AND churchId=?", [id, churchId]);
   }

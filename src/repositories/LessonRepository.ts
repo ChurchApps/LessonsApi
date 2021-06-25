@@ -10,15 +10,15 @@ export class LessonRepository {
 
   public async create(lesson: Lesson) {
     lesson.id = UniqueIdHelper.shortId();
-    const sql = "INSERT INTO lessons (id, churchId, studyId, name, title, sort, image) VALUES (?, ?, ?, ?, ?, ?, ?);";
-    const params = [lesson.id, lesson.churchId, lesson.studyId, lesson.name, lesson.title, lesson.sort, lesson.image];
+    const sql = "INSERT INTO lessons (id, churchId, studyId, name, title, sort, image, live, description) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);";
+    const params = [lesson.id, lesson.churchId, lesson.studyId, lesson.name, lesson.title, lesson.sort, lesson.image, lesson.live, lesson.description];
     await DB.query(sql, params);
     return lesson;
   }
 
   public async update(lesson: Lesson) {
-    const sql = "UPDATE lessons SET studyId=?, name=?, title=?, sort=?, image=? WHERE id=? AND churchId=?";
-    const params = [lesson.studyId, lesson.name, lesson.title, lesson.sort, lesson.image, lesson.id, lesson.churchId];
+    const sql = "UPDATE lessons SET studyId=?, name=?, title=?, sort=?, image=?, live=?, description=? WHERE id=? AND churchId=?";
+    const params = [lesson.studyId, lesson.name, lesson.title, lesson.sort, lesson.image, lesson.live, lesson.description, lesson.id, lesson.churchId];
     await DB.query(sql, params);
     return lesson;
   }
@@ -29,6 +29,11 @@ export class LessonRepository {
 
   public load(id: string): Promise<Lesson> {
     return DB.queryOne("SELECT * FROM lessons WHERE id=?", [id]);
+  }
+
+
+  public loadAll(churchId: string): Promise<Lesson[]> {
+    return DB.query("SELECT * FROM lessons WHERE churchId=?", [churchId]);
   }
 
   public delete(churchId: string, id: string): Promise<Lesson> {

@@ -22,6 +22,13 @@ export class StudyController extends LessonsBaseController {
     });
   }
 
+  @httpGet("/")
+  public async getForAll(req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
+    return this.actionWrapper(req, res, async (au) => {
+      return await this.repositories.study.loadAll(au.churchId);
+    });
+  }
+
   @httpPost("/")
   public async save(req: express.Request<{}, {}, Study[]>, res: express.Response): Promise<interfaces.IHttpActionResult> {
     return this.actionWrapper(req, res, async (au) => {

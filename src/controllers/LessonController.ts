@@ -16,11 +16,19 @@ export class LessonController extends LessonsBaseController {
   }
 
   @httpGet("/study/:studyId")
-  public async getAll(@requestParam("studyId") studyId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
+  public async getForStudy(@requestParam("studyId") studyId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
     return this.actionWrapperAnon(req, res, async () => {
       return await this.repositories.lesson.loadByStudyId(studyId);
     });
   }
+
+  @httpGet("/")
+  public async getAll(req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
+    return this.actionWrapper(req, res, async (au) => {
+      return await this.repositories.lesson.loadAll(au.churchId);
+    });
+  }
+
 
   @httpPost("/")
   public async save(req: express.Request<{}, {}, Lesson[]>, res: express.Response): Promise<interfaces.IHttpActionResult> {
