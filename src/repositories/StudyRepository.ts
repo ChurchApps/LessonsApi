@@ -10,15 +10,15 @@ export class StudyRepository {
 
   public async create(study: Study) {
     study.id = UniqueIdHelper.shortId();
-    const sql = "INSERT INTO studies (id, churchId, programId, name, image) VALUES (?, ?, ?, ?, ?);";
-    const params = [study.id, study.churchId, study.programId, study.name, study.image];
+    const sql = "INSERT INTO studies (id, churchId, programId, name, image, shortDescription, description, videoEmbedUrl) VALUES (?, ?, ?, ?, ?, ?, ?, ?);";
+    const params = [study.id, study.churchId, study.programId, study.name, study.image, study.shortDescription, study.description, study.videoEmbedUrl];
     await DB.query(sql, params);
     return study;
   }
 
   public async update(study: Study) {
-    const sql = "UPDATE studies SET name=?, image=? WHERE id=? AND churchId=?";
-    const params = [study.name, study.image, study.id, study.churchId];
+    const sql = "UPDATE studies SET name=?, image=?, shortDescription=?, description=?, videoEmbedUrl=? WHERE id=? AND churchId=?";
+    const params = [study.name, study.image, study.shortDescription, study.description, study.videoEmbedUrl, study.id, study.churchId];
     await DB.query(sql, params);
     return study;
   }
