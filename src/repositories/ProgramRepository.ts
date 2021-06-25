@@ -10,15 +10,15 @@ export class ProgramRepository {
 
   public async create(program: Program) {
     program.id = UniqueIdHelper.shortId();
-    const sql = "INSERT INTO programs (id, churchId, providerId, name) VALUES (?, ?, ?, ?);";
+    const sql = "INSERT INTO programs (id, churchId, providerId, name, image) VALUES (?, ?, ?, ?, ?);";
     const params = [program.id, program.churchId, program.providerId, program.name];
     await DB.query(sql, params);
     return program;
   }
 
   public async update(program: Program) {
-    const sql = "UPDATE programs SET name=? WHERE id=? AND churchId=?";
-    const params = [program.name, program.id, program.churchId];
+    const sql = "UPDATE programs SET name=?, image=? WHERE id=? AND churchId=?";
+    const params = [program.name, program.image, program.id, program.churchId];
     await DB.query(sql, params);
     return program;
   }

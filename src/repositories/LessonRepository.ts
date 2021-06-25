@@ -10,15 +10,15 @@ export class LessonRepository {
 
   public async create(lesson: Lesson) {
     lesson.id = UniqueIdHelper.shortId();
-    const sql = "INSERT INTO lessons (id, churchId, studyId, name, title, sort) VALUES (?, ?, ?, ?, ?, ?);";
-    const params = [lesson.id, lesson.churchId, lesson.studyId, lesson.name, lesson.title, lesson.sort];
+    const sql = "INSERT INTO lessons (id, churchId, studyId, name, title, sort, image) VALUES (?, ?, ?, ?, ?, ?, ?);";
+    const params = [lesson.id, lesson.churchId, lesson.studyId, lesson.name, lesson.title, lesson.sort, lesson.image];
     await DB.query(sql, params);
     return lesson;
   }
 
   public async update(lesson: Lesson) {
-    const sql = "UPDATE lessons SET studyId=?, name=?, title=?, sort=? WHERE id=? AND churchId=?";
-    const params = [lesson.studyId, lesson.name, lesson.title, lesson.sort, lesson.id, lesson.churchId];
+    const sql = "UPDATE lessons SET studyId=?, name=?, title=?, sort=?, image=? WHERE id=? AND churchId=?";
+    const params = [lesson.studyId, lesson.name, lesson.title, lesson.sort, lesson.image, lesson.id, lesson.churchId];
     await DB.query(sql, params);
     return lesson;
   }

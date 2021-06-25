@@ -3,4 +3,5 @@ export class Program {
   public churchId?: string;
   public providerId?: string;
   public name?: string;
+  public image?: string;
 }

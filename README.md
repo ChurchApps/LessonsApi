@@ -12,3 +12,6 @@ A Node.js API providing the backend for Lessons.church
 
 ## Contributing
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
+
+## Dev Notes
+For uploaded files to show up when developing locally run `mklink /D content ..\LessonsApp\public\content` to create a virtual link on Windows.

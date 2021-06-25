@@ -3,6 +3,7 @@ import express from "express";
 import { LessonsBaseController } from "./LessonsBaseController"
 import { Lesson } from "../models"
 import { Permissions } from '../helpers/Permissions'
+import { FileHelper } from "../helpers"
 
 @controller("/lessons")
 export class LessonController extends LessonsBaseController {
@@ -27,7 +28,18 @@ export class LessonController extends LessonsBaseController {
       // if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
       // else {
       const promises: Promise<Lesson>[] = [];
-      req.body.forEach(lesson => { lesson.churchId = au.churchId; promises.push(this.repositories.lesson.save(lesson)); });
+      req.body.forEach(lesson => {
+        lesson.churchId = au.churchId;
+        const l = lesson;
+        const saveFunction = async () => {
+          if (l.image && l.image.startsWith("data:image/png;base64,")) await this.saveImage(l);
+          return await this.repositories.lesson.save(lesson);
+        }
+        promises.push(saveFunction());
+      });
+
+
+
       const result = await Promise.all(promises);
       return result;
       // }
@@ -39,6 +51,15 @@ export class LessonController extends LessonsBaseController {
     return this.actionWrapper(req, res, async (au) => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
       else await this.repositories.lesson.delete(au.churchId, id);
+    });
+  }
+
+  private async saveImage(lesson: Lesson) {
+    const base64 = lesson.image.split(',')[1];
+    const key = "/lessons/" + lesson.id + ".png";
+    return FileHelper.store(key, "image/png", Buffer.from(base64, 'base64')).then(async () => {
+      const photoUpdated = new Date();
+      lesson.image = "/content" + key + "?dt=" + photoUpdated.getTime().toString();
     });
   }
 

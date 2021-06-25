@@ -3,6 +3,7 @@ import express from "express";
 import { LessonsBaseController } from "./LessonsBaseController"
 import { Program } from "../models"
 import { Permissions } from '../helpers/Permissions'
+import { FileHelper } from "../helpers"
 
 @controller("/programs")
 export class ProgramController extends LessonsBaseController {
@@ -27,7 +28,17 @@ export class ProgramController extends LessonsBaseController {
       // if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
       // else {
       const promises: Promise<Program>[] = [];
-      req.body.forEach(program => { program.churchId = au.churchId; promises.push(this.repositories.program.save(program)); });
+      // req.body.forEach(program => { program.churchId = au.churchId; promises.push(this.repositories.program.save(program)); });
+      req.body.forEach(program => {
+        program.churchId = au.churchId;
+        const p = program;
+        const saveFunction = async () => {
+          if (p.image && p.image.startsWith("data:image/png;base64,")) await this.saveImage(p);
+          return await this.repositories.program.save(program);
+        }
+        promises.push(saveFunction());
+      });
+
       const result = await Promise.all(promises);
       return result;
       // }
@@ -39,6 +50,15 @@ export class ProgramController extends LessonsBaseController {
     return this.actionWrapper(req, res, async (au) => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
       else await this.repositories.program.delete(au.churchId, id);
+    });
+  }
+
+  private async saveImage(program: Program) {
+    const base64 = program.image.split(',')[1];
+    const key = "/programs/" + program.id + ".png";
+    return FileHelper.store(key, "image/png", Buffer.from(base64, 'base64')).then(async () => {
+      const photoUpdated = new Date();
+      program.image = "/content" + key + "?dt=" + photoUpdated.getTime().toString();
     });
   }
 
