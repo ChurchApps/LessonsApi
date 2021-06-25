@@ -23,8 +23,8 @@ export class LessonRepository {
     return lesson;
   }
 
-  public loadByStudyId(studyId: string): Promise<Lesson[]> {
-    return DB.query("SELECT * FROM lessons WHERE studyId=? ORDER BY sort", [studyId]);
+  public loadPublicByStudyId(studyId: string): Promise<Lesson[]> {
+    return DB.query("SELECT * FROM lessons WHERE studyId=? AND live=1 ORDER BY sort", [studyId]);
   }
 
   public load(id: string): Promise<Lesson> {
@@ -33,7 +33,7 @@ export class LessonRepository {
 
 
   public loadAll(churchId: string): Promise<Lesson[]> {
-    return DB.query("SELECT * FROM lessons WHERE churchId=?", [churchId]);
+    return DB.query("SELECT * FROM lessons WHERE churchId=? ORDER BY sort", [churchId]);
   }
 
   public delete(churchId: string, id: string): Promise<Lesson> {

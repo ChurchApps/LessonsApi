@@ -15,10 +15,10 @@ export class LessonController extends LessonsBaseController {
     });
   }
 
-  @httpGet("/study/:studyId")
+  @httpGet("/public/study/:studyId")
   public async getForStudy(@requestParam("studyId") studyId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
     return this.actionWrapperAnon(req, res, async () => {
-      return await this.repositories.lesson.loadByStudyId(studyId);
+      return await this.repositories.lesson.loadPublicByStudyId(studyId);
     });
   }
 
