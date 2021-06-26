@@ -1,4 +1,4 @@
-import { AssociatedFileRepository, FileRepository, LessonRepository, ProviderRepository, SectionRepository, StudyRepository, ProgramRepository } from ".";
+import { AssociatedFileRepository, FileRepository, LessonRepository, ProviderRepository, SectionRepository, StudyRepository, ProgramRepository, VenueRepository } from ".";
 
 export class Repositories {
   public associatedFile: AssociatedFileRepository;
@@ -8,6 +8,7 @@ export class Repositories {
   public program: ProgramRepository;
   public section: SectionRepository;
   public study: StudyRepository;
+  public venue: VenueRepository;
 
   private static _current: Repositories = null;
   public static getCurrent = () => {
@@ -23,5 +24,6 @@ export class Repositories {
     this.program = new ProgramRepository();
     this.section = new SectionRepository();
     this.study = new StudyRepository();
+    this.venue = new VenueRepository();
   }
 }

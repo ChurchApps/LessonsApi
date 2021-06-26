@@ -10,8 +10,8 @@ export class LessonController extends LessonsBaseController {
 
   @httpGet("/:id")
   public async get(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
-    return this.actionWrapperAnon(req, res, async () => {
-      return await this.repositories.lesson.load(id)
+    return this.actionWrapper(req, res, async (au) => {
+      return await this.repositories.lesson.load(au.churchId, id);
     });
   }
 
