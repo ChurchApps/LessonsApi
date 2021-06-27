@@ -73,7 +73,7 @@ export class StudyController extends LessonsBaseController {
     const key = "/studies/" + study.id + ".png";
     return FileHelper.store(key, "image/png", Buffer.from(base64, 'base64')).then(async () => {
       const photoUpdated = new Date();
-      study.image = "/content" + key + "?dt=" + photoUpdated.getTime().toString();
+      study.image = process.env.CONTENT_ROOT + key + "?dt=" + photoUpdated.getTime().toString();
     });
   }
 
