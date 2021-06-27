@@ -1,11 +1,10 @@
-export class Lesson {
+export class Program {
   public id?: string;
   public churchId?: string;
-  public studyId?: string;
+  public providerId?: string;
   public name?: string;
-  public title?: string;
-  public sort?: number;
   public image?: string;
-  public live?: boolean;
+  public shortDescription?: string;
   public description?: string;
+  public videoEmbedUrl: string;
 }

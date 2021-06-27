@@ -13,3 +13,6 @@ DB_PASSWORD=
 
 JWT_SECRET_KEY=this is a test key that is a sentence
 JWT_EXPIRATION=2 days
+
+FILE_STORE=disk
+CONTENT_ROOT=/content

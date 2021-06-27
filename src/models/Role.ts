@@ -1,8 +1,8 @@
-export class Section {
+export class Role {
   public id?: string;
   public churchId?: string;
   public lessonId?: string;
-  public venueId?: string;
+  public sectionId?: string;
   public name?: string;
   public sort?: number;
 }
