@@ -23,8 +23,8 @@ export class VariantRepository {
     return variant;
   }
 
-  public loadByResourceId(resourceId: string): Promise<Variant[]> {
-    return DB.query("SELECT * FROM variants WHERE resourceId=? ORDER BY sort", [resourceId]);
+  public loadByResourceId(churchId: string, resourceId: string): Promise<Variant[]> {
+    return DB.query("SELECT * FROM variants WHERE churchId=? AND resourceId=? ORDER BY sort", [churchId, resourceId]);
   }
 
   public load(churchId: string, id: string): Promise<Variant> {

@@ -24,7 +24,7 @@ export class ResourceRepository {
   }
 
   public loadByContentTypeId(churchId: string, contentType: string, contentId: string): Promise<Resource[]> {
-    return DB.query("SELECT * FROM resources WHERE churchId=? AND contentType=? AND contentId=? ORDER BY sort", [churchId, contentType, contentId]);
+    return DB.query("SELECT * FROM resources WHERE churchId=? AND contentType=? AND contentId=? order by name", [churchId, contentType, contentId]);
   }
 
   public load(churchId: string, id: string): Promise<Resource> {

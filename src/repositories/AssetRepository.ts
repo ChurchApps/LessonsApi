@@ -23,13 +23,10 @@ export class AssetRepository {
     return asset;
   }
 
-  public loadByLessonId(churchId: string, lessonId: string): Promise<Asset[]> {
-    return DB.query("SELECT * FROM assets WHERE churchId=? AND lessonId=? ORDER BY sort", [churchId, lessonId]);
+  public loadByResourceId(churchId: string, resourceId: string): Promise<Asset[]> {
+    return DB.query("SELECT * FROM assets WHERE churchId=? AND resourceId=? ORDER BY sort", [churchId, resourceId]);
   }
 
-  public loadByContentTypeId(churchId: string, contentType: string, contentId: string): Promise<Asset[]> {
-    return DB.query("SELECT * FROM assets WHERE churchId=? AND contentType=? AND contentId=? ORDER BY sort", [churchId, contentType, contentId]);
-  }
 
   public load(churchId: string, id: string): Promise<Asset> {
     return DB.queryOne("SELECT * FROM assets WHERE id=? and churchId=?", [id, churchId]);
