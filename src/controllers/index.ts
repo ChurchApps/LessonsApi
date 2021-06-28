@@ -1,5 +1,5 @@
 export { ActionController } from "./ActionController"
-export { AssociatedFileController } from "./AssociatedFileController"
+export { AssociatedResourceController } from "./AssociatedResourceController"
 export { FileController } from "./FileController"
 export { LessonController } from "./LessonController"
 export { ProviderController } from "./ProviderController"
