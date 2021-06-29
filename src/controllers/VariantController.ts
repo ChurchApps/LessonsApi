@@ -16,10 +16,18 @@ export class VariantController extends LessonsBaseController {
   }
 
   @httpGet("/resourceId/:resourceId")
-  public async getForContent(@requestParam("resourceId") resourceId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
+  public async getForResource(@requestParam("resourceId") resourceId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
     return this.actionWrapper(req, res, async (au) => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
       else return await this.repositories.variant.loadByResourceId(au.churchId, resourceId);
+    });
+  }
+
+  @httpGet("/content/:contentType/:contentId")
+  public async getForContent(@requestParam("contentType") contentType: string, @requestParam("contentId") contentId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
+    return this.actionWrapper(req, res, async (au) => {
+      if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
+      else return await this.repositories.variant.loadByContentTypeId(au.churchId, contentType, contentId);
     });
   }
 

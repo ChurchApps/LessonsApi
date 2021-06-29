@@ -16,10 +16,18 @@ export class AssetController extends LessonsBaseController {
   }
 
   @httpGet("/resourceId/:resourceId")
-  public async getForContent(@requestParam("resourceId") resourceId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
+  public async getForResource(@requestParam("resourceId") resourceId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
     return this.actionWrapper(req, res, async (au) => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
       else return await this.repositories.asset.loadByResourceId(au.churchId, resourceId);
+    });
+  }
+
+  @httpGet("/content/:contentType/:contentId")
+  public async getForContent(@requestParam("contentType") contentType: string, @requestParam("contentId") contentId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
+    return this.actionWrapper(req, res, async (au) => {
+      if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
+      else return await this.repositories.asset.loadByContentTypeId(au.churchId, contentType, contentId);
     });
   }
 

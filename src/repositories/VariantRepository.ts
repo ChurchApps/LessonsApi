@@ -24,7 +24,12 @@ export class VariantRepository {
   }
 
   public loadByResourceId(churchId: string, resourceId: string): Promise<Variant[]> {
-    return DB.query("SELECT * FROM variants WHERE churchId=? AND resourceId=? ORDER BY sort", [churchId, resourceId]);
+    return DB.query("SELECT * FROM variants WHERE churchId=? AND resourceId=? ORDER BY name", [churchId, resourceId]);
+  }
+
+  public loadByContentTypeId(churchId: string, contentType: string, contentId: string): Promise<Variant[]> {
+    const subQuery = "SELECT id from resources WHERE churchId=? AND contentType=? AND contentId=?";
+    return DB.query("SELECT * FROM variants WHERE churchId=? AND resourceId in (" + subQuery + ") order by name", [churchId, churchId, contentType, contentId]);
   }
 
   public load(churchId: string, id: string): Promise<Variant> {
