@@ -58,7 +58,7 @@ export class StudyController extends LessonsBaseController {
           const s = study;
           const saveFunction = async () => {
             if (s.image && s.image.startsWith("data:image/png;base64,")) await this.saveImage(s);
-            return await this.repositories.study.save(study);
+            return await this.repositories.study.save(s);
           }
           promises.push(saveFunction());
         });

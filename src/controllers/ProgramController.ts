@@ -59,7 +59,7 @@ export class ProgramController extends LessonsBaseController {
           const p = program;
           const saveFunction = async () => {
             if (p.image && p.image.startsWith("data:image/png;base64,")) await this.saveImage(p);
-            return await this.repositories.program.save(program);
+            return await this.repositories.program.save(p);
           }
           promises.push(saveFunction());
         });
