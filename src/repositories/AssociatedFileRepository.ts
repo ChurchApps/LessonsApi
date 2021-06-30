@@ -5,10 +5,10 @@ import { UniqueIdHelper } from "../helpers";
 export class AssociatedFileRepository {
 
     public save(associatedFile: AssociatedFile) {
-        if (UniqueIdHelper.isMissing(associatedFile.id)) return this.create(associatedFile); else return this.update(associatedFile);
+        return associatedFile.id ? this.update(associatedFile) : this.create(associatedFile);
     }
 
-    public async create(associatedFile: AssociatedFile) {
+    private async create(associatedFile: AssociatedFile) {
         associatedFile.id = UniqueIdHelper.shortId();
         const sql = "INSERT INTO associatedFiles (id, churchId, contentType, contentId, fileId, fileRole) VALUES (?, ?, ?, ?, ?, ?);";
         const params = [associatedFile.id, associatedFile.churchId, associatedFile.contentType, associatedFile.contentId, associatedFile.fileId, associatedFile.fileRole];
@@ -16,7 +16,7 @@ export class AssociatedFileRepository {
         return associatedFile;
     }
 
-    public async update(associatedFile: AssociatedFile) {
+    private async update(associatedFile: AssociatedFile) {
         const sql = "UPDATE associatedFiles SET contentType=?, contentId=?, fileId=?, fileRole=? WHERE id=? AND churchId=?";
         const params = [associatedFile.contentType, associatedFile.contentId, associatedFile.fileId, associatedFile.fileRole, associatedFile.id, associatedFile.churchId];
         await DB.query(sql, params);

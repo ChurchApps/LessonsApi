@@ -5,10 +5,10 @@ import { UniqueIdHelper } from "../helpers";
 export class LessonRepository {
 
   public save(lesson: Lesson) {
-    if (UniqueIdHelper.isMissing(lesson.id)) return this.create(lesson); else return this.update(lesson);
+    return lesson.id ? this.update(lesson) : this.create(lesson);
   }
 
-  public async create(lesson: Lesson) {
+  private async create(lesson: Lesson) {
     lesson.id = UniqueIdHelper.shortId();
     const sql = "INSERT INTO lessons (id, churchId, studyId, name, title, sort, image, live, description) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);";
     const params = [lesson.id, lesson.churchId, lesson.studyId, lesson.name, lesson.title, lesson.sort, lesson.image, lesson.live, lesson.description];
@@ -16,7 +16,7 @@ export class LessonRepository {
     return lesson;
   }
 
-  public async update(lesson: Lesson) {
+  private async update(lesson: Lesson) {
     const sql = "UPDATE lessons SET studyId=?, name=?, title=?, sort=?, image=?, live=?, description=? WHERE id=? AND churchId=?";
     const params = [lesson.studyId, lesson.name, lesson.title, lesson.sort, lesson.image, lesson.live, lesson.description, lesson.id, lesson.churchId];
     await DB.query(sql, params);
