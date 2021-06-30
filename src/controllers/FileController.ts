@@ -11,8 +11,8 @@ export class FileController extends LessonsBaseController {
 
   @httpGet("/:id")
   public async get(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
-    return this.actionWrapperAnon(req, res, async () => {
-      return await this.repositories.file.load(id)
+    return this.actionWrapper(req, res, async (au) => {
+      return await this.repositories.file.load(au.churchId, id)
     });
   }
 
@@ -56,9 +56,17 @@ export class FileController extends LessonsBaseController {
 
 
   private async saveFile(file: File) {
+    const resource = await this.repositories.resource.load(file.churchId, file.resourceId);
+
+    if (file.id) // delete existing uploadFile
+    {
+      const existingFile = await this.repositories.file.load(file.churchId, file.id)
+      const oldKey = "/files/" + resource.contentType + "/" + resource.contentId + "/" + resource.id + "/" + existingFile.fileName;
+      await FileHelper.remove(oldKey);
+    }
+
     const base64 = file.fileContents.split(',')[1];
     const buffer = Buffer.from(base64, 'base64');
-    const resource = await this.repositories.resource.load(file.churchId, file.resourceId);
     const key = "/files/" + resource.contentType + "/" + resource.contentId + "/" + resource.id + "/" + file.fileName;
     await FileHelper.store(key, file.fileType, buffer);
     const fileUpdated = new Date();

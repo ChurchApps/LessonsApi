@@ -3,6 +3,7 @@ import express from "express";
 import { LessonsBaseController } from "./LessonsBaseController"
 import { Asset } from "../models"
 import { Permissions } from '../helpers/Permissions'
+import { FilesHelper } from "../helpers";
 
 @controller("/assets")
 export class AssetController extends LessonsBaseController {
@@ -48,7 +49,11 @@ export class AssetController extends LessonsBaseController {
   public async delete(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
     return this.actionWrapper(req, res, async (au) => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
-      else await this.repositories.asset.delete(au.churchId, id);
+      else {
+        const asset = await this.repositories.asset.load(au.churchId, id);
+        await FilesHelper.deleteFile(au.churchId, asset.fileId, asset.resourceId);
+        await this.repositories.asset.delete(au.churchId, id);
+      }
     });
   }
 

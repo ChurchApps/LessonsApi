@@ -3,6 +3,7 @@ import express from "express";
 import { LessonsBaseController } from "./LessonsBaseController"
 import { Variant } from "../models"
 import { Permissions } from '../helpers/Permissions'
+import { FilesHelper } from "../helpers"
 
 @controller("/variants")
 export class VariantController extends LessonsBaseController {
@@ -48,7 +49,11 @@ export class VariantController extends LessonsBaseController {
   public async delete(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
     return this.actionWrapper(req, res, async (au) => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
-      else await this.repositories.variant.delete(au.churchId, id);
+      else {
+        const variant = await this.repositories.variant.load(au.churchId, id);
+        await FilesHelper.deleteFile(au.churchId, variant.fileId, variant.resourceId);
+        await this.repositories.variant.delete(au.churchId, id);
+      }
     });
   }
 
