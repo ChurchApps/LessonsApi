@@ -1,6 +1,5 @@
 export { ActionRepository } from "./ActionRepository"
 export { AssetRepository } from "./AssetRepository"
-export { AssociatedResourceRepository } from "./AssociatedResourceRepository"
 export { FileRepository } from "./FileRepository"
 export { LessonRepository } from "./LessonRepository"
 export { ProviderRepository } from "./ProviderRepository"
