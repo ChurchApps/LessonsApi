@@ -8,19 +8,22 @@ import { FilesHelper } from "../helpers";
 @controller("/assets")
 export class AssetController extends LessonsBaseController {
 
-  @httpGet("/:id")
-  public async get(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
-    return this.actionWrapper(req, res, async (au) => {
-      if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
-      else return await this.repositories.asset.load(au.churchId, id)
-    });
-  }
-
   @httpGet("/resourceId/:resourceId")
   public async getForResource(@requestParam("resourceId") resourceId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
     return this.actionWrapper(req, res, async (au) => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
       else return await this.repositories.asset.loadByResourceId(au.churchId, resourceId);
+    });
+  }
+
+  @httpGet("/resourceIds")
+  public async getForResourceIds(req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
+    return this.actionWrapper(req, res, async (au) => {
+      if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
+      else {
+        const ids = req.query.resourceIds.toString().split(',');
+        return await this.repositories.asset.loadByResourceIds(au.churchId, ids);
+      }
     });
   }
 
@@ -31,6 +34,16 @@ export class AssetController extends LessonsBaseController {
       else return await this.repositories.asset.loadByContentTypeId(au.churchId, contentType, contentId);
     });
   }
+
+
+  @httpGet("/:id")
+  public async get(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
+    return this.actionWrapper(req, res, async (au) => {
+      if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
+      else return await this.repositories.asset.load(au.churchId, id)
+    });
+  }
+
 
   @httpPost("/")
   public async save(req: express.Request<{}, {}, Asset[]>, res: express.Response): Promise<interfaces.IHttpActionResult> {

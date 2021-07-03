@@ -1,6 +1,8 @@
 import { DB } from "../apiBase/db";
 import { Asset } from "../models";
 import { UniqueIdHelper } from "../helpers";
+import { ArrayHelper } from "../apiBase";
+import { ConfigurationServicePlaceholders } from "aws-sdk/lib/config_service_placeholders";
 
 export class AssetRepository {
 
@@ -25,6 +27,12 @@ export class AssetRepository {
 
   public loadByResourceId(churchId: string, resourceId: string): Promise<Asset[]> {
     return DB.query("SELECT * FROM assets WHERE churchId=? AND resourceId=? ORDER BY sort", [churchId, resourceId]);
+  }
+
+  public loadByResourceIds(churchId: string, resourceIds: string[]): Promise<Asset[]> {
+    const sql = "SELECT * FROM assets WHERE churchId=? AND resourceId IN (" + ArrayHelper.fillArray("?", resourceIds.length) + ") ORDER BY sort";
+    console.log(sql);
+    return DB.query(sql, [churchId].concat(resourceIds));
   }
 
   public loadByContentTypeId(churchId: string, contentType: string, contentId: string): Promise<Asset[]> {
