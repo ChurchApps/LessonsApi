@@ -1,0 +1,11 @@
+DROP TABLE IF EXISTS `assets`;
+
+CREATE TABLE `assets` (
+  `id` char(11) NOT NULL,
+  `churchId` char(11) DEFAULT NULL,
+  `resourceId` char(11) DEFAULT NULL,
+  `fileId` char(11) DEFAULT NULL,
+  `name` varchar(45) DEFAULT NULL,
+  `sort` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
