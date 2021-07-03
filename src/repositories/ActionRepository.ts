@@ -10,15 +10,15 @@ export class ActionRepository {
 
   public async create(action: Action) {
     action.id = UniqueIdHelper.shortId();
-    const sql = "INSERT INTO actions (id, churchId, lessonId, roleId, actionType, content, sort) VALUES (?, ?, ?, ?, ?, ?, ?);";
-    const params = [action.id, action.churchId, action.lessonId, action.roleId, action.actionType, action.content, action.sort];
+    const sql = "INSERT INTO actions (id, churchId, lessonId, roleId, actionType, content, sort, resourceId, assetId) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);";
+    const params = [action.id, action.churchId, action.lessonId, action.roleId, action.actionType, action.content, action.sort, action.resourceId, action.assetId];
     await DB.query(sql, params);
     return action;
   }
 
   public async update(action: Action) {
-    const sql = "UPDATE actions SET lessonId=?, roleId=?, actionType=?, content=?, sort=? WHERE id=? AND churchId=?";
-    const params = [action.lessonId, action.roleId, action.actionType, action.content, action.sort, action.id, action.churchId];
+    const sql = "UPDATE actions SET lessonId=?, roleId=?, actionType=?, content=?, sort=?, resourceId=?, assetId=? WHERE id=? AND churchId=?";
+    const params = [action.lessonId, action.roleId, action.actionType, action.content, action.sort, action.resourceId, action.assetId, action.id, action.churchId];
     await DB.query(sql, params);
     return action;
   }

@@ -1,15 +1,20 @@
-import { AssociatedFileRepository, FileRepository, LessonRepository, ProviderRepository, SectionRepository, StudyRepository, ProgramRepository, VenueRepository, RoleRepository, ActionRepository } from ".";
+import {
+  FileRepository, LessonRepository, ProviderRepository, SectionRepository, StudyRepository, ProgramRepository, VenueRepository, RoleRepository,
+  ActionRepository, ResourceRepository, VariantRepository, AssetRepository
+} from ".";
 
 export class Repositories {
   public action: ActionRepository;
-  public associatedFile: AssociatedFileRepository;
+  public asset: AssetRepository;
   public file: FileRepository;
   public lesson: LessonRepository;
   public provider: ProviderRepository;
   public program: ProgramRepository;
+  public resource: ResourceRepository;
   public role: RoleRepository;
   public section: SectionRepository;
   public study: StudyRepository;
+  public variant: VariantRepository;
   public venue: VenueRepository;
 
   private static _current: Repositories = null;
@@ -20,14 +25,16 @@ export class Repositories {
 
   constructor() {
     this.action = new ActionRepository();
-    this.associatedFile = new AssociatedFileRepository();
+    this.asset = new AssetRepository();
     this.file = new FileRepository();
     this.lesson = new LessonRepository();
     this.provider = new ProviderRepository();
     this.program = new ProgramRepository();
+    this.resource = new ResourceRepository();
     this.role = new RoleRepository();
     this.section = new SectionRepository();
     this.study = new StudyRepository();
+    this.variant = new VariantRepository();
     this.venue = new VenueRepository();
   }
 }

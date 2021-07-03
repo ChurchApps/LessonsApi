@@ -1,0 +1,14 @@
+DROP TABLE IF EXISTS `lessons`;
+
+CREATE TABLE `lessons` (
+  `id` char(11) NOT NULL,
+  `churchId` char(11) DEFAULT NULL,
+  `studyId` char(11) DEFAULT NULL,
+  `name` varchar(45) DEFAULT NULL,
+  `title` varchar(255) DEFAULT NULL,
+  `sort` int(11) DEFAULT NULL,
+  `image` varchar(1000) DEFAULT NULL,
+  `live` bit(1) DEFAULT NULL,
+  `description` text,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;

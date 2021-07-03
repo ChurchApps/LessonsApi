@@ -50,7 +50,7 @@ export class LessonController extends LessonsBaseController {
           const l = lesson;
           const saveFunction = async () => {
             if (l.image && l.image.startsWith("data:image/png;base64,")) await this.saveImage(l);
-            return await this.repositories.lesson.save(lesson);
+            return await this.repositories.lesson.save(l);
           }
           promises.push(saveFunction());
         });
@@ -64,7 +64,11 @@ export class LessonController extends LessonsBaseController {
   public async delete(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
     return this.actionWrapper(req, res, async (au) => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
-      else await this.repositories.lesson.delete(au.churchId, id);
+      else {
+        const resources = await this.repositories.resource.loadByContentTypeId(au.churchId, "lesson", id);
+        if (resources.length > 0) return this.json({}, 401);
+        else return await this.repositories.lesson.delete(au.churchId, id);
+      }
     });
   }
 
