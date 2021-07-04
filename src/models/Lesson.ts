@@ -8,4 +8,5 @@ export class Lesson {
   public image?: string;
   public live?: boolean;
   public description?: string;
+  public videoEmbedUrl?: string;
 }
