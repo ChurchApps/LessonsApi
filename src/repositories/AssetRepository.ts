@@ -31,7 +31,6 @@ export class AssetRepository {
 
   public loadByResourceIds(churchId: string, resourceIds: string[]): Promise<Asset[]> {
     const sql = "SELECT * FROM assets WHERE churchId=? AND resourceId IN (" + ArrayHelper.fillArray("?", resourceIds.length) + ") ORDER BY sort";
-    console.log(sql);
     return DB.query(sql, [churchId].concat(resourceIds));
   }
 

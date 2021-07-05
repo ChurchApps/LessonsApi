@@ -1,3 +1,5 @@
+import { Action } from "./Action"
+
 export class Role {
   public id?: string;
   public churchId?: string;
@@ -5,4 +7,6 @@ export class Role {
   public sectionId?: string;
   public name?: string;
   public sort?: number;
+
+  public actions?: Action[];
 }
