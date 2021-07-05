@@ -1,6 +1,7 @@
 import { DB } from "../apiBase/db";
 import { File } from "../models";
 import { UniqueIdHelper } from "../helpers";
+import { ArrayHelper } from "../apiBase";
 
 export class FileRepository {
 
@@ -25,6 +26,12 @@ export class FileRepository {
 
   public load(churchId: string, id: string): Promise<File> {
     return DB.queryOne("SELECT * FROM files WHERE id=? AND churchId=?", [id, churchId]);
+  }
+
+
+  public loadByIds(churchId: string, ids: string[]): Promise<File[]> {
+    const sql = "SELECT * FROM files WHERE churchId=? AND id IN (" + ArrayHelper.fillArray("?", ids.length) + ")";
+    return DB.query(sql, [churchId].concat(ids));
   }
 
   public loadAll(churchId: string): Promise<File> {

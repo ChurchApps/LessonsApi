@@ -1,8 +1,9 @@
 import { controller, httpPost, httpGet, interfaces, requestParam, httpDelete } from "inversify-express-utils";
 import express from "express";
 import { LessonsBaseController } from "./LessonsBaseController"
-import { Venue } from "../models"
+import { Venue, Section, Action, Role } from "../models"
 import { Permissions } from '../helpers/Permissions'
+import { ArrayHelper } from "../apiBase";
 
 @controller("/venues")
 export class VenueController extends LessonsBaseController {
@@ -17,7 +18,13 @@ export class VenueController extends LessonsBaseController {
   @httpGet("/public/lesson/:lessonId")
   public async getPublicForLesson(@requestParam("lessonId") lessonId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
     return this.actionWrapperAnon(req, res, async () => {
-      return await this.repositories.venue.loadPublicByLessonId(lessonId);
+      const venues = await this.repositories.venue.loadPublicByLessonId(lessonId);
+      const sections = await this.repositories.section.loadByLessonId(lessonId);
+      const roles = await this.repositories.role.loadByLessonId(lessonId);
+      const actions = await this.repositories.action.loadByLessonId(lessonId);
+      venues.forEach(v => this.appendSections(v, sections, roles, actions));
+      return venues;
+
     });
   }
 
@@ -56,6 +63,17 @@ export class VenueController extends LessonsBaseController {
     return this.actionWrapper(req, res, async (au) => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
       else await this.repositories.venue.delete(au.churchId, id);
+    });
+  }
+
+  private async appendSections(venue: Venue, allSections: Section[], allRoles: Role[], allActions: Action[]) {
+    venue.sections = ArrayHelper.getAll(allSections, "venueId", venue.id);
+
+    venue.sections.forEach(s => {
+      s.roles = ArrayHelper.getAll(allRoles, "sectionId", s.id);
+      s.roles.forEach(r => {
+        r.actions = ArrayHelper.getAll(allActions, "roleId", r.id);
+      });
     });
   }
 

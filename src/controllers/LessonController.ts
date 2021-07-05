@@ -8,12 +8,6 @@ import { FileHelper } from "../helpers"
 @controller("/lessons")
 export class LessonController extends LessonsBaseController {
 
-  @httpGet("/:id")
-  public async get(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
-    return this.actionWrapper(req, res, async (au) => {
-      return await this.repositories.lesson.load(au.churchId, id);
-    });
-  }
 
   @httpGet("/public/study/:studyId")
   public async getPublicForStudy(@requestParam("studyId") studyId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
@@ -27,6 +21,22 @@ export class LessonController extends LessonsBaseController {
     return this.actionWrapper(req, res, async (au) => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
       else return await this.repositories.lesson.loadByStudyId(au.churchId, studyId);
+    });
+  }
+
+
+  @httpGet("/public/:id")
+  public async getPublic(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
+    return this.actionWrapperAnon(req, res, async () => {
+      return await this.repositories.lesson.loadPublic(id)
+    });
+  }
+
+
+  @httpGet("/:id")
+  public async get(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
+    return this.actionWrapper(req, res, async (au) => {
+      return await this.repositories.lesson.load(au.churchId, id);
     });
   }
 

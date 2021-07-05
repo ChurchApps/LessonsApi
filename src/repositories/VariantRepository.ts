@@ -1,6 +1,7 @@
 import { DB } from "../apiBase/db";
 import { Variant } from "../models";
 import { UniqueIdHelper } from "../helpers";
+import { ArrayHelper } from "../apiBase";
 
 export class VariantRepository {
 
@@ -25,6 +26,11 @@ export class VariantRepository {
 
   public loadByResourceId(churchId: string, resourceId: string): Promise<Variant[]> {
     return DB.query("SELECT * FROM variants WHERE churchId=? AND resourceId=? ORDER BY name", [churchId, resourceId]);
+  }
+
+  public loadByResourceIds(churchId: string, resourceIds: string[]): Promise<Variant[]> {
+    const sql = "SELECT * FROM variants WHERE churchId=? AND resourceId IN (" + ArrayHelper.fillArray("?", resourceIds.length) + ") ORDER BY name";
+    return DB.query(sql, [churchId].concat(resourceIds));
   }
 
   public loadByContentTypeId(churchId: string, contentType: string, contentId: string): Promise<Variant[]> {

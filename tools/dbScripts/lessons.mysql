@@ -10,5 +10,6 @@ CREATE TABLE `lessons` (
   `image` varchar(1000) DEFAULT NULL,
   `live` bit(1) DEFAULT NULL,
   `description` text,
+  `videoEmbedUrl` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;

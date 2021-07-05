@@ -1,3 +1,5 @@
+import { File } from "./File"
+
 export class Variant {
   public id?: string;
   public churchId?: string;
@@ -6,4 +8,6 @@ export class Variant {
   public name?: string;
   public downloadDefault?: boolean;
   public playerDefault?: boolean;
+
+  public file?: File;
 }
