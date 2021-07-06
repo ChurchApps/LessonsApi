@@ -7,6 +7,14 @@ import { Permissions } from '../helpers/Permissions'
 @controller("/sections")
 export class SectionController extends LessonsBaseController {
 
+  @httpGet("/venue/:venueId")
+  public async getForVenue(@requestParam("venueId") venueId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
+    return this.actionWrapper(req, res, async (au) => {
+      if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
+      else return await this.repositories.section.loadByVenueId(au.churchId, venueId);
+    });
+  }
+
   @httpGet("/public/lesson/:lessonId")
   public async getForLesson(@requestParam("lessonId") lessonId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
     return this.actionWrapperAnon(req, res, async () => {

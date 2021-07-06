@@ -23,6 +23,10 @@ export class SectionRepository {
     return section;
   }
 
+  public loadByVenueId(churchId: string, venueId: string): Promise<Section[]> {
+    return DB.query("SELECT * FROM sections WHERE churchId=? AND venueId=? ORDER BY sort", [churchId, venueId]);
+  }
+
   public loadByLessonId(lessonId: string): Promise<Section[]> {
     return DB.query("SELECT * FROM sections WHERE lessonId=? ORDER BY sort", [lessonId]);
   }
