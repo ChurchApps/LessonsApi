@@ -3,7 +3,7 @@ import express from "express";
 import { LessonsBaseController } from "./LessonsBaseController"
 import { File } from "../models"
 import { Permissions } from '../helpers/Permissions'
-import { FileHelper } from "../apiBase";
+import { AwsHelper, FileHelper } from "../apiBase";
 import { UploadedFile } from "express-fileupload";
 
 @controller("/files")
@@ -34,8 +34,7 @@ export class FileController extends LessonsBaseController {
           file.churchId = au.churchId;
           const f = file;
           const saveFunction = async () => {
-            if (f.fileContents) await this.saveFile(f);
-            console.log(JSON.stringify(f));
+            await this.saveFile(f);
             return await this.repositories.file.save(f);
           }
           promises.push(saveFunction());
@@ -45,6 +44,20 @@ export class FileController extends LessonsBaseController {
       }
     });
   }
+
+  @httpPost("/postUrl")
+  public async getUploadUrl(req: express.Request<{}, {}, { resourceId: string, fileName: string }>, res: express.Response): Promise<interfaces.IHttpActionResult> {
+    return this.actionWrapper(req, res, async (au) => {
+      if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
+      else {
+        const resource = await this.repositories.resource.load(au.churchId, req.body.resourceId);
+        const key = "/files/" + resource.contentType + "/" + resource.contentId + "/" + resource.id + "/" + req.body.fileName;
+        const result = (process.env.FILE_STORE === "S3") ? await AwsHelper.S3PresignedUrl(key) : {};
+        return result;
+      }
+    });
+  }
+
 
   @httpDelete("/:id")
   public async delete(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
@@ -57,18 +70,20 @@ export class FileController extends LessonsBaseController {
 
   private async saveFile(file: File) {
     const resource = await this.repositories.resource.load(file.churchId, file.resourceId);
-
+    const key = "/files/" + resource.contentType + "/" + resource.contentId + "/" + resource.id + "/" + file.fileName;
     if (file.id) // delete existing uploadFile
     {
       const existingFile = await this.repositories.file.load(file.churchId, file.id)
       const oldKey = "/files/" + resource.contentType + "/" + resource.contentId + "/" + resource.id + "/" + existingFile.fileName;
-      await FileHelper.remove(oldKey);
+      if (oldKey !== key) await FileHelper.remove(oldKey);
     }
 
-    const base64 = file.fileContents.split(',')[1];
-    const buffer = Buffer.from(base64, 'base64');
-    const key = "/files/" + resource.contentType + "/" + resource.contentId + "/" + resource.id + "/" + file.fileName;
-    await FileHelper.store(key, file.fileType, buffer);
+    if (file.fileContents) {
+      const base64 = file.fileContents.split(',')[1];
+      const buffer = Buffer.from(base64, 'base64');
+      await FileHelper.store(key, file.fileType, buffer);
+    }
+
     const fileUpdated = new Date();
     file.contentPath = process.env.CONTENT_ROOT + key + "?dt=" + fileUpdated.getTime().toString();
     file.fileContents = null;
