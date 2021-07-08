@@ -10,25 +10,25 @@ export class StudyRepository {
 
   public async create(study: Study) {
     study.id = UniqueIdHelper.shortId();
-    const sql = "INSERT INTO studies (id, churchId, programId, name, image, shortDescription, description, videoEmbedUrl) VALUES (?, ?, ?, ?, ?, ?, ?, ?);";
-    const params = [study.id, study.churchId, study.programId, study.name, study.image, study.shortDescription, study.description, study.videoEmbedUrl];
+    const sql = "INSERT INTO studies (id, churchId, programId, name, image, shortDescription, description, videoEmbedUrl, sort, live) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
+    const params = [study.id, study.churchId, study.programId, study.name, study.image, study.shortDescription, study.description, study.videoEmbedUrl, study.sort, study.live];
     await DB.query(sql, params);
     return study;
   }
 
   public async update(study: Study) {
-    const sql = "UPDATE studies SET name=?, image=?, shortDescription=?, description=?, videoEmbedUrl=? WHERE id=? AND churchId=?";
-    const params = [study.name, study.image, study.shortDescription, study.description, study.videoEmbedUrl, study.id, study.churchId];
+    const sql = "UPDATE studies SET name=?, image=?, shortDescription=?, description=?, videoEmbedUrl=?, sort=?, live=? WHERE id=? AND churchId=?";
+    const params = [study.name, study.image, study.shortDescription, study.description, study.videoEmbedUrl, study.sort, study.live, study.id, study.churchId];
     await DB.query(sql, params);
     return study;
   }
 
   public loadByProgramId(churchId: string, programId: string): Promise<Study[]> {
-    return DB.query("SELECT * FROM studies WHERE churchId=? AND programId=?", [churchId, programId]);
+    return DB.query("SELECT * FROM studies WHERE churchId=? AND programId=? ORDER BY sort", [churchId, programId]);
   }
 
   public loadPublicByProgramId(programId: string): Promise<Study[]> {
-    return DB.query("SELECT * FROM studies WHERE programId=?", [programId]);
+    return DB.query("SELECT * FROM studies WHERE programId=? AND live=1 ORDER BY sort", [programId]);
   }
 
   public load(churchId: string, id: string): Promise<Study> {
@@ -36,11 +36,11 @@ export class StudyRepository {
   }
 
   public loadPublic(id: string): Promise<Study> {
-    return DB.queryOne("SELECT * FROM studies WHERE id=?", [id]);
+    return DB.queryOne("SELECT * FROM studies WHERE id=? AND live=1 ORDER BY sort", [id]);
   }
 
   public loadAll(churchId: string): Promise<Study[]> {
-    return DB.query("SELECT * FROM studies WHERE churchId=?", [churchId]);
+    return DB.query("SELECT * FROM studies WHERE churchId=? ORDER BY sort", [churchId]);
   }
 
   public delete(churchId: string, id: string): Promise<Study> {
