@@ -9,5 +9,7 @@ CREATE TABLE `programs` (
   `shortDescription` varchar(255) DEFAULT NULL,
   `description` text,
   `videoEmbedUrl` varchar(255) DEFAULT NULL,
+  `live` bit(1) DEFAULT NULL,
+  `aboutSection` text,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
