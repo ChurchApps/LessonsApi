@@ -18,7 +18,7 @@ export class ResourceRepository {
 
   public async update(resource: Resource) {
     const sql = "UPDATE resources SET contentType=?, contentId=?, name=? WHERE id=? AND churchId=?";
-    const params = [resource.name, resource.contentType, resource.contentId, resource.name, resource.id, resource.churchId];
+    const params = [resource.contentType, resource.contentId, resource.name, resource.id, resource.churchId];
     await DB.query(sql, params);
     return resource;
   }

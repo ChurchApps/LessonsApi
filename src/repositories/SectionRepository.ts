@@ -10,17 +10,21 @@ export class SectionRepository {
 
   public async create(section: Section) {
     section.id = UniqueIdHelper.shortId();
-    const sql = "INSERT INTO sections (id, churchId, lessonId, venueId, name, sort) VALUES (?, ?, ?, ?, ?, ?);";
-    const params = [section.id, section.churchId, section.lessonId, section.venueId, section.name, section.sort];
+    const sql = "INSERT INTO sections (id, churchId, lessonId, venueId, name, sort, materials) VALUES (?, ?, ?, ?, ?, ?, ?);";
+    const params = [section.id, section.churchId, section.lessonId, section.venueId, section.name, section.sort, section.materials];
     await DB.query(sql, params);
     return section;
   }
 
   public async update(section: Section) {
-    const sql = "UPDATE sections SET lessonId=?, venueId=?, name=?, sort=? WHERE id=? AND churchId=?";
-    const params = [section.lessonId, section.venueId, section.name, section.sort, section.id, section.churchId];
+    const sql = "UPDATE sections SET lessonId=?, venueId=?, name=?, sort=?, materials=? WHERE id=? AND churchId=?";
+    const params = [section.lessonId, section.venueId, section.name, section.sort, section.materials, section.id, section.churchId];
     await DB.query(sql, params);
     return section;
+  }
+
+  public loadByVenueId(churchId: string, venueId: string): Promise<Section[]> {
+    return DB.query("SELECT * FROM sections WHERE churchId=? AND venueId=? ORDER BY sort", [churchId, venueId]);
   }
 
   public loadByLessonId(lessonId: string): Promise<Section[]> {

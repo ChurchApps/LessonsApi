@@ -43,7 +43,7 @@ export class ProgramController extends LessonsBaseController {
   public async getAll(req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
     return this.actionWrapper(req, res, async (au) => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
-      else return await this.repositories.program.loadAll();
+      else return await this.repositories.program.loadAll(au.churchId);
     });
   }
 

@@ -10,15 +10,15 @@ export class ProgramRepository {
 
   public async create(program: Program) {
     program.id = UniqueIdHelper.shortId();
-    const sql = "INSERT INTO programs (id, churchId, providerId, name, image, shortDescription, description, videoEmbedUrl) VALUES (?, ?, ?, ?, ?, ?, ?, ?);";
-    const params = [program.id, program.churchId, program.providerId, program.name, program.shortDescription, program.description, program.videoEmbedUrl];
+    const sql = "INSERT INTO programs (id, churchId, providerId, name, image, shortDescription, description, videoEmbedUrl, live, aboutSection) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
+    const params = [program.id, program.churchId, program.providerId, program.name, program.image, program.shortDescription, program.description, program.videoEmbedUrl, program.live, program.aboutSection];
     await DB.query(sql, params);
     return program;
   }
 
   public async update(program: Program) {
-    const sql = "UPDATE programs SET name=?, image=?, shortDescription=?, description=?, videoEmbedUrl=? WHERE id=? AND churchId=?";
-    const params = [program.name, program.image, program.shortDescription, program.description, program.videoEmbedUrl, program.id, program.churchId];
+    const sql = "UPDATE programs SET name=?, image=?, shortDescription=?, description=?, videoEmbedUrl=?, live=?, aboutSection=? WHERE id=? AND churchId=?";
+    const params = [program.name, program.image, program.shortDescription, program.description, program.videoEmbedUrl, program.live, program.aboutSection, program.id, program.churchId];
     await DB.query(sql, params);
     return program;
   }
@@ -33,15 +33,15 @@ export class ProgramRepository {
 
 
   public loadPublic(id: string): Promise<Program> {
-    return DB.queryOne("SELECT * FROM programs WHERE id=?", [id]);
+    return DB.queryOne("SELECT * FROM programs WHERE id=? and live=1", [id]);
   }
 
   public loadPublicAll(): Promise<Program> {
-    return DB.query("SELECT * FROM programs", []);
+    return DB.query("SELECT * FROM programs WHERE live=1", []);
   }
 
-  public loadAll(): Promise<Program> {
-    return DB.query("SELECT * FROM programs", []);
+  public loadAll(churchId: string): Promise<Program> {
+    return DB.query("SELECT * FROM programs WHERE churchId=?", [churchId]);
   }
 
   public delete(churchId: string, id: string): Promise<Program> {

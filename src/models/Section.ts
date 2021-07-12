@@ -7,6 +7,7 @@ export class Section {
   public venueId?: string;
   public name?: string;
   public sort?: number;
+  public materials?: string;
 
   public roles?: Role[];
 }

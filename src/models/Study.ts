@@ -7,4 +7,7 @@ export class Study {
   public shortDescription?: string;
   public description?: string;
   public videoEmbedUrl?: string;
+  public sort?: number;
+  public live?: boolean;
+
 }

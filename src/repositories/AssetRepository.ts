@@ -20,7 +20,7 @@ export class AssetRepository {
 
   public async update(asset: Asset) {
     const sql = "UPDATE assets SET resourceId=?, fileId=?, name=?, sort=? WHERE id=? AND churchId=?";
-    const params = [asset.name, asset.resourceId, asset.fileId, asset.name, asset.sort, asset.id, asset.churchId];
+    const params = [asset.resourceId, asset.fileId, asset.name, asset.sort, asset.id, asset.churchId];
     await DB.query(sql, params);
     return asset;
   }
