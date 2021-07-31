@@ -15,6 +15,13 @@ export class StudyController extends LessonsBaseController {
     });
   }
 
+  @httpGet("/public/slug/:slug")
+  public async getPublicBySlug(@requestParam("slug") slug: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
+    return this.actionWrapperAnon(req, res, async () => {
+      return await this.repositories.study.loadPublicBySlug(slug)
+    });
+  }
+
   @httpGet("/public/:id")
   public async getPublic(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
     return this.actionWrapperAnon(req, res, async () => {

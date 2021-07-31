@@ -10,15 +10,15 @@ export class StudyRepository {
 
   public async create(study: Study) {
     study.id = UniqueIdHelper.shortId();
-    const sql = "INSERT INTO studies (id, churchId, programId, name, image, shortDescription, description, videoEmbedUrl, sort, live) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
-    const params = [study.id, study.churchId, study.programId, study.name, study.image, study.shortDescription, study.description, study.videoEmbedUrl, study.sort, study.live];
+    const sql = "INSERT INTO studies (id, churchId, programId, name, slug, image, shortDescription, description, videoEmbedUrl, sort, live) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
+    const params = [study.id, study.churchId, study.programId, study.name, study.slug, study.image, study.shortDescription, study.description, study.videoEmbedUrl, study.sort, study.live];
     await DB.query(sql, params);
     return study;
   }
 
   public async update(study: Study) {
-    const sql = "UPDATE studies SET name=?, image=?, shortDescription=?, description=?, videoEmbedUrl=?, sort=?, live=? WHERE id=? AND churchId=?";
-    const params = [study.name, study.image, study.shortDescription, study.description, study.videoEmbedUrl, study.sort, study.live, study.id, study.churchId];
+    const sql = "UPDATE studies SET name=?, slug=?, image=?, shortDescription=?, description=?, videoEmbedUrl=?, sort=?, live=? WHERE id=? AND churchId=?";
+    const params = [study.name, study.slug, study.image, study.shortDescription, study.description, study.videoEmbedUrl, study.sort, study.live, study.id, study.churchId];
     await DB.query(sql, params);
     return study;
   }
@@ -33,6 +33,10 @@ export class StudyRepository {
 
   public load(churchId: string, id: string): Promise<Study> {
     return DB.queryOne("SELECT * FROM studies WHERE id=? AND churchId=?", [id, churchId]);
+  }
+
+  public loadPublicBySlug(slug: string): Promise<Study> {
+    return DB.queryOne("SELECT * FROM studies WHERE slug=? AND live=1 ORDER BY sort", [slug]);
   }
 
   public loadPublic(id: string): Promise<Study> {

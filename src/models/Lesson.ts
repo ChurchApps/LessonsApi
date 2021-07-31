@@ -3,6 +3,7 @@ export class Lesson {
   public churchId?: string;
   public studyId?: string;
   public name?: string;
+  public slug?: string;
   public title?: string;
   public sort?: number;
   public image?: string;
