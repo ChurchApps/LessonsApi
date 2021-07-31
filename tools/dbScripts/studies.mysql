@@ -5,6 +5,7 @@ CREATE TABLE `studies` (
   `churchId` char(11) DEFAULT NULL,
   `programId` char(11) DEFAULT NULL,
   `name` varchar(255) DEFAULT NULL,
+  `slug` varchar(45) DEFAULT NULL,
   `image` varchar(1000) DEFAULT NULL,
   `shortDescription` varchar(255) DEFAULT NULL,
   `description` text,

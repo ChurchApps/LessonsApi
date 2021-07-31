@@ -24,6 +24,12 @@ export class LessonController extends LessonsBaseController {
     });
   }
 
+  @httpGet("/public/slug/:slug")
+  public async getPublicBySlug(@requestParam("slug") slug: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
+    return this.actionWrapperAnon(req, res, async () => {
+      return await this.repositories.lesson.loadPublicBySlug(slug)
+    });
+  }
 
   @httpGet("/public/:id")
   public async getPublic(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
@@ -31,7 +37,6 @@ export class LessonController extends LessonsBaseController {
       return await this.repositories.lesson.loadPublic(id)
     });
   }
-
 
   @httpGet("/:id")
   public async get(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {

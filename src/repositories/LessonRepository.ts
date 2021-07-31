@@ -10,15 +10,15 @@ export class LessonRepository {
 
   public async create(lesson: Lesson) {
     lesson.id = UniqueIdHelper.shortId();
-    const sql = "INSERT INTO lessons (id, churchId, studyId, name, title, sort, image, live, description, videoEmbedUrl) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
-    const params = [lesson.id, lesson.churchId, lesson.studyId, lesson.name, lesson.title, lesson.sort, lesson.image, lesson.live, lesson.description, lesson.videoEmbedUrl];
+    const sql = "INSERT INTO lessons (id, churchId, studyId, name, slug, title, sort, image, live, description, videoEmbedUrl) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
+    const params = [lesson.id, lesson.churchId, lesson.studyId, lesson.name, lesson.slug, lesson.title, lesson.sort, lesson.image, lesson.live, lesson.description, lesson.videoEmbedUrl];
     await DB.query(sql, params);
     return lesson;
   }
 
   public async update(lesson: Lesson) {
-    const sql = "UPDATE lessons SET studyId=?, name=?, title=?, sort=?, image=?, live=?, description=?, videoEmbedUrl=? WHERE id=? AND churchId=?";
-    const params = [lesson.studyId, lesson.name, lesson.title, lesson.sort, lesson.image, lesson.live, lesson.description, lesson.videoEmbedUrl, lesson.id, lesson.churchId];
+    const sql = "UPDATE lessons SET studyId=?, name=?, slug=?, title=?, sort=?, image=?, live=?, description=?, videoEmbedUrl=? WHERE id=? AND churchId=?";
+    const params = [lesson.studyId, lesson.name, lesson.slug, lesson.title, lesson.sort, lesson.image, lesson.live, lesson.description, lesson.videoEmbedUrl, lesson.id, lesson.churchId];
     await DB.query(sql, params);
     return lesson;
   }
@@ -31,8 +31,12 @@ export class LessonRepository {
     return DB.query("SELECT * FROM lessons WHERE studyId=? AND live=1 ORDER BY sort", [studyId]);
   }
 
+  public loadPublicBySlug(slug: string): Promise<Lesson> {
+    return DB.queryOne("SELECT * FROM lessons WHERE slug=? and live=1", [slug]);
+  }
+
   public loadPublic(id: string): Promise<Lesson> {
-    return DB.queryOne("SELECT * FROM lessons WHERE id=?", [id]);
+    return DB.queryOne("SELECT * FROM lessons WHERE id=? and live=1", [id]);
   }
 
   public load(churchId: string, id: string): Promise<Lesson> {
