@@ -15,6 +15,15 @@ export class StudyController extends LessonsBaseController {
     });
   }
 
+  @httpGet("/public/programs")
+  public async getPublicByPrograms(req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
+    return this.actionWrapperAnon(req, res, async () => {
+      if (!req.query.ids) return []
+      const ids = req.query.ids.toString().split(',')
+      return this.repositories.study.loadPublicByProgramIds(ids)
+    })
+  }
+
   @httpGet("/public/slug/:slug")
   public async getPublicBySlug(@requestParam("slug") slug: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
     return this.actionWrapperAnon(req, res, async () => {
