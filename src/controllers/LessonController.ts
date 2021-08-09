@@ -16,6 +16,15 @@ export class LessonController extends LessonsBaseController {
     });
   }
 
+  @httpGet("/public/studies")
+  public async getPublicForStudies(req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
+    return this.actionWrapperAnon(req, res, async () => {
+      if (!req.query.ids) return []
+      const ids = req.query.ids.toString().split(',')
+      return this.repositories.lesson.loadPublicByStudyIds(ids);
+    })
+  }
+
   @httpGet("/study/:studyId")
   public async getForStudy(@requestParam("studyId") studyId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
     return this.actionWrapper(req, res, async (au) => {
