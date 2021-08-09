@@ -1,6 +1,6 @@
 import { DB } from "../apiBase/db";
 import { Lesson } from "../models";
-import { UniqueIdHelper } from "../helpers";
+import { UniqueIdHelper, MySqlHelper } from "../helpers";
 
 export class LessonRepository {
 
@@ -29,6 +29,10 @@ export class LessonRepository {
 
   public loadPublicByStudyId(studyId: string): Promise<Lesson[]> {
     return DB.query("SELECT * FROM lessons WHERE studyId=? AND live=1 ORDER BY sort", [studyId]);
+  }
+
+  public loadPublicByStudyIds(ids: string[]): Promise<Lesson[]> {
+    return DB.query("SELECT * FROM lessons WHERE studyId IN (" + MySqlHelper.toQuotedAndCommaSeparatedString(ids) + ") AND live=1 ORDER BY sort", []);
   }
 
   public loadPublicBySlug(slug: string): Promise<Lesson> {
