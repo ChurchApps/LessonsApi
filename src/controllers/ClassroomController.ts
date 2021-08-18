@@ -18,12 +18,9 @@ export class ClassroomController extends LessonsBaseController {
       actions.forEach(a => {
         const file = (a.assetId) ? ArrayHelper.getOne(files, "assetId", a.assetId) : ArrayHelper.getOne(files, "resourceId", a.resourceId);
         if (file) {
-          result.push({ name: file.resourceName, url: file.contentPath })
+          result.push({ name: file.resourceName, url: process.env.CONTENT_ROOT + file.contentPath })
         }
       })
-
-
-
       return result;
     });
   }
@@ -82,8 +79,6 @@ export class ClassroomController extends LessonsBaseController {
 
     const assetFiles = (assetIds.length === 0) ? [] : await this.repositories.asset.loadPlaylist(assetIds);
     const variantFiles = (resourceIds.length === 0) ? [] : await this.repositories.variant.loadPlaylist(resourceIds);
-    console.log(assetFiles);
-    console.log(variantFiles);
 
     return assetFiles.concat(variantFiles);
 
