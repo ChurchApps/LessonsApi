@@ -1,0 +1,9 @@
+CREATE TABLE `schedules` (
+  `id` char(11) NOT NULL,
+  `churchId` char(11) DEFAULT NULL,
+  `classroomId` char(11) DEFAULT NULL,
+  `scheduledDate` date DEFAULT NULL,
+  `lessonId` char(11) DEFAULT NULL,
+  `displayName` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
