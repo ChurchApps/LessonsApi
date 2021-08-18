@@ -4,5 +4,4 @@ export class Schedule {
   public classroomId?: string;
   public scheduleDate?: Date;
   public lessonId: string;
-  public venueId?: string;
 }

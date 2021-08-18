@@ -10,15 +10,15 @@ export class ScheduleRepository {
 
   public async create(schedule: Schedule) {
     schedule.id = UniqueIdHelper.shortId();
-    const sql = "INSERT INTO schedules (id, churchId, classroomId, scheduleDate, lessonId, venueId) VALUES (?, ?, ?, ?, ?, ?);";
-    const params = [schedule.id, schedule.churchId, schedule.classroomId, schedule.scheduleDate, schedule.lessonId, schedule.venueId];
+    const sql = "INSERT INTO schedules (id, churchId, classroomId, scheduleDate, lessonId) VALUES (?, ?, ?, ?, ?);";
+    const params = [schedule.id, schedule.churchId, schedule.classroomId, schedule.scheduleDate, schedule.lessonId];
     await DB.query(sql, params);
     return schedule;
   }
 
   public async update(schedule: Schedule) {
-    const sql = "UPDATE schedules SET classroomId=?, scheduleDate=?, lessonId=?, venueId=? WHERE id=? AND churchId=?";
-    const params = [schedule.classroomId, schedule.scheduleDate, schedule.lessonId, schedule.venueId, schedule.id, schedule.churchId];
+    const sql = "UPDATE schedules SET classroomId=?, scheduleDate=?, lessonId=? WHERE id=? AND churchId=?";
+    const params = [schedule.classroomId, schedule.scheduleDate, schedule.lessonId, schedule.id, schedule.churchId];
     await DB.query(sql, params);
     return schedule;
   }
