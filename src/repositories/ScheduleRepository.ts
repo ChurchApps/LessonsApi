@@ -27,6 +27,10 @@ export class ScheduleRepository {
     return DB.query("SELECT * FROM schedules WHERE churchId=? AND classroomId=? ORDER BY scheduledDate", [churchId, classroomId]);
   }
 
+  public loadCurrent(classroomId: string): Promise<Schedule> {
+    return DB.queryOne("SELECT * FROM schedules WHERE classroomId=? AND scheduledDate<now() ORDER BY scheduledDate desc LIMIT 1;", [classroomId]);
+  }
+
   public load(id: string): Promise<Schedule> {
     return DB.queryOne("SELECT * FROM schedules WHERE id=?", [id]);
   }

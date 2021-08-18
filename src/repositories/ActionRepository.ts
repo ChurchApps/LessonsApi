@@ -23,6 +23,15 @@ export class ActionRepository {
     return action;
   }
 
+  public loadPlaylistActions(venueId: string): Promise<Action[]> {
+    const sql = "select a.* from sections s"
+      + " inner join roles r on r.sectionId=s.id"
+      + " inner join actions a on a.roleId=r.id and a.actionType='Play'"
+      + " where s.venueId=?"
+      + " order by s.sort, r.sort, a.sort"
+    return DB.query(sql, [venueId]);
+  }
+
   public loadByLessonId(lessonId: string): Promise<Action[]> {
     return DB.query("SELECT * FROM actions WHERE lessonId=? ORDER BY sort", [lessonId]);
   }

@@ -43,6 +43,14 @@ export class AssetRepository {
     return DB.queryOne("SELECT * FROM assets WHERE id=? and churchId=?", [id, churchId]);
   }
 
+  public loadPlaylist(assetIds: string[]): Promise<any> {
+    const sql = "select f.contentPath,r.id as resourceId, r.name as resourceName, a.id as assetId from resources r"
+      + " inner join assets a on a.resourceId=r.id"
+      + " inner join files f on f.id=a.fileId"
+      + " where a.id in (" + ArrayHelper.fillArray("?", assetIds.length).join(", ") + ");"
+    return DB.query(sql, [assetIds]);
+  }
+
   public delete(churchId: string, id: string): Promise<Asset> {
     return DB.query("DELETE FROM assets WHERE id=? AND churchId=?", [id, churchId]);
   }
