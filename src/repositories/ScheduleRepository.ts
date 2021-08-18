@@ -10,21 +10,21 @@ export class ScheduleRepository {
 
   public async create(schedule: Schedule) {
     schedule.id = UniqueIdHelper.shortId();
-    const sql = "INSERT INTO schedules (id, churchId, classroomId, scheduleDate, lessonId) VALUES (?, ?, ?, ?, ?);";
-    const params = [schedule.id, schedule.churchId, schedule.classroomId, schedule.scheduleDate, schedule.lessonId];
+    const sql = "INSERT INTO schedules (id, churchId, classroomId, scheduledDate, lessonId, displayName) VALUES (?, ?, ?, ?, ?, ?);";
+    const params = [schedule.id, schedule.churchId, schedule.classroomId, schedule.scheduledDate, schedule.lessonId, schedule.displayName];
     await DB.query(sql, params);
     return schedule;
   }
 
   public async update(schedule: Schedule) {
-    const sql = "UPDATE schedules SET classroomId=?, scheduleDate=?, lessonId=? WHERE id=? AND churchId=?";
-    const params = [schedule.classroomId, schedule.scheduleDate, schedule.lessonId, schedule.id, schedule.churchId];
+    const sql = "UPDATE schedules SET classroomId=?, scheduledDate=?, lessonId=?, displayName=? WHERE id=? AND churchId=?";
+    const params = [schedule.classroomId, schedule.scheduledDate, schedule.lessonId, schedule.displayName, schedule.id, schedule.churchId];
     await DB.query(sql, params);
     return schedule;
   }
 
   public loadByClassroomId(churchId: string, classroomId: string): Promise<Schedule[]> {
-    return DB.query("SELECT * FROM schedules WHERE churchId=? AND classroomId=? ORDER BY scheduleDate", [churchId, classroomId]);
+    return DB.query("SELECT * FROM schedules WHERE churchId=? AND classroomId=? ORDER BY scheduledDate", [churchId, classroomId]);
   }
 
   public load(id: string): Promise<Schedule> {

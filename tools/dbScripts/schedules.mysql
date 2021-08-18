@@ -4,5 +4,6 @@ CREATE TABLE `schedules` (
   `classroomId` char(11) DEFAULT NULL,
   `scheduledDate` date DEFAULT NULL,
   `lessonId` char(11) DEFAULT NULL,
+  `displayName` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
