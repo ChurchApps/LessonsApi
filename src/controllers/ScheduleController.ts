@@ -25,7 +25,7 @@ export class ScheduleController extends LessonsBaseController {
   @httpPost("/")
   public async save(req: express.Request<{}, {}, Schedule[]>, res: express.Response): Promise<interfaces.IHttpActionResult> {
     return this.actionWrapper(req, res, async (au) => {
-      if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
+      if (!au.checkAccess(Permissions.schedules.edit)) return this.json({}, 401);
       else {
         const promises: Promise<Schedule>[] = [];
         req.body.forEach(schedule => { schedule.churchId = au.churchId; promises.push(this.repositories.schedule.save(schedule)); });
@@ -38,7 +38,7 @@ export class ScheduleController extends LessonsBaseController {
   @httpDelete("/:id")
   public async delete(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
     return this.actionWrapper(req, res, async (au) => {
-      if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
+      if (!au.checkAccess(Permissions.schedules.edit)) return this.json({}, 401);
       else await this.repositories.schedule.delete(au.churchId, id);
     });
   }

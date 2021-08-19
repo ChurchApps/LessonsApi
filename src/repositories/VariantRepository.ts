@@ -47,7 +47,7 @@ export class VariantRepository {
       + " inner join variants v on v.resourceId=r.id"
       + " inner join files f on f.id=v.fileId"
       + " where r.id in (" + ArrayHelper.fillArray("?", resourceIds.length).join(", ") + ");"
-    return DB.query(sql, [resourceIds]);
+    return DB.query(sql, resourceIds);
   }
 
   public delete(churchId: string, id: string): Promise<Variant> {

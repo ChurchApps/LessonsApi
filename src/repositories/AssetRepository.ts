@@ -48,7 +48,7 @@ export class AssetRepository {
       + " inner join assets a on a.resourceId=r.id"
       + " inner join files f on f.id=a.fileId"
       + " where a.id in (" + ArrayHelper.fillArray("?", assetIds.length).join(", ") + ");"
-    return DB.query(sql, [assetIds]);
+    return DB.query(sql, assetIds);
   }
 
   public delete(churchId: string, id: string): Promise<Asset> {

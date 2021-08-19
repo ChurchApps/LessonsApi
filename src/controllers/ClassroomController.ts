@@ -18,7 +18,8 @@ export class ClassroomController extends LessonsBaseController {
       actions.forEach(a => {
         const file = (a.assetId) ? ArrayHelper.getOne(files, "assetId", a.assetId) : ArrayHelper.getOne(files, "resourceId", a.resourceId);
         if (file) {
-          result.push({ name: file.resourceName, url: process.env.CONTENT_ROOT + file.contentPath })
+          const contentPath = (file.contentPath.indexOf("://") === -1) ? process.env.CONTENT_ROOT + file.contentPath : file.contentPath;
+          result.push({ name: file.resourceName, url: contentPath })
         }
       })
       return result;
@@ -43,7 +44,7 @@ export class ClassroomController extends LessonsBaseController {
   @httpPost("/")
   public async save(req: express.Request<{}, {}, Classroom[]>, res: express.Response): Promise<interfaces.IHttpActionResult> {
     return this.actionWrapper(req, res, async (au) => {
-      if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
+      if (!au.checkAccess(Permissions.schedules.edit)) return this.json({}, 401);
       else {
         const promises: Promise<Classroom>[] = [];
         req.body.forEach(classroom => { classroom.churchId = au.churchId; promises.push(this.repositories.classroom.save(classroom)); });
@@ -56,15 +57,24 @@ export class ClassroomController extends LessonsBaseController {
   @httpDelete("/:id")
   public async delete(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
     return this.actionWrapper(req, res, async (au) => {
-      if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
+      if (!au.checkAccess(Permissions.schedules.edit)) return this.json({}, 401);
       else await this.repositories.classroom.delete(au.churchId, id);
     });
   }
 
   private async loadPlaylistActions(classroomId: string, venueName: string): Promise<Action[]> {
     const currentSchedule = await this.repositories.schedule.loadCurrent(classroomId);
-    const venues = await this.repositories.venue.loadByLessonId(currentSchedule.churchId, currentSchedule.lessonId);
+    if (!currentSchedule) throw new Error(("Could not load schedule"));
+
+    const lesson = await this.repositories.lesson.loadPublic(currentSchedule.lessonId);
+    if (!lesson) throw new Error(("Could not load lesson"));
+
+    const venues = await this.repositories.venue.loadByLessonId(lesson.churchId, lesson.id);
+    if (!venues || venues.length === 0) throw new Error(("Could not load venues"));
+
     const venue: Venue = ArrayHelper.getOne(venues, "name", venueName);
+    if (!venue) throw new Error(("Venue '" + venueName + "' not found. " + venues.join(", ")));
+
     const actions = await this.repositories.action.loadPlaylistActions(venue.id)
     return actions;
   }
