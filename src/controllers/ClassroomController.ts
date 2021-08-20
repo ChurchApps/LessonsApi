@@ -13,16 +13,15 @@ export class ClassroomController extends LessonsBaseController {
   public async getPlaylist(@requestParam("classroomId") classroomId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
     return this.actionWrapperAnon(req, res, async () => {
       const actions = await PlaylistHelper.loadPlaylistActions(classroomId, req.query.venueName.toString())
-      const files = await PlaylistHelper.loadPlaylistFiles(actions);
+      const availableFiles = await PlaylistHelper.loadPlaylistFiles(actions);
 
       const result: any[] = [];
       actions.forEach(a => {
-        const file = PlaylistHelper.getBestFile(a, files);
-        // const file = (a.assetId) ? ArrayHelper.getOne(files, "assetId", a.assetId) : ArrayHelper.getOne(files, "resourceId", a.resourceId);
-        if (file) {
+        const files = PlaylistHelper.getBestFiles(a, availableFiles);
+        files.forEach(file => {
           const contentPath = (file.contentPath.indexOf("://") === -1) ? process.env.CONTENT_ROOT + file.contentPath : file.contentPath;
           result.push({ name: file.resourceName, url: contentPath })
-        }
+        });
       })
       return result;
     });

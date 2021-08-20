@@ -47,7 +47,8 @@ export class AssetRepository {
     const sql = "select f.contentPath, r.id as resourceId, concat(r.name, ' - ', a.name) as resourceName, a.id as assetId, f.fileType from resources r"
       + " inner join assets a on a.resourceId=r.id"
       + " inner join files f on f.id=a.fileId"
-      + " where r.id in (" + ArrayHelper.fillArray("?", resourceIds.length).join(", ") + ");"
+      + " where r.id in (" + ArrayHelper.fillArray("?", resourceIds.length).join(", ") + ")"
+      + " order by sort";
     return DB.query(sql, resourceIds);
   }
 

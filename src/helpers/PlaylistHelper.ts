@@ -33,20 +33,29 @@ export class PlaylistHelper {
     return assetFiles.concat(variantFiles);
   }
 
-  public static getBestFile(action: Action, allFiles: any[]) {
+  public static getBestFiles(action: Action, allFiles: any[]) {
+
+    if (!action.assetId) {
+      const assetFiles: any[] = []
+      allFiles.forEach(f => { if (f.resourceId === action.resourceId && f.assetId) assetFiles.push(f); })
+      if (assetFiles.length > 0) return assetFiles;
+    }
+
     const preferredFileTypes = ["video/webm", "video/mp4", "image/jpeg", "image/png", "image/gif", "image/bitmap"]
 
     let availableFiles: any[] = [];
     if (action.assetId) availableFiles = ArrayHelper.getAll(allFiles, "assetId", action.assetId)
-    else availableFiles = ArrayHelper.getAll(ArrayHelper.getAll(allFiles, "resourceId", action.resourceId), "assetId", "");
+    else availableFiles = ArrayHelper.getAll(allFiles, "resourceId", action.resourceId);
 
-    let result: any = null;
     let bestIdx = 999;
+    let bestFile: any = null;
     availableFiles.forEach(f => {
       const idx = preferredFileTypes.indexOf(f.fileType);
-      if (idx > -1 && idx < bestIdx) { result = f; bestIdx = idx; }
+      if (idx > -1 && idx < bestIdx) { bestFile = f; bestIdx = idx; }
     });
-    return result;
+
+    if (bestFile) return [bestFile];
+    else return [];
   }
 
 
