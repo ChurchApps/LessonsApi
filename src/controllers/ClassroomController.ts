@@ -4,6 +4,7 @@ import { LessonsBaseController } from "./LessonsBaseController"
 import { Classroom, Venue, Action } from "../models"
 import { Permissions } from '../helpers/Permissions'
 import { ArrayHelper } from "../apiBase";
+import { PlaylistHelper } from "../helpers/PlaylistHelper";
 
 @controller("/classrooms")
 export class ClassroomController extends LessonsBaseController {
@@ -11,12 +12,13 @@ export class ClassroomController extends LessonsBaseController {
   @httpGet("/playlist/:classroomId")
   public async getPlaylist(@requestParam("classroomId") classroomId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
     return this.actionWrapperAnon(req, res, async () => {
-      const actions = await this.loadPlaylistActions(classroomId, req.query.venueName.toString())
-      const files = await this.loadPlaylistFiles(actions);
+      const actions = await PlaylistHelper.loadPlaylistActions(classroomId, req.query.venueName.toString())
+      const files = await PlaylistHelper.loadPlaylistFiles(actions);
 
       const result: any[] = [];
       actions.forEach(a => {
-        const file = (a.assetId) ? ArrayHelper.getOne(files, "assetId", a.assetId) : ArrayHelper.getOne(files, "resourceId", a.resourceId);
+        const file = PlaylistHelper.getBestFile(a, files);
+        // const file = (a.assetId) ? ArrayHelper.getOne(files, "assetId", a.assetId) : ArrayHelper.getOne(files, "resourceId", a.resourceId);
         if (file) {
           const contentPath = (file.contentPath.indexOf("://") === -1) ? process.env.CONTENT_ROOT + file.contentPath : file.contentPath;
           result.push({ name: file.resourceName, url: contentPath })
@@ -62,36 +64,5 @@ export class ClassroomController extends LessonsBaseController {
     });
   }
 
-  private async loadPlaylistActions(classroomId: string, venueName: string): Promise<Action[]> {
-    const currentSchedule = await this.repositories.schedule.loadCurrent(classroomId);
-    if (!currentSchedule) throw new Error(("Could not load schedule"));
-
-    const lesson = await this.repositories.lesson.loadPublic(currentSchedule.lessonId);
-    if (!lesson) throw new Error(("Could not load lesson"));
-
-    const venues = await this.repositories.venue.loadByLessonId(lesson.churchId, lesson.id);
-    if (!venues || venues.length === 0) throw new Error(("Could not load venues"));
-
-    const venue: Venue = ArrayHelper.getOne(venues, "name", venueName);
-    if (!venue) throw new Error(("Venue '" + venueName + "' not found. " + venues.join(", ")));
-
-    const actions = await this.repositories.action.loadPlaylistActions(venue.id)
-    return actions;
-  }
-
-  private async loadPlaylistFiles(actions: Action[]) {
-    const assetIds: string[] = [];
-    const resourceIds: string[] = [];
-    actions.forEach(a => {
-      if (a.assetId) assetIds.push(a.assetId);
-      else resourceIds.push(a.resourceId);
-    });
-
-    const assetFiles = (assetIds.length === 0) ? [] : await this.repositories.asset.loadPlaylist(assetIds);
-    const variantFiles = (resourceIds.length === 0) ? [] : await this.repositories.variant.loadPlaylist(resourceIds);
-
-    return assetFiles.concat(variantFiles);
-
-  }
 
 }
