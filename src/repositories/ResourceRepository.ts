@@ -35,6 +35,16 @@ export class ResourceRepository {
     return DB.queryOne("SELECT * FROM resources WHERE id=? and churchId=?", [id, churchId]);
   }
 
+  public loadNeedingWebm(): Promise<any[]> {
+    const sql = "select r.churchId, r.id, r.name, f.contentPath"
+      + " from files f"
+      + " inner join variants v on v.fileId=f.id"
+      + " inner join resources r on r.id=v.resourceId"
+      + " left outer join variants v2 on v2.resourceId=v.resourceId and v2.name='WEBM'"
+      + " where f.contentPath like '%.mp4%' and v2.id is null";
+    return DB.query(sql, []);
+  }
+
   public delete(churchId: string, id: string): Promise<Resource> {
     return DB.query("DELETE FROM resources WHERE id=? AND churchId=?", [id, churchId]);
   }

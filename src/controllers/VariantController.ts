@@ -4,9 +4,22 @@ import { LessonsBaseController } from "./LessonsBaseController"
 import { Variant } from "../models"
 import { Permissions } from '../helpers/Permissions'
 import { FilesHelper } from "../helpers"
+import { TranscodeHelper } from "../helpers/TranscodeHelper";
 
 @controller("/variants")
 export class VariantController extends LessonsBaseController {
+
+  @httpGet("/createWebms")
+  public async createWebms(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
+    return this.actionWrapperAnon(req, res, async () => {
+
+      const items = await this.repositories.resource.loadNeedingWebm();
+      for (const item of items) {
+        await TranscodeHelper.tmpProcessItem(item.churchId, item.id, item.name, item.contentPath);
+      }
+
+    });
+  }
 
   @httpGet("/:id")
   public async get(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
