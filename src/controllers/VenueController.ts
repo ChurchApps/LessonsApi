@@ -36,6 +36,14 @@ export class VenueController extends LessonsBaseController {
     });
   }
 
+
+  @httpGet("/names/classroom/:classroomId")
+  public async getNameByClassroom(@requestParam("classroomId") classroomId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
+    return this.actionWrapper(req, res, async (au) => {
+      return await this.repositories.venue.loadNamesForClassroom(au.churchId, classroomId)
+    });
+  }
+
   @httpGet("/")
   public async getAll(req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
     return this.actionWrapper(req, res, async (au) => {

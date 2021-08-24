@@ -23,6 +23,16 @@ export class VenueRepository {
     return venue;
   }
 
+  public loadNamesForClassroom(churchId: string, lessonId: string): Promise<string[]> {
+    const sql = "select v.name"
+      + " from schedules s"
+      + " inner join venues v on v.lessonId=s.lessonId"
+      + " where s.churchId=? AND s.classroomId=?"
+      + " group by v.name"
+      + " order by v.name;"
+    return DB.query(sql, [churchId, lessonId]);
+  }
+
   public loadByLessonId(churchId: string, lessonId: string): Promise<Venue[]> {
     return DB.query("SELECT * FROM venues WHERE churchId=? AND lessonId=? ORDER BY sort", [churchId, lessonId]);
   }
