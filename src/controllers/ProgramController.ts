@@ -67,7 +67,7 @@ export class ProgramController extends LessonsBaseController {
           program.churchId = au.churchId;
           const p = program;
           const saveFunction = async () => {
-            if (p.image && p.image.startsWith("data:image/png;base64,")) await this.saveImage(p);
+            if (p.image && p.image.startsWith("data:image/")) await this.saveImage(p);
             return await this.repositories.program.save(p);
           }
           promises.push(saveFunction());

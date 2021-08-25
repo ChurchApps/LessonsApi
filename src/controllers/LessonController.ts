@@ -73,7 +73,7 @@ export class LessonController extends LessonsBaseController {
           lesson.churchId = au.churchId;
           const l = lesson;
           const saveFunction = async () => {
-            if (l.image && l.image.startsWith("data:image/png;base64,")) {
+            if (l.image && l.image.startsWith("data:image/")) {
               if (!l.id) await this.repositories.lesson.save(l);  // save first to generate an id
               await this.saveImage(l);
             }
