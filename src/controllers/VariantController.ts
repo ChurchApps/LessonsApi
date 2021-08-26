@@ -64,7 +64,7 @@ export class VariantController extends LessonsBaseController {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
       else {
         const variant = await this.repositories.variant.load(au.churchId, id);
-        await FilesHelper.deleteFile(au.churchId, variant.fileId, variant.resourceId);
+        if (variant.fileId) await FilesHelper.deleteFile(au.churchId, variant.fileId, variant.resourceId);
         await this.repositories.variant.delete(au.churchId, id);
       }
     });

@@ -64,7 +64,7 @@ export class AssetController extends LessonsBaseController {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
       else {
         const asset = await this.repositories.asset.load(au.churchId, id);
-        await FilesHelper.deleteFile(au.churchId, asset.fileId, asset.resourceId);
+        if (asset.fileId) await FilesHelper.deleteFile(au.churchId, asset.fileId, asset.resourceId);
         await this.repositories.asset.delete(au.churchId, id);
       }
     });
