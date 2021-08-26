@@ -24,10 +24,10 @@ export class StudyController extends LessonsBaseController {
     })
   }
 
-  @httpGet("/public/slug/:slug")
-  public async getPublicBySlug(@requestParam("slug") slug: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
+  @httpGet("/public/slug/:programId/:slug")
+  public async getPublicBySlug(@requestParam("programId") programId: string, @requestParam("slug") slug: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
     return this.actionWrapperAnon(req, res, async () => {
-      return await this.repositories.study.loadPublicBySlug(slug)
+      return await this.repositories.study.loadPublicBySlug(programId, slug)
     });
   }
 

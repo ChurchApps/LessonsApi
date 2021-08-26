@@ -39,8 +39,8 @@ export class StudyRepository {
     return DB.queryOne("SELECT * FROM studies WHERE id=? AND churchId=?", [id, churchId]);
   }
 
-  public loadPublicBySlug(slug: string): Promise<Study> {
-    return DB.queryOne("SELECT * FROM studies WHERE slug=? AND live=1 ORDER BY sort", [slug]);
+  public loadPublicBySlug(programId: string, slug: string): Promise<Study> {
+    return DB.queryOne("SELECT * FROM studies WHERE programId=? AND slug=? AND live=1 ORDER BY sort", [programId, slug]);
   }
 
   public loadPublic(id: string): Promise<Study> {

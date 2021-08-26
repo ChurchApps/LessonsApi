@@ -35,8 +35,8 @@ export class LessonRepository {
     return DB.query("SELECT * FROM lessons WHERE studyId IN (" + MySqlHelper.toQuotedAndCommaSeparatedString(ids) + ") AND live=1 ORDER BY sort", []);
   }
 
-  public loadPublicBySlug(slug: string): Promise<Lesson> {
-    return DB.queryOne("SELECT * FROM lessons WHERE slug=? and live=1", [slug]);
+  public loadPublicBySlug(studyId: string, slug: string): Promise<Lesson> {
+    return DB.queryOne("SELECT * FROM lessons WHERE studyId=? AND slug=? and live=1", [studyId, slug]);
   }
 
   public loadPublic(id: string): Promise<Lesson> {
