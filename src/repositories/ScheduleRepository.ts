@@ -28,7 +28,7 @@ export class ScheduleRepository {
   }
 
   public loadCurrent(classroomId: string): Promise<Schedule> {
-    return DB.queryOne("SELECT * FROM schedules WHERE classroomId=? AND scheduledDate<now() ORDER BY scheduledDate desc LIMIT 1;", [classroomId]);
+    return DB.queryOne("SELECT * FROM schedules WHERE classroomId=? AND scheduledDate > (now() - INTERVAL 1 DAY) ORDER BY scheduledDate LIMIT 1;", [classroomId]);
   }
 
   public load(id: string): Promise<Schedule> {
