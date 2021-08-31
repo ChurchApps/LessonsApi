@@ -11,15 +11,15 @@ export class VariantRepository {
 
   public async create(variant: Variant) {
     variant.id = UniqueIdHelper.shortId();
-    const sql = "INSERT INTO variants (id, churchId, resourceId, fileId, name, downloadDefault, playerDefault) VALUES (?, ?, ?, ?, ?, ?, ?);";
-    const params = [variant.id, variant.churchId, variant.resourceId, variant.fileId, variant.name, variant.downloadDefault, variant.playerDefault];
+    const sql = "INSERT INTO variants (id, churchId, resourceId, fileId, name, downloadDefault, playerDefault, hidden) VALUES (?, ?, ?, ?, ?, ?, ?, ?);";
+    const params = [variant.id, variant.churchId, variant.resourceId, variant.fileId, variant.name, variant.downloadDefault, variant.playerDefault, variant.hidden];
     await DB.query(sql, params);
     return variant;
   }
 
   public async update(variant: Variant) {
-    const sql = "UPDATE variants SET resourceId=?, fileId=?, name=?, downloadDefault=?, playerDefault=? WHERE id=? AND churchId=?";
-    const params = [variant.resourceId, variant.fileId, variant.name, variant.downloadDefault, variant.playerDefault, variant.id, variant.churchId];
+    const sql = "UPDATE variants SET resourceId=?, fileId=?, name=?, downloadDefault=?, playerDefault=?, hidden=? WHERE id=? AND churchId=?";
+    const params = [variant.resourceId, variant.fileId, variant.name, variant.downloadDefault, variant.playerDefault, variant.hidden, variant.id, variant.churchId];
     await DB.query(sql, params);
     return variant;
   }

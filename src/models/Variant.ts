@@ -8,6 +8,7 @@ export class Variant {
   public name?: string;
   public downloadDefault?: boolean;
   public playerDefault?: boolean;
+  public hidden?: boolean;
 
   public file?: File;
 }
