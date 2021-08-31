@@ -75,7 +75,7 @@ export class TranscodeHelper {
     file = await repo.file.save(file);
     console.log(file);
 
-    const variant: Variant = { churchId, resourceId, fileId: file.id, name: "WEBM", downloadDefault: false, playerDefault: true }
+    const variant: Variant = { churchId, resourceId, fileId: file.id, name: "WEBM", downloadDefault: false, playerDefault: true, hidden: true }
     await repo.variant.save(variant);
 
 
