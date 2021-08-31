@@ -7,6 +7,7 @@ export class Resource {
   public contentType?: string;
   public contentId?: string;
   public name?: string;
+  public category?: string;
 
   public variants?: Variant[];
   public assets?: Asset[];
