@@ -11,7 +11,7 @@ export class ResourceRepository {
   public async create(resource: Resource) {
     resource.id = UniqueIdHelper.shortId();
     const sql = "INSERT INTO resources (id, churchId, contentType, contentId, name, category) VALUES (?, ?, ?, ?, ?, ?);";
-    const params = [resource.id, resource.churchId, resource.contentType, resource.contentId, resource.name];
+    const params = [resource.id, resource.churchId, resource.contentType, resource.contentId, resource.name, resource.category];
     await DB.query(sql, params);
     return resource;
   }
