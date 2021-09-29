@@ -1,8 +1,9 @@
 import { controller, httpPost, httpGet, interfaces, requestParam, httpDelete } from "inversify-express-utils";
 import express from "express";
 import { LessonsBaseController } from "./LessonsBaseController"
-import { Section } from "../models"
+import { Section, Venue, Action } from "../models"
 import { Permissions } from '../helpers/Permissions'
+import { ArrayHelper } from "../apiBase";
 
 @controller("/sections")
 export class SectionController extends LessonsBaseController {
@@ -26,6 +27,44 @@ export class SectionController extends LessonsBaseController {
   public async get(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
     return this.actionWrapperAnon(req, res, async () => {
       return await this.repositories.section.load(id)
+    });
+  }
+
+  @httpGet("/copy/:sourceSectionId/:destVenueId")
+  public async copy(@requestParam("sourceSectionId") sourceSectionId: string, @requestParam("destVenueId") destVenueId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
+    return this.actionWrapper(req, res, async (au) => {
+      const sourceSection: Section = await this.repositories.section.load(sourceSectionId);
+      const destVenue: Venue = await this.repositories.venue.load(au.churchId, destVenueId);
+
+      if (destVenue.churchId !== au.churchId) this.denyAccess(["Access denied"]);
+      else {
+
+        let newSection = { ...sourceSection };
+        newSection.venueId = destVenueId;
+        newSection.id = null;
+        newSection.lessonId = destVenue.lessonId;
+        newSection = await this.repositories.section.save(newSection)
+
+        let sourceRoles = await this.repositories.role.loadByLessonId(sourceSection.lessonId)
+        const allSourceActions = await this.repositories.action.loadByLessonId(sourceSection.lessonId)
+        sourceRoles = ArrayHelper.getAll(sourceRoles, "sectionId", sourceSection.id);
+        for (const sourceRole of sourceRoles) {
+          let newRole = { ...sourceRole }
+          newRole.id = null;
+          newRole.sectionId = newSection.id;
+          newRole.lessonId = newSection.lessonId;
+          newRole = await this.repositories.role.save(newRole);
+          const sourceActions: Action[] = ArrayHelper.getAll(allSourceActions, "roleId", sourceRole.id);
+          for (const sourceAction of sourceActions) {
+            const newAction = { ...sourceAction };
+            newAction.id = null;
+            newAction.lessonId = newRole.lessonId;
+            newAction.roleId = newRole.id;
+            await this.repositories.action.save(newAction);
+          }
+        }
+        return [];
+      }
     });
   }
 
