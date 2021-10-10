@@ -1,8 +1,36 @@
 import AWS from "aws-sdk";
 import { Repositories } from "../repositories/Repositories";
-import { File, Variant } from "../models";
+import { File, Variant, Resource } from "../models";
 
 export class TranscodeHelper {
+
+  static async handlePingback(data: any): Promise<void> {
+    try {
+      const messageString = data.Records[0].Sns.Message;
+      const message: any = JSON.parse(messageString);
+      const webmPath = message.outputKeyPrefix;
+      const parts = webmPath.split("/");
+      const resourceId = parts[3];
+      const webmName = message.outputs[0].key;
+      const seconds = message.outputs[0].duration;
+      const dateModified = new Date();
+      const contentPath = process.env.CONTENT_ROOT + "/" + webmPath + webmName + "?dt=" + dateModified.getTime().toString();
+      const size = 0;
+
+      const repo = Repositories.getCurrent();
+      const resource: Resource = await repo.resource.loadWithoutChurchId(resourceId);
+
+      let file: File = { churchId: resource.churchId, fileName: webmName, contentPath, fileType: "video/webm", size, dateModified, seconds }
+      file = await repo.file.save(file);
+
+      const variant: Variant = { churchId: resource.churchId, resourceId, fileId: file.id, name: "WEBM", downloadDefault: false, playerDefault: true, hidden: true }
+      await repo.variant.save(variant);
+    } catch (e) {
+      console.log(e);
+    }
+
+  }
+
 
   private static getEncoder() {
     const config: AWS.ElasticTranscoder.ClientConfiguration = {
@@ -70,6 +98,7 @@ export class TranscodeHelper {
 
     await TranscodeHelper.encodeWebm(mp4, path, webmName);
 
+    /*
     const repo = Repositories.getCurrent();
     let file: File = { churchId, fileName: webmName, contentPath: webmPath, fileType: "video/webm", size: 0, dateModified }
     file = await repo.file.save(file);
@@ -77,7 +106,7 @@ export class TranscodeHelper {
 
     const variant: Variant = { churchId, resourceId, fileId: file.id, name: "WEBM", downloadDefault: false, playerDefault: true, hidden: true }
     await repo.variant.save(variant);
-
+*/
 
   }
 

@@ -14,9 +14,15 @@ export class VariantController extends LessonsBaseController {
     return this.actionWrapperAnon(req, res, async () => {
 
       const items = await this.repositories.resource.loadNeedingWebm();
-      for (const item of items) {
+
+      if (items.length > 0) {
+        const item = items[0];
         await TranscodeHelper.tmpProcessItem(item.churchId, item.id, item.name, item.contentPath);
       }
+      /*
+      for (const item of items) {
+        await TranscodeHelper.tmpProcessItem(item.churchId, item.id, item.name, item.contentPath);
+      }*/
 
     });
   }

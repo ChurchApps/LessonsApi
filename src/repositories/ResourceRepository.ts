@@ -35,6 +35,10 @@ export class ResourceRepository {
     return DB.queryOne("SELECT * FROM resources WHERE id=? and churchId=?", [id, churchId]);
   }
 
+  public loadWithoutChurchId(id: string): Promise<Resource> {
+    return DB.queryOne("SELECT * FROM resources WHERE id=?", [id]);
+  }
+
   public loadNeedingWebm(): Promise<any[]> {
     const sql = "select r.churchId, r.id, r.name, f.contentPath"
       + " from files f"
