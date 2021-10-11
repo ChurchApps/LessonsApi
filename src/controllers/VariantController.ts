@@ -9,17 +9,21 @@ import { TranscodeHelper } from "../helpers/TranscodeHelper";
 @controller("/variants")
 export class VariantController extends LessonsBaseController {
 
+  /*
   @httpGet("/createWebms")
   public async createWebms(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
     return this.actionWrapperAnon(req, res, async () => {
-
       const items = await this.repositories.resource.loadNeedingWebm();
+      if (items.length > 0) {
+        const item = items[0];
+        await TranscodeHelper.tmpProcessItem(item.churchId, item.id, item.name, item.contentPath);
+      }
       for (const item of items) {
         await TranscodeHelper.tmpProcessItem(item.churchId, item.id, item.name, item.contentPath);
       }
-
     });
   }
+  */
 
   @httpGet("/:id")
   public async get(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
@@ -53,6 +57,9 @@ export class VariantController extends LessonsBaseController {
         const promises: Promise<Variant>[] = [];
         req.body.forEach(variant => { variant.churchId = au.churchId; promises.push(this.repositories.variant.save(variant)); });
         const result = await Promise.all(promises);
+        req.body.forEach(async variant => {
+          await TranscodeHelper.createWebms(variant.resourceId);
+        });
         return result;
       }
     });

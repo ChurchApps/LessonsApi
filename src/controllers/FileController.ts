@@ -4,7 +4,6 @@ import { LessonsBaseController } from "./LessonsBaseController"
 import { File } from "../models"
 import { Permissions } from '../helpers/Permissions'
 import { AwsHelper, FileHelper } from "../apiBase";
-import { UploadedFile } from "express-fileupload";
 
 @controller("/files")
 export class FileController extends LessonsBaseController {
