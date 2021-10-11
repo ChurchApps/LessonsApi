@@ -13,8 +13,7 @@ export class FilesHelper {
   }
 
   static async updateSize(file: File) {
-    const url = process.env.CONTENT_ROOT + "/" + file.contentPath + "?dt=" + file.dateModified.getTime().toString();
-    const resp = await Axios.head(url);
+    const resp = await Axios.head(file.contentPath);
     file.size = parseInt(resp.headers["content-length"], 0);
     await Repositories.getCurrent().file.save(file);
   }
