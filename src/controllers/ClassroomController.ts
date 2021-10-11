@@ -1,9 +1,8 @@
 import { controller, httpPost, httpGet, interfaces, requestParam, httpDelete } from "inversify-express-utils";
 import express from "express";
 import { LessonsBaseController } from "./LessonsBaseController"
-import { Classroom, Venue, Action } from "../models"
+import { Classroom } from "../models"
 import { Permissions } from '../helpers/Permissions'
-import { ArrayHelper } from "../apiBase";
 import { PlaylistHelper } from "../helpers/PlaylistHelper";
 
 @controller("/classrooms")
@@ -17,10 +16,12 @@ export class ClassroomController extends LessonsBaseController {
 
       const result: any[] = [];
       actions.forEach(a => {
-        const files = PlaylistHelper.getBestFiles(a, availableFiles);
+        const files: any[] = PlaylistHelper.getBestFiles(a, availableFiles);
         files.forEach(file => {
           const contentPath = (file.contentPath.indexOf("://") === -1) ? process.env.CONTENT_ROOT + file.contentPath : file.contentPath;
-          result.push({ name: file.resourceName, url: contentPath })
+          let seconds = parseInt(file.seconds, 0);
+          if (!seconds || seconds === 0) seconds = 3600;
+          result.push({ name: file.resourceName, url: contentPath, seconds })
         });
       })
       return result;
