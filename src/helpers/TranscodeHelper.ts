@@ -83,36 +83,28 @@ export class TranscodeHelper {
 
   }
 
+  static async createWebms(resourceId: string) {
+    const items = await Repositories.getCurrent().resource.loadNeedingWebm();
+    for (const item of items) {
+      const encode = (!resourceId || resourceId === item.id)
+      if (encode) await TranscodeHelper.createWebm(item.name, item.contentPath);
+    }
+  }
 
-  static async tmpProcessItem(churchId: string, resourceId: string, resourceName: string, mp4Path: string) {
+  static async createWebm(resourceName: string, mp4Path: string) {
     const webmName = resourceName.toLowerCase()
       .replace(' ', '-')
       .replace(/[^0-9a-z\-]/gi, '')
       .replace('--', '-')
       .replace('--', '-') + ".webm";
-    console.log(webmName);
 
-    let mp4 = mp4Path.replace("https://content.lessons.church", "")
+    let mp4 = mp4Path.replace(process.env.CONTENT_ROOT, "");
     mp4 = mp4.split("?")[0];
     mp4 = mp4.substr(1, mp4.length);
     const idx = mp4.lastIndexOf('/');
     const path = mp4.substr(0, idx + 1);
 
-    const dateModified = new Date();
-    const webmPath = "https://content.lessons.church/" + path + webmName + "?dt=" + dateModified.getTime().toString();
-
     await TranscodeHelper.encodeWebm(mp4, path, webmName);
-
-    /*
-    const repo = Repositories.getCurrent();
-    let file: File = { churchId, fileName: webmName, contentPath: webmPath, fileType: "video/webm", size: 0, dateModified }
-    file = await repo.file.save(file);
-    console.log(file);
-
-    const variant: Variant = { churchId, resourceId, fileId: file.id, name: "WEBM", downloadDefault: false, playerDefault: true, hidden: true }
-    await repo.variant.save(variant);
-*/
-
   }
 
 
