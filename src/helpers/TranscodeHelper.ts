@@ -1,6 +1,7 @@
 import AWS from "aws-sdk";
 import { Repositories } from "../repositories/Repositories";
 import { File, Variant, Resource } from "../models";
+import { FilesHelper } from ".";
 
 export class TranscodeHelper {
 
@@ -25,6 +26,10 @@ export class TranscodeHelper {
 
       const variant: Variant = { churchId: resource.churchId, resourceId, fileId: file.id, name: "WEBM", downloadDefault: false, playerDefault: true, hidden: true }
       await repo.variant.save(variant);
+
+      await FilesHelper.updateSize(file);
+
+
     } catch (e) {
       console.log(e);
     }
