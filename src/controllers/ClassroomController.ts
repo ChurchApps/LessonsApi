@@ -4,6 +4,7 @@ import { LessonsBaseController } from "./LessonsBaseController"
 import { Classroom } from "../models"
 import { Permissions } from '../helpers/Permissions'
 import { PlaylistHelper } from "../helpers/PlaylistHelper";
+import { Environment } from "../helpers";
 
 @controller("/classrooms")
 export class ClassroomController extends LessonsBaseController {
@@ -18,7 +19,7 @@ export class ClassroomController extends LessonsBaseController {
       actions.forEach(a => {
         const files: any[] = PlaylistHelper.getBestFiles(a, availableFiles);
         files.forEach(file => {
-          const contentPath = (file.contentPath.indexOf("://") === -1) ? process.env.CONTENT_ROOT + file.contentPath : file.contentPath;
+          const contentPath = (file.contentPath.indexOf("://") === -1) ? Environment.contentRoot + file.contentPath : file.contentPath;
           let seconds = parseInt(file.seconds, 0);
           if (!seconds || seconds === 0) seconds = 3600;
           result.push({ name: file.resourceName, url: contentPath, seconds })

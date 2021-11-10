@@ -4,6 +4,7 @@ import { LessonsBaseController } from "./LessonsBaseController"
 import { File } from "../models"
 import { Permissions } from '../helpers/Permissions'
 import { AwsHelper, FileHelper } from "../apiBase";
+import { Environment } from "../helpers";
 
 @controller("/files")
 export class FileController extends LessonsBaseController {
@@ -51,7 +52,7 @@ export class FileController extends LessonsBaseController {
       else {
         const resource = await this.repositories.resource.load(au.churchId, req.body.resourceId);
         const key = "/files/" + resource.contentType + "/" + resource.contentId + "/" + resource.id + "/" + req.body.fileName;
-        const result = (process.env.FILE_STORE === "S3") ? await AwsHelper.S3PresignedUrl(key) : {};
+        const result = (Environment.fileStore === "S3") ? await AwsHelper.S3PresignedUrl(key) : {};
         return result;
       }
     });
@@ -84,7 +85,7 @@ export class FileController extends LessonsBaseController {
     }
 
     const fileUpdated = new Date();
-    file.contentPath = process.env.CONTENT_ROOT + key + "?dt=" + fileUpdated.getTime().toString();
+    file.contentPath = Environment.contentRoot + key + "?dt=" + fileUpdated.getTime().toString();
     file.fileContents = null;
     return file;
   }

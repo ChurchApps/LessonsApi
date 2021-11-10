@@ -2,7 +2,9 @@ const { createServer, proxy } = require('aws-serverless-express');
 const { init } = require('./dist/App');
 const { Pool } = require('./dist/apiBase/pool');
 const { TranscodeHelper } = require('./dist/helpers/TranscodeHelper');
+const { Environment } = require('./dist/helpers/Environment');
 
+Environment.init(process.env.APP_ENV);
 Pool.initPool();
 
 const universal = function universal(event, context) {

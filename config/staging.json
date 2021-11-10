@@ -1,0 +1,10 @@
+{
+  "appEnv": "staging",
+  "appName": "LessonsApi",
+  "contentRoot": "https://content.staging.lessons.church",
+  "fileStore": "S3",
+  "mailSystem": "SES",
+  "s3Bucket": "staging-lessons-content",
+  "transcodePipeline": "",
+  "transcodePreset": "1629426494444-cjk4hm"
+}

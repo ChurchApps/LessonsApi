@@ -1,0 +1,10 @@
+{
+  "appEnv": "prod",
+  "appName": "LessonsApi",
+  "contentRoot": "https://content.lessons.church",
+  "fileStore": "S3",
+  "mailSystem": "SES",
+  "s3Bucket": "lessons-content",
+  "transcodePipeline": "1629426398392-g97qyu",
+  "transcodePreset": "1629426494444-cjk4hm"
+}

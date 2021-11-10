@@ -1,7 +1,7 @@
 import AWS from "aws-sdk";
 import { Repositories } from "../repositories/Repositories";
 import { File, Variant, Resource } from "../models";
-import { FilesHelper } from ".";
+import { Environment, FilesHelper } from ".";
 
 export class TranscodeHelper {
 
@@ -15,7 +15,7 @@ export class TranscodeHelper {
       const webmName = message.outputs[0].key;
       const seconds = message.outputs[0].duration;
       const dateModified = new Date();
-      const contentPath = process.env.CONTENT_ROOT + "/" + webmPath + webmName + "?dt=" + dateModified.getTime().toString();
+      const contentPath = Environment.contentRoot + "/" + webmPath + webmName + "?dt=" + dateModified.getTime().toString();
       const size = 0;
 
       const repo = Repositories.getCurrent();
@@ -41,13 +41,6 @@ export class TranscodeHelper {
     const config: AWS.ElasticTranscoder.ClientConfiguration = {
       apiVersion: "2012-09-25",
       region: "us-east-1",
-      /*
-            credentials:
-            {
-              accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-              secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
-            },*/
-      // endpoint: process.env.AMAZON_S3_BUCKET
     }
     return new AWS.ElasticTranscoder(config)
   }
@@ -55,13 +48,13 @@ export class TranscodeHelper {
   static async encodeWebm(sourcePath: string, destPath: string, destFile: string) {
     const params: AWS.ElasticTranscoder.CreateJobRequest =
     {
-      PipelineId: process.env.AWS_TRANSCODER_PIPELINE_ID,
+      PipelineId: Environment.transcodePipeline,
       OutputKeyPrefix: destPath,
       Input: {
         Key: sourcePath
       }, Outputs: [{
         Key: destFile,
-        PresetId: process.env.AWS_TRANSCODER_PRESET_ID
+        PresetId: Environment.transcodePreset
       }]
     }
 
@@ -98,7 +91,7 @@ export class TranscodeHelper {
       .replace('--', '-')
       .replace('--', '-') + ".webm";
 
-    let mp4 = mp4Path.replace(process.env.CONTENT_ROOT, "");
+    let mp4 = mp4Path.replace(Environment.contentRoot, "");
     mp4 = mp4.split("?")[0];
     mp4 = mp4.substr(1, mp4.length);
     const idx = mp4.lastIndexOf('/');

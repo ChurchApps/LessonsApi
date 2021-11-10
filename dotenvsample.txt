@@ -1,18 +1,10 @@
-# Modify and save this file as ".env"
-API_ENV=dev
-APP_NAME=LessonsApi
-
-# Node.js server configuration
+APP_ENV=dev
+CONNECTION_STRING=mysql://
+ENCRYPTION_KEY=encryptionKey
+JWT_SECRET=this is a test key that is a sentence
 SERVER_PORT=8090
 
-# MySql configuration
-DB_HOST=localhost
-DB_DATABASE=lessons
-DB_USER=root
-DB_PASSWORD=
-
-JWT_SECRET_KEY=this is a test key that is a sentence
-JWT_EXPIRATION=2 days
-
-FILE_STORE=disk
-CONTENT_ROOT=/content
+#SMTP_HOST=
+#SMTP_PASS=
+#SMTP_SECURE=false
+#SMTP_USER=
