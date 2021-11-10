@@ -16,3 +16,12 @@ functions:
      - http: ANY /
  videoPingback:
    handler: lambda.videoPingback
+
+
+plugins:
+  - serverless-layers
+  
+custom:
+  serverless-layers:
+    dependenciesPath: ./package.json
+    layersDeploymentBucket: "lcs-layers"
