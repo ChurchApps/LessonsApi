@@ -3,7 +3,7 @@
   "appName": "LessonsApi",
   "contentRoot": "http://localhost:3402",
   "fileStore": "disk",
-  "mailSystem": "SMTP",
+  "mailSystem": "",
   "s3Bucket": "",
   "transcodePipeline": "",
   "transcodePreset": "1629426494444-cjk4hm"
