@@ -3,12 +3,43 @@ import express from "express";
 import { LessonsBaseController } from "./LessonsBaseController"
 import { Bundle, Resource, Asset, Variant, File } from "../models"
 import { Permissions } from '../helpers/Permissions'
-import { FilesHelper } from "../helpers";
+import { Environment, FilesHelper } from "../helpers";
 import { ArrayHelper } from "../apiBase";
+import { ZipHelper } from "../helpers/ZipHelper";
 
 
 @controller("/bundles")
 export class BundleController extends LessonsBaseController {
+
+  @httpGet("/zip/:id")
+  public async zip(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
+    return this.actionWrapper(req, res, async (au) => {
+      // if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
+      // else {
+      const churchId = "Q5EjNf69beb" // au.churchId
+      const bundle = await this.repositories.bundle.load(churchId, id);
+      const resources = await this.repositories.resource.loadByBundleId(churchId, bundle.id);
+      const variants = await this.repositories.variant.loadByResourceIds(churchId, ArrayHelper.getIds(resources, "id"));
+      const files = await this.repositories.file.loadByIds(churchId, ArrayHelper.getIds(variants, "fileId"));
+
+      const zipFiles: { name: string, key: string }[] = [];
+      files.forEach(f => {
+        const variant: Variant = ArrayHelper.getOne(variants, "fileId", f.id)
+        if (variant && !variant.hidden) {
+          let filePath = f.contentPath.split("?")[0];
+          console.log(filePath);
+          filePath = filePath.replace("/content/", "").replace(Environment.contentRoot + "/", "")
+          console.log(filePath);
+          zipFiles.push({ name: f.fileName, key: filePath });
+        }
+      });
+      const zipName = "bundles/" + bundle.contentType + "/" + bundle.contentId + "/" + bundle.name + ".zip";
+      await ZipHelper.zipFiles(zipName, zipFiles)
+
+
+      // }
+    });
+  }
 
   @httpGet("/:id")
   public async get(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
