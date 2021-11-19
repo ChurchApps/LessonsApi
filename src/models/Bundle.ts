@@ -4,4 +4,6 @@ export class Bundle {
   public contentType?: string;
   public contentId?: string;
   public name?: string;
+  public fileId?: string;
+  public pendingUpdate?: boolean;
 }

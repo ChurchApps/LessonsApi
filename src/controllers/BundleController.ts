@@ -11,6 +11,15 @@ import { ZipHelper } from "../helpers/ZipHelper";
 @controller("/bundles")
 export class BundleController extends LessonsBaseController {
 
+  @httpGet("/zip")
+  public async zipAll(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
+    return this.actionWrapper(req, res, async (au) => {
+      const bundles = await this.repositories.bundle.loadPendingUpdate();
+      for (const bundle of bundles) { await ZipHelper.createBundle(bundle); }
+      return [];
+    });
+  }
+
   @httpGet("/zip/:id")
   public async zip(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
     return this.actionWrapper(req, res, async (au) => {
@@ -18,23 +27,7 @@ export class BundleController extends LessonsBaseController {
       // else {
       const churchId = "Q5EjNf69beb" // au.churchId
       const bundle = await this.repositories.bundle.load(churchId, id);
-      const resources = await this.repositories.resource.loadByBundleId(churchId, bundle.id);
-      const variants = await this.repositories.variant.loadByResourceIds(churchId, ArrayHelper.getIds(resources, "id"));
-      const files = await this.repositories.file.loadByIds(churchId, ArrayHelper.getIds(variants, "fileId"));
-
-      const zipFiles: { name: string, key: string }[] = [];
-      files.forEach(f => {
-        const variant: Variant = ArrayHelper.getOne(variants, "fileId", f.id)
-        if (variant && !variant.hidden) {
-          let filePath = f.contentPath.split("?")[0];
-          console.log(filePath);
-          filePath = filePath.replace("/content/", "").replace(Environment.contentRoot + "/", "")
-          console.log(filePath);
-          zipFiles.push({ name: f.fileName, key: filePath });
-        }
-      });
-      const zipName = "bundles/" + bundle.contentType + "/" + bundle.contentId + "/" + bundle.name + ".zip";
-      await ZipHelper.zipFiles(zipName, zipFiles)
+      await ZipHelper.createBundle(bundle);
 
 
       // }

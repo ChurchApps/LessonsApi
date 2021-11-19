@@ -10,15 +10,15 @@ export class BundleRepository {
 
   public async create(bundle: Bundle) {
     bundle.id = UniqueIdHelper.shortId();
-    const sql = "INSERT INTO bundles (id, churchId, contentType, contentId, name) VALUES (?, ?, ?, ?, ?);";
-    const params = [bundle.id, bundle.churchId, bundle.contentType, bundle.contentId, bundle.name];
+    const sql = "INSERT INTO bundles (id, churchId, contentType, contentId, name, fileId, pendingUpdate) VALUES (?, ?, ?, ?, ?, ?, ?);";
+    const params = [bundle.id, bundle.churchId, bundle.contentType, bundle.contentId, bundle.name, bundle.fileId, bundle.pendingUpdate];
     await DB.query(sql, params);
     return bundle;
   }
 
   public async update(bundle: Bundle) {
-    const sql = "UPDATE bundles SET contentType=?, contentId=?, name=? WHERE id=? AND churchId=?";
-    const params = [bundle.contentType, bundle.contentId, bundle.name, bundle.id, bundle.churchId];
+    const sql = "UPDATE bundles SET contentType=?, contentId=?, name=?, fileId=?, pendingUpdate=? WHERE id=? AND churchId=?";
+    const params = [bundle.contentType, bundle.contentId, bundle.name, bundle.fileId, bundle.pendingUpdate, bundle.id, bundle.churchId];
     await DB.query(sql, params);
     return bundle;
   }
@@ -27,10 +27,14 @@ export class BundleRepository {
     return DB.query("SELECT * FROM bundles WHERE churchId=? AND contentType=? AND contentId=? order by name", [churchId, contentType, contentId]);
   }
 
+  public loadPendingUpdate(): Promise<Bundle[]> {
+    return DB.query("SELECT * FROM bundles WHERE pendingUpdate=1", []);
+  }
 
   public load(churchId: string, id: string): Promise<Bundle> {
     return DB.queryOne("SELECT * FROM bundles WHERE id=? and churchId=?", [id, churchId]);
   }
+
 
 
   public delete(churchId: string, id: string): Promise<Bundle> {
