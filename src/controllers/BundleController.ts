@@ -45,7 +45,7 @@ export class BundleController extends LessonsBaseController {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
       else {
         const resources: Resource[] = await this.repositories.resource.loadByBundleId(au.churchId, id);
-        for (let r of resources) await this.deleteResource(r.churchId, r.id);
+        for (const r of resources) await this.deleteResource(r.churchId, r.id);
         await FilesHelper.deleteBundleFolder(au.churchId, id);
         await this.repositories.bundle.delete(au.churchId, id);
       }

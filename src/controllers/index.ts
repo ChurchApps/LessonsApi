@@ -1,5 +1,6 @@
 export { ActionController } from "./ActionController"
 export { AssetController } from "./AssetController"
+export { BundleController } from "./BundleController"
 export { ClassroomController } from "./ClassroomController"
 export { FileController } from "./FileController"
 export { LessonController } from "./LessonController"
