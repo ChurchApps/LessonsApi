@@ -24,4 +24,10 @@ export class FilesHelper {
     await FileHelper.removeFolder(oldKey);
   }
 
+  static async deleteBundleFolder(churchId: string, bundleId: string) {
+    const bundle = await Repositories.getCurrent().bundle.load(churchId, bundleId);
+    const oldKey = "bundles/" + bundle.contentType + "/" + bundle.contentId + "/" + bundle.id;
+    await FileHelper.removeFolder(oldKey);
+  }
+
 }

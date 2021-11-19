@@ -27,6 +27,10 @@ export class ResourceRepository {
     return DB.query("SELECT * FROM resources WHERE churchId=? AND contentType=? AND contentId=? order by name", [churchId, contentType, contentId]);
   }
 
+  public loadByBundleId(churchId: string, bundleId: string): Promise<Resource[]> {
+    return DB.query("SELECT * FROM resources WHERE churchId=? AND bundleId=? order by name", [churchId, bundleId]);
+  }
+
   public loadPublicForLesson(lessonId: string): Promise<Resource[]> {
     return DB.query("SELECT * FROM resources WHERE id in (SELECT resourceId from actions WHERE lessonId=?)", [lessonId]);
   }
