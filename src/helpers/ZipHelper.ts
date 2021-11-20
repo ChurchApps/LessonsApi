@@ -35,13 +35,14 @@ export class ZipHelper {
         s3Upload.on("httpUploadProgress", progress => {
           console.log(progress);
         })*/
+        console.log(zipKey);
 
         const archive = Archiver("zip", { zlib: { level: 0 } });
         archive.on("error", error => {
           reject(error);
-          throw new Error(
-            `${error.name} ${error.code} ${error.message} ${error.path}  ${error.stack}`
-          )
+          // throw new Error(
+          //            `${error.name} ${error.code} ${error.message} ${error.path}  ${error.stack}`
+          // )
         })
 
         archive.pipe(streamPassThrough);

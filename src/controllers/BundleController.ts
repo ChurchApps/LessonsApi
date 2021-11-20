@@ -17,8 +17,11 @@ export class BundleController extends LessonsBaseController {
       const bundles: Bundle[] = await this.repositories.bundle.loadPublicForLesson(lessonId);
       if (bundles.length === 0) return bundles;
       const fileIds = ArrayHelper.getIds(bundles, "fileId");
-      const files = await this.repositories.file.loadByIds(bundles[0].churchId, fileIds);
-      bundles.forEach(b => { b.file = ArrayHelper.getOne(files, "id", b.fileId) });
+      for (let i = fileIds.length; i >= 0; i--) if (!fileIds[i]) fileIds.splice(i, 1);
+      if (fileIds.length > 0) {
+        const files = await this.repositories.file.loadByIds(bundles[0].churchId, fileIds);
+        bundles.forEach(b => { b.file = ArrayHelper.getOne(files, "id", b.fileId) });
+      }
       return bundles;
     });
   }
