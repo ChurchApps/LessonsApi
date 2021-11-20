@@ -1,9 +1,9 @@
 import { controller, httpPost, httpGet, interfaces, requestParam, httpDelete } from "inversify-express-utils";
 import express from "express";
 import { LessonsBaseController } from "./LessonsBaseController"
-import { Bundle, Resource, Asset, Variant, File } from "../models"
+import { Bundle, Resource } from "../models"
 import { Permissions } from '../helpers/Permissions'
-import { Environment, FilesHelper } from "../helpers";
+import { FilesHelper } from "../helpers";
 import { ArrayHelper } from "../apiBase";
 import { ZipHelper } from "../helpers/ZipHelper";
 
@@ -27,23 +27,7 @@ export class BundleController extends LessonsBaseController {
   @httpGet("/zip")
   public async zipAll(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
     return this.actionWrapper(req, res, async (au) => {
-      const bundles = await this.repositories.bundle.loadPendingUpdate();
-      for (const bundle of bundles) { await ZipHelper.createBundle(bundle); }
-      return [];
-    });
-  }
-
-  @httpGet("/zip/:id")
-  public async zip(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
-    return this.actionWrapper(req, res, async (au) => {
-      // if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
-      // else {
-      const churchId = "Q5EjNf69beb" // au.churchId
-      const bundle = await this.repositories.bundle.load(churchId, id);
-      await ZipHelper.createBundle(bundle);
-
-
-      // }
+      ZipHelper.zipPendingBundles();
     });
   }
 

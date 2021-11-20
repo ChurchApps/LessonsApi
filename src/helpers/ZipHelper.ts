@@ -14,6 +14,7 @@ export class ZipHelper {
     return new AWS.S3({ apiVersion: "2006-03-01" });
   }
 
+
   static async zipFiles(zipKey: string, files: { name: string, key: string, stream?: any }[]) {
     return new Promise((resolve, reject) => {
 
@@ -27,12 +28,6 @@ export class ZipHelper {
         const streamPassThrough = new Stream.PassThrough()
         const uploadParams: AWS.S3.PutObjectRequest = { Bucket: Environment.s3Bucket, ACL: "public-read", Body: streamPassThrough, ContentType: "application/zip", Key: zipKey }
         const s3Upload = this.S3().upload(uploadParams, (error: Error, data: AWS.S3.ManagedUpload.SendData) => {
-          /*
-          console.log("error")
-          console.log(error);
-          console.log("data")
-          console.log(data);
-          */
           resolve(null);
         });
 
@@ -58,8 +53,12 @@ export class ZipHelper {
     });
   }
 
+  static async zipPendingBundles() {
+    const bundles = await Repositories.getCurrent().bundle.loadPendingUpdate();
+    for (const bundle of bundles) { await ZipHelper.zipBundle(bundle); }
+  }
 
-  static async createBundle(bundle: Bundle) {
+  static async zipBundle(bundle: Bundle) {
     const resources = await Repositories.getCurrent().resource.loadByBundleId(bundle.churchId, bundle.id);
     const variants = await Repositories.getCurrent().variant.loadByResourceIds(bundle.churchId, ArrayHelper.getIds(resources, "id"));
     const files = await Repositories.getCurrent().file.loadByIds(bundle.churchId, ArrayHelper.getIds(variants, "fileId"));
