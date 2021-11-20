@@ -16,6 +16,8 @@ functions:
      - http: ANY /
  videoPingback:
    handler: lambda.videoPingback
+ zipBundles:
+   handler: lambda.zipBundles
 
 
 plugins:

@@ -31,11 +31,12 @@ export class ZipHelper {
           resolve(null);
         });
 
+        /*
         s3Upload.on("httpUploadProgress", progress => {
           console.log(progress);
-        })
+        })*/
 
-        const archive = Archiver("zip", { zlib: { level: 7 } });
+        const archive = Archiver("zip", { zlib: { level: 0 } });
         archive.on("error", error => {
           reject(error);
           throw new Error(
@@ -46,7 +47,6 @@ export class ZipHelper {
         archive.pipe(streamPassThrough);
         files.forEach(f => { archive.append(f.stream, { name: f.name }) });
         archive.finalize();
-        console.log("finalized")
       } catch (ex) {
         reject(ex);
       }
@@ -54,8 +54,15 @@ export class ZipHelper {
   }
 
   static async zipPendingBundles() {
-    const bundles = await Repositories.getCurrent().bundle.loadPendingUpdate();
-    for (const bundle of bundles) { await ZipHelper.zipBundle(bundle); }
+    const bundles = await Repositories.getCurrent().bundle.loadPendingUpdate(5);
+    for (const bundle of bundles) {
+      try {
+        await ZipHelper.zipBundle(bundle);
+      } catch {
+        bundle.pendingUpdate = false;
+        await Repositories.getCurrent().bundle.save(bundle);
+      }
+    }
   }
 
   static async zipBundle(bundle: Bundle) {
@@ -68,55 +75,52 @@ export class ZipHelper {
       const variant: Variant = ArrayHelper.getOne(variants, "fileId", f.id)
       if (variant && !variant.hidden) {
         let filePath = f.contentPath.split("?")[0];
-        console.log(filePath);
         filePath = filePath.replace("/content/", "").replace(Environment.contentRoot + "/", "")
-        console.log(filePath);
         zipFiles.push({ name: f.fileName, key: filePath });
       }
     });
     const zipName = "files/bundles/" + bundle.id + "/" + bundle.name + ".zip";
+    let success = true;
     try {
-      console.log("zipping");
       await ZipHelper.zipFiles(zipName, zipFiles)
       console.log("done zipping");
     } catch {
+      success = false;
       console.log("failed to zip");
+      bundle.pendingUpdate = false;
+      await Repositories.getCurrent().bundle.save(bundle);
     }
-    let file: File = null;
-    if (bundle.fileId) {
-      console.log("existing file");
-      file = await Repositories.getCurrent().file.load(bundle.churchId, bundle.fileId);
-      const oldKey = file.contentPath.split("?")[0].replace(Environment.contentRoot + "/", "");
-      if (oldKey !== zipName) {
-        await FileHelper.remove(oldKey);
-        await Repositories.getCurrent().file.delete(bundle.churchId, file.id);
-        file = null;
+    if (success) {
+      let file: File = null;
+      if (bundle.fileId) {
+        file = await Repositories.getCurrent().file.load(bundle.churchId, bundle.fileId);
+        const oldKey = file.contentPath.split("?")[0].replace(Environment.contentRoot + "/", "");
+        if (oldKey !== zipName) {
+          await FileHelper.remove(oldKey);
+          await Repositories.getCurrent().file.delete(bundle.churchId, file.id);
+          file = null;
+        }
       }
-    }
-    const now = new Date();
-    if (file === null) {
-      console.log("file is null")
-
-      file = {
-        id: "",
-        dateModified: now,
-        contentPath: Environment.contentRoot + "/" + zipName + "?dt=" + now.getTime().toString(),
-        churchId: bundle.churchId,
-        fileName: bundle.name + ".zip",
-        fileType: "application/zip"
+      const now = new Date();
+      if (file === null) {
+        file = {
+          id: "",
+          dateModified: now,
+          contentPath: Environment.contentRoot + "/" + zipName + "?dt=" + now.getTime().toString(),
+          churchId: bundle.churchId,
+          fileName: bundle.name + ".zip",
+          fileType: "application/zip"
+        }
+      } else {
+        file.dateModified = now;
+        file.contentPath = Environment.contentRoot + "/" + zipName + "?dt=" + now.getTime().toString()
       }
-    } else {
-      file.dateModified = now;
-      file.contentPath = Environment.contentRoot + "/" + zipName + "?dt=" + now.getTime().toString()
+      file = await Repositories.getCurrent().file.save(file);
+      bundle.fileId = file.id;
+      bundle.pendingUpdate = false;
+      await Repositories.getCurrent().bundle.save(bundle);
+      await FilesHelper.updateSize(file);
     }
-    console.log("saving file")
-    file = await Repositories.getCurrent().file.save(file);
-    console.log("saved file")
-    bundle.fileId = file.id;
-    bundle.pendingUpdate = false;
-    await Repositories.getCurrent().bundle.save(bundle)
-    console.log("saved bundle")
-
   }
 
 }

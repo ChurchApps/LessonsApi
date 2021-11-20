@@ -27,7 +27,8 @@ export class BundleController extends LessonsBaseController {
   @httpGet("/zip")
   public async zipAll(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
     return this.actionWrapper(req, res, async (au) => {
-      ZipHelper.zipPendingBundles();
+      await ZipHelper.zipPendingBundles();
+      return []
     });
   }
 

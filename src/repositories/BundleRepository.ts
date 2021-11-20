@@ -27,8 +27,8 @@ export class BundleRepository {
     return DB.query("SELECT * FROM bundles WHERE churchId=? AND contentType=? AND contentId=? order by name", [churchId, contentType, contentId]);
   }
 
-  public loadPendingUpdate(): Promise<Bundle[]> {
-    return DB.query("SELECT * FROM bundles WHERE pendingUpdate=1", []);
+  public loadPendingUpdate(limit: number): Promise<Bundle[]> {
+    return DB.query("SELECT * FROM bundles WHERE pendingUpdate=1 limit " + limit.toString(), []);
   }
 
 
