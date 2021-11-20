@@ -31,6 +31,11 @@ export class BundleRepository {
     return DB.query("SELECT * FROM bundles WHERE pendingUpdate=1", []);
   }
 
+
+  public loadPublicForLesson(lessonId: string): Promise<Bundle[]> {
+    return DB.query("SELECT * FROM bundles WHERE id in (SELECT bundleId FROM resources WHERE id in (SELECT resourceId from actions WHERE lessonId=?))", [lessonId]);
+  }
+
   public load(churchId: string, id: string): Promise<Bundle> {
     return DB.queryOne("SELECT * FROM bundles WHERE id=? and churchId=?", [id, churchId]);
   }

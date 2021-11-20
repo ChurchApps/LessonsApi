@@ -1,3 +1,5 @@
+import { File } from "./File";
+
 export class Bundle {
   public id?: string;
   public churchId?: string;
@@ -6,4 +8,6 @@ export class Bundle {
   public name?: string;
   public fileId?: string;
   public pendingUpdate?: boolean;
+
+  public file?: File;
 }

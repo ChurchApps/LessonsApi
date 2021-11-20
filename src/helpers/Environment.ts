@@ -12,7 +12,7 @@ export class Environment extends EnvironmentBase {
 
 
   static init(environment: string) {
-    environment = "staging"
+    // environment = "staging"
     let file = "dev.json";
     if (environment === "staging") file = "staging.json";
     if (environment === "prod") file = "prod.json";

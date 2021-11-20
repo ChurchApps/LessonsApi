@@ -11,6 +11,19 @@ import { ZipHelper } from "../helpers/ZipHelper";
 @controller("/bundles")
 export class BundleController extends LessonsBaseController {
 
+  @httpGet("/public/lesson/:lessonId")
+  public async getPublicForLesson(@requestParam("lessonId") lessonId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
+    return this.actionWrapperAnon(req, res, async () => {
+      const bundles: Bundle[] = await this.repositories.bundle.loadPublicForLesson(lessonId);
+      if (bundles.length === 0) return bundles;
+      const fileIds = ArrayHelper.getIds(bundles, "fileId");
+      const files = await this.repositories.file.loadByIds(bundles[0].churchId, fileIds);
+      bundles.forEach(b => { b.file = ArrayHelper.getOne(files, "id", b.fileId) });
+      return bundles;
+    });
+  }
+
+
   @httpGet("/zip")
   public async zipAll(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
     return this.actionWrapper(req, res, async (au) => {
