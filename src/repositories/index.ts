@@ -1,5 +1,6 @@
 export { ActionRepository } from "./ActionRepository"
 export { AssetRepository } from "./AssetRepository"
+export { BundleRepository } from "./BundleRepository"
 export { ClassroomRepository } from "./ClassroomRepository"
 export { FileRepository } from "./FileRepository"
 export { LessonRepository } from "./LessonRepository"

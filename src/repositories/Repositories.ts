@@ -1,11 +1,12 @@
 import {
   FileRepository, LessonRepository, ProviderRepository, SectionRepository, StudyRepository, ProgramRepository, VenueRepository, RoleRepository,
-  ActionRepository, ResourceRepository, VariantRepository, AssetRepository, ClassroomRepository, ScheduleRepository
+  ActionRepository, ResourceRepository, VariantRepository, AssetRepository, ClassroomRepository, ScheduleRepository, BundleRepository
 } from ".";
 
 export class Repositories {
   public action: ActionRepository;
   public asset: AssetRepository;
+  public bundle: BundleRepository;
   public classroom: ClassroomRepository;
   public file: FileRepository;
   public lesson: LessonRepository;
@@ -28,6 +29,7 @@ export class Repositories {
   constructor() {
     this.action = new ActionRepository();
     this.asset = new AssetRepository();
+    this.bundle = new BundleRepository();
     this.classroom = new ClassroomRepository();
     this.file = new FileRepository();
     this.lesson = new LessonRepository();

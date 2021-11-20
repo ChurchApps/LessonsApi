@@ -3,6 +3,7 @@ const { init } = require('./dist/App');
 const { Pool } = require('./dist/apiBase/pool');
 const { TranscodeHelper } = require('./dist/helpers/TranscodeHelper');
 const { Environment } = require('./dist/helpers/Environment');
+const { ZipHelper } = require('./dist/helpers/ZipHelper');
 
 Environment.init(process.env.APP_ENV);
 Pool.initPool();
@@ -21,5 +22,10 @@ const videoPingback = async (event, context) => {
   await TranscodeHelper.handlePingback(event);
 }
 
+const zipBundles = async (event, context) => {
+  await ZipHelper.zipPendingBundles();
+}
+
 module.exports.universal = universal;
 module.exports.videoPingback = videoPingback;
+module.exports.zipBundles = zipBundles;

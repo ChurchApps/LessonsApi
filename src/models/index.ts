@@ -1,5 +1,6 @@
 export { Action } from "./Action"
 export { Asset } from "./Asset"
+export { Bundle } from "./Bundle"
 export { Classroom } from "./Classroom"
 export { File } from "./File"
 export { Lesson } from "./Lesson"
