@@ -3,7 +3,7 @@ import express from "express";
 import { LessonsBaseController } from "./LessonsBaseController"
 import { Asset } from "../models"
 import { Permissions } from '../helpers/Permissions'
-import { FilesHelper } from "../helpers";
+import { FilesHelper, ZipHelper } from "../helpers";
 
 @controller("/assets")
 export class AssetController extends LessonsBaseController {
@@ -51,7 +51,15 @@ export class AssetController extends LessonsBaseController {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
       else {
         const promises: Promise<Asset>[] = [];
-        req.body.forEach(asset => { asset.churchId = au.churchId; promises.push(this.repositories.asset.save(asset)); });
+        req.body.forEach(asset => {
+          asset.churchId = au.churchId;
+          promises.push(
+            this.repositories.asset.save(asset).then(async (a) => {
+              await this.setBundlePending(asset.churchId, asset.resourceId);
+              return a;
+            })
+          );
+        });
         const result = await Promise.all(promises);
         return result;
       }
@@ -66,8 +74,14 @@ export class AssetController extends LessonsBaseController {
         const asset = await this.repositories.asset.load(au.churchId, id);
         if (asset.fileId) await FilesHelper.deleteFile(au.churchId, asset.fileId, asset.resourceId);
         await this.repositories.asset.delete(au.churchId, id);
+        await this.setBundlePending(asset.churchId, asset.resourceId);
       }
     });
+  }
+
+  private async setBundlePending(churchId: string, resourceId: string) {
+    const r = await this.repositories.resource.load(churchId, resourceId);
+    await ZipHelper.setBundlePending(churchId, r.bundleId);
   }
 
 }

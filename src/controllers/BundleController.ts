@@ -54,7 +54,11 @@ export class BundleController extends LessonsBaseController {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
       else {
         const promises: Promise<Bundle>[] = [];
-        req.body.forEach(bundle => { bundle.churchId = au.churchId; promises.push(this.repositories.bundle.save(bundle)); });
+        req.body.forEach(bundle => {
+          bundle.churchId = au.churchId;
+          bundle.pendingUpdate = true;
+          promises.push(this.repositories.bundle.save(bundle));
+        });
         const result = await Promise.all(promises);
         return result;
       }

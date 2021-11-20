@@ -3,3 +3,4 @@ export { UniqueIdHelper, EmailHelper, DateTimeHelper, MySqlHelper, FileHelper } 
 export { Permissions } from "./Permissions"
 export { FilesHelper } from "./FilesHelper"
 export { Environment } from "./Environment"
+export { ZipHelper } from "./ZipHelper"

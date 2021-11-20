@@ -53,6 +53,12 @@ export class ZipHelper {
     });
   }
 
+  static async setBundlePending(churchId: string, bundleId: string) {
+    const bundle = await Repositories.getCurrent().bundle.load(churchId, bundleId);
+    bundle.pendingUpdate = true;
+    await Repositories.getCurrent().bundle.save(bundle);
+  }
+
   static async zipPendingBundles() {
     const bundles = await Repositories.getCurrent().bundle.loadPendingUpdate(5);
     for (const bundle of bundles) {

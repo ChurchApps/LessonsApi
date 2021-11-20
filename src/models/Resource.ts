@@ -4,6 +4,7 @@ import { Asset } from "./Asset"
 export class Resource {
   public id?: string;
   public churchId?: string;
+  public bundleId?: string;
   public contentType?: string;
   public contentId?: string;
   public name?: string;
