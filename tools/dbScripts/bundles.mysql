@@ -4,5 +4,7 @@ CREATE TABLE `bundles` (
   `contentType` varchar(45) DEFAULT NULL,
   `contentId` char(11) DEFAULT NULL,
   `name` varchar(45) DEFAULT NULL,
+  `fileId` char(11) DEFAULT NULL,
+  `pendingUpdate` bit(1) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
