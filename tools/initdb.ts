@@ -25,6 +25,7 @@ const init = async () => {
     { title: "Studies", file: "studies.mysql" },
     { title: "Variants", file: "variants.mysql" },
     { title: "Venues", file: "venues.mysql" },
+    { title: "Labelled Bundles", file: "labelledBundles.mysql" },
   ];
 
   await initTables("Access", tables);
