@@ -10,21 +10,21 @@ export class ResourceRepository {
 
   public async create(resource: Resource) {
     resource.id = UniqueIdHelper.shortId();
-    const sql = "INSERT INTO resources (id, churchId, contentType, contentId, name, category, bundleId) VALUES (?, ?, ?, ?, ?, ?, ?);";
-    const params = [resource.id, resource.churchId, resource.contentType, resource.contentId, resource.name, resource.category, resource.bundleId];
+    const sql = "INSERT INTO resources (id, churchId, name, category, bundleId) VALUES (?, ?, ?, ?, ?);";
+    const params = [resource.id, resource.churchId, resource.name, resource.category, resource.bundleId];
     await DB.query(sql, params);
     return resource;
   }
 
   public async update(resource: Resource) {
-    const sql = "UPDATE resources SET contentType=?, contentId=?, name=?, category=?, bundleId=? WHERE id=? AND churchId=?";
-    const params = [resource.contentType, resource.contentId, resource.name, resource.category, resource.bundleId, resource.id, resource.churchId];
+    const sql = "UPDATE resources SET name=?, category=?, bundleId=? WHERE id=? AND churchId=?";
+    const params = [resource.name, resource.category, resource.bundleId, resource.id, resource.churchId];
     await DB.query(sql, params);
     return resource;
   }
 
   public loadByContentTypeId(churchId: string, contentType: string, contentId: string): Promise<Resource[]> {
-    return DB.query("SELECT * FROM resources WHERE churchId=? AND contentType=? AND contentId=? order by name", [churchId, contentType, contentId]);
+    return DB.query("SELECT * FROM resources WHERE bundleId in (SELECT id from bundles WHERE churchId=? AND contentType=? AND contentId=?) order by name", [churchId, contentType, contentId]);
   }
 
   public loadByBundleId(churchId: string, bundleId: string): Promise<Resource[]> {

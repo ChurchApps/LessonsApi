@@ -35,6 +35,15 @@ export class BundleController extends LessonsBaseController {
     });
   }
 
+
+  @httpGet("/available")
+  public async getAvailable(req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
+    return this.actionWrapper(req, res, async (au) => {
+      if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
+      else return await this.repositories.bundle.loadAvailable(au.churchId, req.query.programId.toString(), req.query.studyId.toString());
+    });
+  }
+
   @httpGet("/:id")
   public async get(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
     return this.actionWrapper(req, res, async (au) => {
@@ -42,6 +51,7 @@ export class BundleController extends LessonsBaseController {
       else return await this.repositories.bundle.load(au.churchId, id)
     });
   }
+
 
   @httpGet("/content/:contentType/:contentId")
   public async getForContent(@requestParam("contentType") contentType: string, @requestParam("contentId") contentId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {

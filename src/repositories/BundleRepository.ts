@@ -31,6 +31,17 @@ export class BundleRepository {
     return DB.query("SELECT * FROM bundles WHERE pendingUpdate=1 limit " + limit.toString(), []);
   }
 
+  public loadAvailable(churchId: string, programId: string, studyId: string): Promise<Bundle[]> {
+    const params = [churchId, programId]
+    let sql = "SELECT * FROM labelledBundles WHERE churchId=? AND "
+    if (studyId) {
+      sql += "(programId=? OR studyId=?)";
+      params.push(studyId);
+    } else sql += "programId=?"
+    console.log(sql);
+    console.log(JSON.stringify(params))
+    return DB.query(sql, params);
+  }
 
   public loadPublicForLesson(lessonId: string): Promise<Bundle[]> {
     return DB.query("SELECT * FROM bundles WHERE id in (SELECT bundleId FROM resources WHERE id in (SELECT resourceId from actions WHERE lessonId=?))", [lessonId]);

@@ -34,7 +34,7 @@ export class VariantRepository {
   }
 
   public loadByContentTypeId(churchId: string, contentType: string, contentId: string): Promise<Variant[]> {
-    const subQuery = "SELECT id from resources WHERE churchId=? AND contentType=? AND contentId=?";
+    const subQuery = "SELECT r.id from resources r INNER JOIN bundles b on b.id=r.bundleId WHERE b.churchId=? AND b.contentType=? AND b.contentId=?";
     return DB.query("SELECT * FROM variants WHERE churchId=? AND resourceId in (" + subQuery + ") order by name", [churchId, churchId, contentType, contentId]);
   }
 

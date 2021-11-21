@@ -51,7 +51,8 @@ export class FileController extends LessonsBaseController {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
       else {
         const resource = await this.repositories.resource.load(au.churchId, req.body.resourceId);
-        const key = "/files/" + resource.contentType + "/" + resource.contentId + "/" + resource.id + "/" + req.body.fileName;
+        const bundle = await this.repositories.bundle.load(au.churchId, resource.bundleId);
+        const key = "/files/" + bundle.contentType + "/" + bundle.contentId + "/" + resource.id + "/" + req.body.fileName;
         const result = (Environment.fileStore === "S3") ? await AwsHelper.S3PresignedUrl(key) : {};
         return result;
       }
@@ -70,11 +71,12 @@ export class FileController extends LessonsBaseController {
 
   private async saveFile(file: File) {
     const resource = await this.repositories.resource.load(file.churchId, file.resourceId);
-    const key = "/files/" + resource.contentType + "/" + resource.contentId + "/" + resource.id + "/" + file.fileName;
+    const bundle = await this.repositories.bundle.load(file.churchId, resource.bundleId);
+    const key = "/files/" + bundle.contentType + "/" + bundle.contentId + "/" + resource.id + "/" + file.fileName;
     if (file.id) // delete existing uploadFile
     {
       const existingFile = await this.repositories.file.load(file.churchId, file.id)
-      const oldKey = "/files/" + resource.contentType + "/" + resource.contentId + "/" + resource.id + "/" + existingFile.fileName;
+      const oldKey = "/files/" + bundle.contentType + "/" + bundle.contentId + "/" + resource.id + "/" + existingFile.fileName;
       if (oldKey !== key) await FileHelper.remove(oldKey);
     }
 
