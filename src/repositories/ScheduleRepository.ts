@@ -23,8 +23,12 @@ export class ScheduleRepository {
     return schedule;
   }
 
-  public loadByClassroomId(churchId: string, classroomId: string): Promise<Schedule[]> {
+  public loadByChurchIdClassroomId(churchId: string, classroomId: string): Promise<Schedule[]> {
     return DB.query("SELECT * FROM schedules WHERE churchId=? AND classroomId=? ORDER BY scheduledDate", [churchId, classroomId]);
+  }
+
+  public loadByClassroomId(classroomId: string): Promise<Schedule[]> {
+    return DB.query("SELECT * FROM schedules WHERE classroomId=? ORDER BY scheduledDate", [classroomId]);
   }
 
   public loadCurrent(classroomId: string): Promise<Schedule> {

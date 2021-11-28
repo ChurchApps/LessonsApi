@@ -7,18 +7,27 @@ import { Permissions } from '../helpers/Permissions'
 @controller("/schedules")
 export class ScheduleController extends LessonsBaseController {
 
-  @httpGet("/:id")
-  public async get(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
-    return this.actionWrapperAnon(req, res, async () => {
-      return await this.repositories.schedule.load(id)
-    });
-  }
 
 
   @httpGet("/classroom/:classroomId")
   public async getAll(@requestParam("classroomId") classroomId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
     return this.actionWrapper(req, res, async (au) => {
-      return await this.repositories.schedule.loadByClassroomId(au.churchId, classroomId)
+      return await this.repositories.schedule.loadByChurchIdClassroomId(au.churchId, classroomId)
+    });
+  }
+
+  @httpGet("/public/classroom/:classroomId")
+  public async getPublicClassroom(@requestParam("classroomId") classroomId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
+    return this.actionWrapperAnon(req, res, async () => {
+      return await this.repositories.schedule.loadByClassroomId(classroomId)
+    });
+  }
+
+
+  @httpGet("/:id")
+  public async get(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
+    return this.actionWrapperAnon(req, res, async () => {
+      return await this.repositories.schedule.load(id)
     });
   }
 

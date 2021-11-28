@@ -44,6 +44,13 @@ export class ClassroomController extends LessonsBaseController {
     });
   }
 
+  @httpGet("/public/church/:churchId")
+  public async getForChurch(@requestParam("churchId") churchId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
+    return this.actionWrapperAnon(req, res, async () => {
+      return await this.repositories.classroom.loadByChurchId(churchId)
+    });
+  }
+
   @httpPost("/")
   public async save(req: express.Request<{}, {}, Classroom[]>, res: express.Response): Promise<interfaces.IHttpActionResult> {
     return this.actionWrapper(req, res, async (au) => {
