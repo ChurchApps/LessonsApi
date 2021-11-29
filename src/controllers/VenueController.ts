@@ -15,6 +15,18 @@ export class VenueController extends LessonsBaseController {
     });
   }
 
+  @httpGet("/public/:id")
+  public async getPublic(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
+    return this.actionWrapperAnon(req, res, async () => {
+      const venue = await this.repositories.venue.loadPublic(id);
+      const sections = await this.repositories.section.loadByLessonId(venue.lessonId);
+      const roles = await this.repositories.role.loadByLessonId(venue.lessonId);
+      const actions = await this.repositories.action.loadByLessonId(venue.lessonId);
+      this.appendSections(venue, sections, roles, actions);
+      return venue;
+    });
+  }
+
   @httpGet("/public/lesson/:lessonId")
   public async getPublicForLesson(@requestParam("lessonId") lessonId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
     return this.actionWrapperAnon(req, res, async () => {
