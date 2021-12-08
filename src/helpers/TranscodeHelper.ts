@@ -2,6 +2,7 @@ import AWS from "aws-sdk";
 import { Repositories } from "../repositories/Repositories";
 import { File, Variant, Resource } from "../models";
 import { Environment, FilesHelper } from ".";
+import { AwsHelper } from "../apiBase";
 
 export class TranscodeHelper {
 
@@ -46,6 +47,11 @@ export class TranscodeHelper {
   }
 
   static async encodeWebm(sourcePath: string, destPath: string, destFile: string) {
+
+    const existing = await AwsHelper.S3Read(destPath);
+    if (existing) await AwsHelper.S3Remove(destPath);
+
+
     const params: AWS.ElasticTranscoder.CreateJobRequest =
     {
       PipelineId: Environment.transcodePipeline,
@@ -54,7 +60,7 @@ export class TranscodeHelper {
         Key: sourcePath
       }, Outputs: [{
         Key: destFile,
-        PresetId: Environment.transcodePreset
+        PresetId: Environment.transcodePreset,
       }]
     }
 

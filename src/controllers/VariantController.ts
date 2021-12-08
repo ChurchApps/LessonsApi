@@ -9,6 +9,18 @@ import { TranscodeHelper } from "../helpers/TranscodeHelper";
 @controller("/variants")
 export class VariantController extends LessonsBaseController {
 
+
+  @httpGet("/createWebms")
+  public async createWebms(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
+    return this.actionWrapperAnon(req, res, async () => {
+      const items = await this.repositories.resource.loadNeedingWebm();
+      for (const item of items) {
+        await TranscodeHelper.createWebms(item.id)
+      }
+    });
+  }
+
+
   /*
   @httpGet("/createWebms")
   public async createWebms(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
