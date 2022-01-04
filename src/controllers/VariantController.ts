@@ -11,11 +11,15 @@ export class VariantController extends LessonsBaseController {
 
 
   @httpGet("/createWebms")
-  public async createWebms(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
+  public async createWebms(req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
     return this.actionWrapperAnon(req, res, async () => {
       const items = await this.repositories.resource.loadNeedingWebm();
       for (const item of items) {
-        await TranscodeHelper.createWebms(item.id)
+        try {
+          await TranscodeHelper.createWebms(item.id)
+        } catch (ex) {
+          console.log(ex);
+        }
       }
     });
   }

@@ -48,8 +48,14 @@ export class TranscodeHelper {
 
   static async encodeWebm(sourcePath: string, destPath: string, destFile: string) {
 
-    const existing = await AwsHelper.S3Read(destPath);
-    if (existing) await AwsHelper.S3Remove(destPath);
+    /*
+    const existing = await AwsHelper.S3Read(destPath + destFile);
+    if (existing) await AwsHelper.S3Remove(destPath + destFile);*/
+    try {
+      await AwsHelper.S3Remove(destPath + destFile);
+    } catch (ex) {
+      console.log(ex);
+    }
 
 
     const params: AWS.ElasticTranscoder.CreateJobRequest =
