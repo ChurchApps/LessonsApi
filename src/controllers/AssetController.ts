@@ -55,7 +55,7 @@ export class AssetController extends LessonsBaseController {
           asset.churchId = au.churchId;
           promises.push(
             this.repositories.asset.save(asset).then(async (a) => {
-              await this.setBundlePending(asset.churchId, asset.resourceId);
+              await ZipHelper.setBundlePendingResource(a.churchId, a.resourceId);
               return a;
             })
           );
@@ -74,14 +74,10 @@ export class AssetController extends LessonsBaseController {
         const asset = await this.repositories.asset.load(au.churchId, id);
         if (asset.fileId) await FilesHelper.deleteFile(au.churchId, asset.fileId, asset.resourceId);
         await this.repositories.asset.delete(au.churchId, id);
-        await this.setBundlePending(asset.churchId, asset.resourceId);
+        await ZipHelper.setBundlePendingResource(asset.churchId, asset.resourceId);
       }
     });
   }
 
-  private async setBundlePending(churchId: string, resourceId: string) {
-    const r = await this.repositories.resource.load(churchId, resourceId);
-    await ZipHelper.setBundlePending(churchId, r.bundleId);
-  }
 
 }

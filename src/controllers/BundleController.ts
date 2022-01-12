@@ -70,7 +70,12 @@ export class BundleController extends LessonsBaseController {
         req.body.forEach(bundle => {
           bundle.churchId = au.churchId;
           bundle.pendingUpdate = true;
-          promises.push(this.repositories.bundle.save(bundle));
+          promises.push(
+            this.repositories.bundle.save(bundle).then(async (b) => {
+              await ZipHelper.setBundlePending(bundle.churchId, b.id);
+              return b;
+            })
+          );
         });
         const result = await Promise.all(promises);
         return result;

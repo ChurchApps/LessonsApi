@@ -54,6 +54,7 @@ export class ResourceController extends LessonsBaseController {
           if (resource.id) await this.checkMoveFiles(resource);
           promises.push(this.repositories.resource.save(resource).then(async r => {
             await ZipHelper.setBundlePending(r.churchId, r.bundleId);
+            if (r.bundleId !== resource.bundleId) await ZipHelper.setBundlePending(resource.churchId, resource.bundleId); // update the old bundle too
             return r;
           }));
         }
