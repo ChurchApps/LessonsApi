@@ -43,7 +43,7 @@ export class VariantRepository {
   }
 
   public loadPlaylist(resourceIds: string[]): Promise<any> {
-    const sql = "select f.contentPath, r.id as resourceId, r.name as resourceName, '' as assetId, f.fileType from resources r"
+    const sql = "select f.contentPath, r.id as resourceId, r.name as resourceName, '' as assetId, f.fileType, f.seconds from resources r"
       + " inner join variants v on v.resourceId=r.id"
       + " inner join files f on f.id=v.fileId"
       + " where r.id in (" + ArrayHelper.fillArray("?", resourceIds.length).join(", ") + ");"

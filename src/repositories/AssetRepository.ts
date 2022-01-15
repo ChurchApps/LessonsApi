@@ -44,7 +44,7 @@ export class AssetRepository {
   }
 
   public loadPlaylist(resourceIds: string[]): Promise<any> {
-    const sql = "select f.contentPath, r.id as resourceId, concat(r.name, ' - ', a.name) as resourceName, a.id as assetId, f.fileType from resources r"
+    const sql = "select f.contentPath, r.id as resourceId, concat(r.name, ' - ', a.name) as resourceName, a.id as assetId, f.fileType, f.seconds from resources r"
       + " inner join assets a on a.resourceId=r.id"
       + " inner join files f on f.id=a.fileId"
       + " where r.id in (" + ArrayHelper.fillArray("?", resourceIds.length).join(", ") + ")"
