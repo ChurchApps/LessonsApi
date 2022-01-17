@@ -12,7 +12,7 @@ export class FileRepository {
   public async create(file: File) {
     file.id = UniqueIdHelper.shortId();
     const sql = "INSERT INTO files (id, churchId, fileName, contentPath, fileType, size, seconds, dateModified) VALUES (?, ?, ?, ?, ?, ?, ?, NOW());";
-    const params = [file.id, file.churchId, file.fileName, file.contentPath, file.fileType, file.seconds, file.size];
+    const params = [file.id, file.churchId, file.fileName, file.contentPath, file.fileType, file.size, file.seconds];
     await DB.query(sql, params);
     return file;
   }

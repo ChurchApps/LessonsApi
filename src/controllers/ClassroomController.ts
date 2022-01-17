@@ -18,12 +18,14 @@ export class ClassroomController extends LessonsBaseController {
       const result: any[] = [];
       actions.forEach(a => {
         const files: any[] = PlaylistHelper.getBestFiles(a, availableFiles);
+        const itemFiles: any[] = []
         files.forEach(file => {
           const contentPath = (file.contentPath.indexOf("://") === -1) ? Environment.contentRoot + file.contentPath : file.contentPath;
           let seconds = parseInt(file.seconds, 0);
           if (!seconds || seconds === 0) seconds = 3600;
-          result.push({ name: file.resourceName, url: contentPath, seconds })
+          itemFiles.push({ name: file.resourceName, url: contentPath, seconds })
         });
+        result.push({ name: a.content, files: itemFiles });
       })
       return result;
     });
