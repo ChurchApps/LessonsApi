@@ -12,7 +12,7 @@ export class ClassroomController extends LessonsBaseController {
   @httpGet("/playlist/:classroomId")
   public async getPlaylist(@requestParam("classroomId") classroomId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
     return this.actionWrapperAnon(req, res, async () => {
-      const actions = await PlaylistHelper.loadPlaylistActions(classroomId, req.query.venueName.toString())
+      const actions = await PlaylistHelper.loadPlaylistActions(classroomId)
       const availableFiles = await PlaylistHelper.loadPlaylistFiles(actions);
 
       const result: any[] = [];
