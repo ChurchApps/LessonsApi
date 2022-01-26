@@ -16,6 +16,13 @@ export class SectionController extends LessonsBaseController {
     });
   }
 
+  @httpGet("/public/venue/:venueId")
+  public async getPublicForVenue(@requestParam("venueId") venueId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
+    return this.actionWrapperAnon(req, res, async () => {
+      return await this.repositories.section.loadByVenueIdPublic(venueId);
+    });
+  }
+
   @httpGet("/public/lesson/:lessonId")
   public async getForLesson(@requestParam("lessonId") lessonId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
     return this.actionWrapperAnon(req, res, async () => {
