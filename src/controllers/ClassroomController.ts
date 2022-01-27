@@ -1,10 +1,11 @@
 import { controller, httpPost, httpGet, interfaces, requestParam, httpDelete } from "inversify-express-utils";
 import express from "express";
 import { LessonsBaseController } from "./LessonsBaseController"
-import { Classroom } from "../models"
+import { Classroom, Venue } from "../models"
 import { Permissions } from '../helpers/Permissions'
 import { PlaylistHelper } from "../helpers/PlaylistHelper";
 import { Environment } from "../helpers";
+import { ArrayHelper } from "../apiBase";
 
 @controller("/classrooms")
 export class ClassroomController extends LessonsBaseController {
@@ -12,21 +13,36 @@ export class ClassroomController extends LessonsBaseController {
   @httpGet("/playlist/:classroomId")
   public async getPlaylist(@requestParam("classroomId") classroomId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
     return this.actionWrapperAnon(req, res, async () => {
-      const actions = await PlaylistHelper.loadPlaylistActions(classroomId)
+      const currentSchedule = await this.repositories.schedule.loadCurrent(classroomId);
+      if (!currentSchedule) throw new Error(("Could not load schedule"));
+      const venue: Venue = await this.repositories.venue.loadPublic(currentSchedule.venueId);
+      if (!venue) throw new Error(("Could not load venue: " + currentSchedule.venueId));
+      const sections = await this.repositories.section.loadByVenueId(venue.churchId, venue.id);
+      const actions = await this.repositories.action.loadPlaylistActions(venue.id, currentSchedule.churchId)
       const availableFiles = await PlaylistHelper.loadPlaylistFiles(actions);
 
       const result: any[] = [];
-      actions.forEach(a => {
-        const files: any[] = PlaylistHelper.getBestFiles(a, availableFiles);
-        const itemFiles: any[] = []
-        files.forEach(file => {
-          const contentPath = (file.contentPath.indexOf("://") === -1) ? Environment.contentRoot + file.contentPath : file.contentPath;
-          let seconds = parseInt(file.seconds, 0);
-          if (!seconds || seconds === 0) seconds = 3600;
-          itemFiles.push({ name: file.resourceName, url: contentPath, seconds })
+
+      sections.forEach(s => {
+        const sectionActions = ArrayHelper.getAll(actions, "sectionId", s.id);
+        const itemFiles: any[] = [];
+        sectionActions.forEach(a => {
+          const files: any[] = PlaylistHelper.getBestFiles(a, availableFiles);
+          files.forEach(file => {
+            const contentPath = (file.contentPath.indexOf("://") === -1) ? Environment.contentRoot + file.contentPath : file.contentPath;
+            let seconds = parseInt(file.seconds, 0);
+            if (!seconds || seconds === 0) seconds = 3600;
+            itemFiles.push({ name: file.resourceName, url: contentPath, seconds })
+          });
         });
-        result.push({ name: a.content, files: itemFiles });
-      })
+        result.push({ name: s.name, files: itemFiles });
+
+
+      });
+
+
+
+
       return result;
     });
   }

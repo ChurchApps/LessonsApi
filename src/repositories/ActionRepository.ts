@@ -24,7 +24,7 @@ export class ActionRepository {
   }
 
   public loadPlaylistActions(venueId: string, churchId: string): Promise<Action[]> {
-    const sql = "select a.* "
+    const sql = "select a.*, s.id as sectionId "
       + " from sections s"
       + " inner join roles r on r.sectionId=s.id"
       + " inner join actions a on a.roleId=r.id and a.actionType='Play'"

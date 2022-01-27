@@ -5,20 +5,6 @@ import { Venue, Action } from "../models";
 export class PlaylistHelper {
 
 
-  public static async loadPlaylistActions(classroomId: string): Promise<Action[]> {
-    const repo = Repositories.getCurrent();
-
-    const currentSchedule = await repo.schedule.loadCurrent(classroomId);
-    if (!currentSchedule) throw new Error(("Could not load schedule"));
-
-    const venue: Venue = await repo.venue.loadPublic(currentSchedule.venueId);
-    if (!venue) throw new Error(("Could not load venue: " + currentSchedule.venueId));
-
-    const actions = await repo.action.loadPlaylistActions(venue.id, currentSchedule.churchId)
-    return actions;
-  }
-
-
   public static async loadPlaylistFiles(actions: Action[]) {
     const repo = Repositories.getCurrent();
     const resourceIds: string[] = ArrayHelper.getIds(actions, "resourceId");
