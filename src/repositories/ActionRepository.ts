@@ -23,13 +23,15 @@ export class ActionRepository {
     return action;
   }
 
-  public loadPlaylistActions(venueId: string): Promise<Action[]> {
-    const sql = "select a.* from sections s"
+  public loadPlaylistActions(venueId: string, churchId: string): Promise<Action[]> {
+    const sql = "select a.* "
+      + " from sections s"
       + " inner join roles r on r.sectionId=s.id"
       + " inner join actions a on a.roleId=r.id and a.actionType='Play'"
-      + " where s.venueId=?"
+      + " left join customizations c on c.churchId=? AND c.venueId=s.venueId AND c.action='remove' AND c.contentId IN (s.id, r.id, a.id)"
+      + " where s.venueId=? and c.id is null"
       + " order by s.sort, r.sort, a.sort"
-    return DB.query(sql, [venueId]);
+    return DB.query(sql, [churchId, venueId]);
   }
 
   public loadByLessonId(lessonId: string): Promise<Action[]> {

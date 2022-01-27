@@ -14,6 +14,13 @@ export class CustomizationController extends LessonsBaseController {
     });
   }
 
+  @httpGet("/public/venue/:venueId/:churchId")
+  public async getPublicForVenue(@requestParam("venueId") venueId: string, @requestParam("churchId") churchId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
+    return this.actionWrapper(req, res, async (au) => {
+      return await this.repositories.customization.loadByVenueId(churchId, venueId);
+    });
+  }
+
   @httpGet("/:id")
   public async get(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
     return this.actionWrapper(req, res, async (au) => {

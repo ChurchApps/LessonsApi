@@ -14,7 +14,7 @@ export class PlaylistHelper {
     const venue: Venue = await repo.venue.loadPublic(currentSchedule.venueId);
     if (!venue) throw new Error(("Could not load venue: " + currentSchedule.venueId));
 
-    const actions = await repo.action.loadPlaylistActions(venue.id)
+    const actions = await repo.action.loadPlaylistActions(venue.id, currentSchedule.churchId)
     return actions;
   }
 
