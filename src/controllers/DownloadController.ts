@@ -12,7 +12,7 @@ export class DownloadController extends LessonsBaseController {
       const promises: Promise<Download>[] = [];
       req.body.forEach(download => {
         if (!download.id) {
-          download.ipAddress = req.ip;
+          download.ipAddress = (req.headers['x-forwarded-for'] || req.socket.remoteAddress).toString().split(",")[0];
           download.downloadDate = new Date();
         }
         promises.push(this.repositories.download.save(download));
