@@ -10,15 +10,15 @@ export class DownloadRepository {
 
   public async create(download: Download) {
     download.id = UniqueIdHelper.shortId();
-    const sql = "INSERT INTO downloads (id, lessonId, fileId, userId, ipAddress, downloadDate, fileName) VALUES (?, ?, ?, ?, ?, ?, ?);";
-    const params = [download.id, download.lessonId, download.fileId, download.userId, download.ipAddress, download.downloadDate, download.fileName];
+    const sql = "INSERT INTO downloads (id, lessonId, fileId, userId, churchId, ipAddress, downloadDate, fileName) VALUES (?, ?, ?, ?, ?, ?, ?, ?);";
+    const params = [download.id, download.lessonId, download.fileId, download.userId, download.churchId, download.ipAddress, download.downloadDate, download.fileName];
     await DB.query(sql, params);
     return download;
   }
 
   public async update(download: Download) {
-    const sql = "UPDATE downloads SET lessonId=?, fileId=?, userId=?, ipAddress=?, downloadDate=?, fileName=? WHERE id=?";
-    const params = [download.lessonId, download.fileId, download.userId, download.ipAddress, download.downloadDate, download.fileName, download.id];
+    const sql = "UPDATE downloads SET lessonId=?, fileId=?, userId=?, churchId=?, ipAddress=?, downloadDate=?, fileName=? WHERE id=?";
+    const params = [download.lessonId, download.fileId, download.userId, download.churchId, download.ipAddress, download.downloadDate, download.fileName, download.id];
     await DB.query(sql, params);
     return download;
   }

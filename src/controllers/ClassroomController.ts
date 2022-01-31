@@ -1,7 +1,7 @@
 import { controller, httpPost, httpGet, interfaces, requestParam, httpDelete } from "inversify-express-utils";
 import express from "express";
 import { LessonsBaseController } from "./LessonsBaseController"
-import { Classroom, Venue } from "../models"
+import { Classroom, Download, Venue } from "../models"
 import { Permissions } from '../helpers/Permissions'
 import { PlaylistHelper } from "../helpers/PlaylistHelper";
 import { Environment } from "../helpers";
@@ -20,6 +20,9 @@ export class ClassroomController extends LessonsBaseController {
       const sections = await this.repositories.section.loadByVenueId(venue.churchId, venue.id);
       const actions = await this.repositories.action.loadPlaylistActions(venue.id, currentSchedule.churchId)
       const availableFiles = await PlaylistHelper.loadPlaylistFiles(actions);
+
+      const ipAddress = (req.headers['x-forwarded-for'] || req.socket.remoteAddress).toString().split(",")[0]
+      await this.logDownload(venue.lessonId, venue.name, currentSchedule.churchId, ipAddress);
 
       const result: any[] = [];
 
@@ -88,6 +91,18 @@ export class ClassroomController extends LessonsBaseController {
       if (!au.checkAccess(Permissions.schedules.edit)) return this.json({}, 401);
       else await this.repositories.classroom.delete(au.churchId, id);
     });
+  }
+
+  public async logDownload(lessonId: string, venueName: string, churchId: string, ipAddress: string) {
+    const download: Download = {
+      lessonId,
+      churchId,
+      ipAddress,
+      downloadDate: new Date(),
+      fileName: "Playlist: " + venueName
+    }
+    await this.repositories.download.save(download);
+
   }
 
 
