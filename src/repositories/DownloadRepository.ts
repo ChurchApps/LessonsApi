@@ -27,6 +27,29 @@ export class DownloadRepository {
     return DB.queryOne("SELECT * FROM downloads WHERE id=?", [id]);
   }
 
+  public countsByStudy(programId: string, startDate: Date, endDate: Date): Promise<any[]> {
+    const sql = "SELECT s.id, s.name as studyName, count(distinct(ipAddress)) as downloadCount"
+      + " FROM downloads d"
+      + " INNER JOIN lessons l ON l.id=d.lessonId"
+      + " INNER JOIN studies s on s.id=l.studyId"
+      + " WHERE s.programId=? AND d.downloadDate between ? AND ?"
+      + " GROUP by s.id, s.name"
+
+    return DB.query(sql, [programId, startDate, endDate]);
+  }
+
+  public uniqueChurches(programId: string, startDate: Date, endDate: Date): Promise<any[]> {
+    const sql = "SELECT d.churchId"
+      + " FROM downloads d"
+      + " INNER JOIN lessons l ON l.id=d.lessonId"
+      + " INNER JOIN studies s on s.id=l.studyId"
+      + " WHERE s.programId=? AND d.downloadDate between ? AND ?"
+      + " AND d.churchId IS NOT NULL and d.churchId<>''"
+      + " group by d.churchId"
+
+    return DB.query(sql, [programId, startDate, endDate]);
+  }
+
 
   public delete(id: string): Promise<Download> {
     return DB.query("DELETE FROM downloads WHERE id=?", [id]);
