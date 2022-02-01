@@ -34,6 +34,7 @@ export class DownloadRepository {
       + " INNER JOIN studies s on s.id=l.studyId"
       + " WHERE s.programId=? AND d.downloadDate between ? AND ?"
       + " GROUP by s.id, s.name"
+      + " ORDER by s.name"
 
     return DB.query(sql, [programId, startDate, endDate]);
   }
