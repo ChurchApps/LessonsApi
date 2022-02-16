@@ -29,9 +29,12 @@ export class ActionRepository {
       + " inner join roles r on r.sectionId=s.id"
       + " inner join actions a on a.roleId=r.id and a.actionType='Play'"
       + " left join customizations c on c.churchId=? AND c.venueId=s.venueId AND c.action='remove' AND c.contentId IN (s.id, r.id, a.id)"
+      + " left join customizations ac on ac.churchId=? AND ac.venueId=s.venueId AND ac.action='sort' AND ac.contentId=a.id"
+      + " left join customizations rc on rc.churchId=? AND rc.venueId=s.venueId AND rc.action='sort' AND rc.contentId=r.id"
+      + " left join customizations sc on sc.churchId=? AND sc.venueId=s.venueId AND sc.action='sort' AND sc.contentId=s.id"
       + " where s.venueId=? and c.id is null"
-      + " order by s.sort, r.sort, a.sort"
-    return DB.query(sql, [churchId, venueId]);
+      + " order by IFNULL(cast(sc.actionContent as unsigned), s.sort), IFNULL(cast(rc.actionContent as unsigned), r.sort), IFNULL(cast(ac.actionContent as unsigned), a.sort)"
+    return DB.query(sql, [churchId, churchId, churchId, churchId, venueId]);
   }
 
   public loadByLessonId(lessonId: string): Promise<Action[]> {

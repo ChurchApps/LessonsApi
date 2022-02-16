@@ -17,7 +17,7 @@ export class ClassroomController extends LessonsBaseController {
       if (!currentSchedule) throw new Error(("Could not load schedule"));
       const venue: Venue = await this.repositories.venue.loadPublic(currentSchedule.venueId);
       if (!venue) throw new Error(("Could not load venue: " + currentSchedule.venueId));
-      const sections = await this.repositories.section.loadByVenueId(venue.churchId, venue.id);
+      const sections = await this.repositories.section.loadForPlaylist(venue.churchId, venue.id, currentSchedule.churchId);
       const actions = await this.repositories.action.loadPlaylistActions(venue.id, currentSchedule.churchId)
       const availableFiles = await PlaylistHelper.loadPlaylistFiles(actions);
 
@@ -42,9 +42,6 @@ export class ClassroomController extends LessonsBaseController {
 
 
       });
-
-
-
 
       return result;
     });

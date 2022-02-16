@@ -27,6 +27,14 @@ export class SectionRepository {
     return DB.query("SELECT * FROM sections WHERE churchId=? AND venueId=? ORDER BY sort", [churchId, venueId]);
   }
 
+  public loadForPlaylist(churchId: string, venueId: string, classRoomChurchId: string): Promise<Section[]> {
+    const sql = "SELECT s.* FROM sections s"
+      + " left join customizations sectionSort on sectionSort.churchId=? AND sectionSort.venueId=s.venueId AND sectionSort.action='sort' AND sectionSort.contentId=s.id"
+      + " WHERE s.churchId=? AND s.venueId=?"
+      + " ORDER BY IFNULL(cast(sectionSort.actionContent as unsigned), s.sort)"
+    return DB.query(sql, [classRoomChurchId, churchId, venueId]);
+  }
+
   public loadByVenueIdPublic(venueId: string): Promise<Section[]> {
     return DB.query("SELECT * FROM sections WHERE venueId=? ORDER BY sort", [venueId]);
   }
