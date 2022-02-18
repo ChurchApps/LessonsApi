@@ -1,7 +1,7 @@
 import { controller, httpPost, httpGet, interfaces, requestParam, httpDelete } from "inversify-express-utils";
 import express from "express";
 import { LessonsBaseController } from "./LessonsBaseController"
-import { Classroom, Download, Venue } from "../models"
+import { Classroom, Download, Lesson, Venue } from "../models"
 import { Permissions } from '../helpers/Permissions'
 import { PlaylistHelper } from "../helpers/PlaylistHelper";
 import { Environment } from "../helpers";
@@ -17,6 +17,7 @@ export class ClassroomController extends LessonsBaseController {
       if (!currentSchedule) throw new Error(("Could not load schedule"));
       const venue: Venue = await this.repositories.venue.loadPublic(currentSchedule.venueId);
       if (!venue) throw new Error(("Could not load venue: " + currentSchedule.venueId));
+      const lesson: Lesson = await this.repositories.lesson.loadPublic(venue.lessonId);
       const sections = await this.repositories.section.loadForPlaylist(venue.churchId, venue.id, currentSchedule.churchId);
       const actions = await this.repositories.action.loadPlaylistActions(venue.id, currentSchedule.churchId)
       const availableFiles = await PlaylistHelper.loadPlaylistFiles(actions);
@@ -24,7 +25,7 @@ export class ClassroomController extends LessonsBaseController {
       const ipAddress = (req.headers['x-forwarded-for'] || req.socket.remoteAddress).toString().split(",")[0]
       await this.logDownload(venue.lessonId, venue.name, currentSchedule.churchId, ipAddress);
 
-      const result: any[] = [];
+      const messages: any[] = [];
 
       sections.forEach(s => {
         const sectionActions = ArrayHelper.getAll(actions, "sectionId", s.id);
@@ -38,12 +39,12 @@ export class ClassroomController extends LessonsBaseController {
             itemFiles.push({ name: file.resourceName, url: contentPath, seconds })
           });
         });
-        result.push({ name: s.name, files: itemFiles });
+        messages.push({ name: s.name, files: itemFiles });
 
 
       });
 
-      return result;
+      return { messages, lessonName: lesson.name, venueName: venue.name };
     });
   }
 
