@@ -6,6 +6,19 @@ import { AwsHelper } from "../apiBase";
 
 export class TranscodeHelper {
 
+  static zeroPad(num: number, places: number) {
+    return String(num).padStart(places, '0')
+  }
+
+  static async deleteThumbs(s3Path: string) {
+    const files = await AwsHelper.S3List(s3Path);
+    const toDelete: string[] = [];
+    files.forEach(f => { if (f.indexOf("thumb-") > -1) toDelete.push(f); });
+    const promises: Promise<void>[] = []
+    toDelete.forEach(d => promises.push(AwsHelper.S3Remove(d)));
+    await Promise.all(promises);
+  }
+
   static async handlePingback(data: any): Promise<void> {
     try {
       const messageString = data.Records[0].Sns.Message;
@@ -19,10 +32,19 @@ export class TranscodeHelper {
       const contentPath = Environment.contentRoot + "/" + webmPath + webmName + "?dt=" + dateModified.getTime().toString();
       const size = 0;
 
+      let thumbMid = Math.floor(seconds / 15);
+      if (thumbMid !== 1) thumbMid = Math.floor(thumbMid / 2);
+      const thumbName = (thumbMid === 0) ? ""
+        : webmName.replace(".webm", "thumb-" + String(thumbMid).padStart(5, '0') + ".png")
+
+      const finalThumbName = webmName.replace(".webm", "-thumb.png");
+
+      await AwsHelper.S3Rename(webmPath + thumbName, webmPath + finalThumbName);
+      await this.deleteThumbs(webmPath);
       const repo = Repositories.getCurrent();
       const resource: Resource = await repo.resource.loadWithoutChurchId(resourceId);
 
-      let file: File = { churchId: resource.churchId, fileName: webmName, contentPath, fileType: "video/webm", size, dateModified, seconds }
+      let file: File = { churchId: resource.churchId, fileName: webmName, contentPath, fileType: "video/webm", size, dateModified, seconds, thumbPath: Environment.contentRoot + "/" + webmPath + finalThumbName }
       file = await repo.file.save(file);
 
       const variant: Variant = { churchId: resource.churchId, resourceId, fileId: file.id, name: "WEBM", downloadDefault: false, playerDefault: true, hidden: true }
@@ -57,7 +79,7 @@ export class TranscodeHelper {
       console.log(ex);
     }
 
-
+    const thumbPattern = destFile.replace(".webm", "thumb-{count}");
     const params: AWS.ElasticTranscoder.CreateJobRequest =
     {
       PipelineId: Environment.transcodePipeline,
@@ -67,6 +89,7 @@ export class TranscodeHelper {
       }, Outputs: [{
         Key: destFile,
         PresetId: Environment.transcodePreset,
+        ThumbnailPattern: thumbPattern
       }]
     }
 

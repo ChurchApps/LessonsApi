@@ -8,5 +8,6 @@ CREATE TABLE `files` (
   `fileType` varchar(45) DEFAULT NULL,
   `size` int(11) DEFAULT NULL,
   `dateModified` datetime DEFAULT NULL,
+  `filePath` varchar(1024) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;

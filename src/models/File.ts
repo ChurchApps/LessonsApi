@@ -7,6 +7,7 @@ export class File {
   public size?: number;
   public dateModified?: Date;
   public seconds?: number;
+  public thumbPath?: string;
 
   public resourceId?: string;     // doesn't get saved, but determines the file path.
   public fileContents?: string;

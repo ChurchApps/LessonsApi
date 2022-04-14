@@ -11,15 +11,15 @@ export class FileRepository {
 
   public async create(file: File) {
     file.id = UniqueIdHelper.shortId();
-    const sql = "INSERT INTO files (id, churchId, fileName, contentPath, fileType, size, seconds, dateModified) VALUES (?, ?, ?, ?, ?, ?, ?, NOW());";
-    const params = [file.id, file.churchId, file.fileName, file.contentPath, file.fileType, file.size, file.seconds];
+    const sql = "INSERT INTO files (id, churchId, fileName, contentPath, fileType, size, seconds, dateModified, thumbPath) VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), ?);";
+    const params = [file.id, file.churchId, file.fileName, file.contentPath, file.fileType, file.size, file.seconds, file.thumbPath];
     await DB.query(sql, params);
     return file;
   }
 
   public async update(file: File) {
-    const sql = "UPDATE files SET fileName=?, contentPath=?, fileType=?, size=?, seconds=?, dateModified=NOW() WHERE id=? AND churchId=?";
-    const params = [file.fileName, file.contentPath, file.fileType, file.size, file.seconds, file.id, file.churchId];
+    const sql = "UPDATE files SET fileName=?, contentPath=?, fileType=?, size=?, seconds=?, dateModified=NOW(), thumbPath=? WHERE id=? AND churchId=?";
+    const params = [file.fileName, file.contentPath, file.fileType, file.size, file.seconds, file.id, file.thumbPath, file.churchId];
     await DB.query(sql, params);
     return file;
   }
