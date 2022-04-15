@@ -19,6 +19,17 @@ export class TranscodeHelper {
     await Promise.all(promises);
   }
 
+  static async updateAllVariantThumbs(churchId: string, resourceId: string, thumbPath: string) {
+    const variants = await Repositories.getCurrent().variant.loadByResourceId(churchId, resourceId);
+    for (const v of variants) {
+      if (v.fileId && !v.hidden) {
+        const f = await Repositories.getCurrent().file.load(churchId, v.fileId);
+        f.thumbPath = thumbPath;
+        await Repositories.getCurrent().file.save(f);
+      }
+    }
+  }
+
   static async handlePingback(data: any): Promise<void> {
     try {
       const messageString = data.Records[0].Sns.Message;
@@ -37,20 +48,22 @@ export class TranscodeHelper {
       const thumbName = (thumbMid === 0) ? ""
         : webmName.replace(".webm", "thumb-" + String(thumbMid).padStart(5, '0') + ".png")
 
-      const finalThumbName = webmName.replace(".webm", "-thumb.png");
+      const finalThumbName = (thumbName) ? webmName.replace(".webm", "-thumb.png") : "";
 
-      await AwsHelper.S3Rename(webmPath + thumbName, webmPath + finalThumbName);
+      if (thumbName) await AwsHelper.S3Rename(webmPath + thumbName, webmPath + finalThumbName);
       await this.deleteThumbs(webmPath);
       const repo = Repositories.getCurrent();
       const resource: Resource = await repo.resource.loadWithoutChurchId(resourceId);
 
-      let file: File = { churchId: resource.churchId, fileName: webmName, contentPath, fileType: "video/webm", size, dateModified, seconds, thumbPath: Environment.contentRoot + "/" + webmPath + finalThumbName }
+      const thumbPath = (finalThumbName) ? Environment.contentRoot + "/" + webmPath + finalThumbName : "";
+      let file: File = { churchId: resource.churchId, fileName: webmName, contentPath, fileType: "video/webm", size, dateModified, seconds, thumbPath }
       file = await repo.file.save(file);
 
       const variant: Variant = { churchId: resource.churchId, resourceId, fileId: file.id, name: "WEBM", downloadDefault: false, playerDefault: true, hidden: true }
       await repo.variant.save(variant);
 
       await FilesHelper.updateSize(file);
+      await this.updateAllVariantThumbs(variant.churchId, variant.id, file.thumbPath);
 
 
     } catch (e) {
@@ -75,6 +88,7 @@ export class TranscodeHelper {
     if (existing) await AwsHelper.S3Remove(destPath + destFile);*/
     try {
       await AwsHelper.S3Remove(destPath + destFile);
+      await this.deleteThumbs(destPath);
     } catch (ex) {
       console.log(ex);
     }
