@@ -10,15 +10,15 @@ export class ResourceRepository {
 
   public async create(resource: Resource) {
     resource.id = UniqueIdHelper.shortId();
-    const sql = "INSERT INTO resources (id, churchId, name, category, bundleId) VALUES (?, ?, ?, ?, ?);";
-    const params = [resource.id, resource.churchId, resource.name, resource.category, resource.bundleId];
+    const sql = "INSERT INTO resources (id, churchId, name, category, bundleId, loopVideo) VALUES (?, ?, ?, ?, ?, ?);";
+    const params = [resource.id, resource.churchId, resource.name, resource.category, resource.bundleId, resource.loopVideo];
     await DB.query(sql, params);
     return resource;
   }
 
   public async update(resource: Resource) {
-    const sql = "UPDATE resources SET name=?, category=?, bundleId=? WHERE id=? AND churchId=?";
-    const params = [resource.name, resource.category, resource.bundleId, resource.id, resource.churchId];
+    const sql = "UPDATE resources SET name=?, category=?, bundleId=?, loopVideo=? WHERE id=? AND churchId=?";
+    const params = [resource.name, resource.category, resource.bundleId, resource.loopVideo, resource.id, resource.churchId];
     await DB.query(sql, params);
     return resource;
   }

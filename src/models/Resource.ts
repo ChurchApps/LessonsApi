@@ -7,6 +7,7 @@ export class Resource {
   public bundleId?: string;
   public name?: string;
   public category?: string;
+  public loopVideo?: boolean;
 
   public variants?: Variant[];
   public assets?: Asset[];
