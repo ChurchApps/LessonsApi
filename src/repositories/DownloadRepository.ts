@@ -28,7 +28,7 @@ export class DownloadRepository {
   }
 
   public countsByStudy(programId: string, startDate: Date, endDate: Date): Promise<any[]> {
-    const sql = "SELECT s.id, s.name as studyName, count(distinct(ipAddress)) as downloadCount"
+    const sql = "SELECT s.id, s.name as studyName, count(distinct(IF(d.churchId IS NULL or d.churchId='', ipAddress, d.churchId))) as downloadCount"
       + " FROM downloads d"
       + " INNER JOIN lessons l ON l.id=d.lessonId"
       + " INNER JOIN studies s on s.id=l.studyId"
