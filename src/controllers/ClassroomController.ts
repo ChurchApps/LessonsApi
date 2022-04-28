@@ -99,8 +99,8 @@ export class ClassroomController extends LessonsBaseController {
       downloadDate: new Date(),
       fileName: "Playlist: " + venueName
     }
-    await this.repositories.download.save(download);
-
+    const existing = await this.repositories.download.loadExisting(download)
+    if (!existing) await this.repositories.download.save(download);
   }
 
 
