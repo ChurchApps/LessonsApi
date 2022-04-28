@@ -35,8 +35,9 @@ export class ClassroomController extends LessonsBaseController {
           files.forEach(file => {
             const contentPath = (file.contentPath.indexOf("://") === -1) ? Environment.contentRoot + file.contentPath : file.contentPath;
             let seconds = parseInt(file.seconds, 0);
-            if (!seconds || seconds === 0) seconds = 3600;
-            itemFiles.push({ name: file.resourceName, url: contentPath, seconds, loopVideo: file.loopVideo })
+            const loopVideo = (file.loopVideo) ? true : false;
+            if (!seconds || seconds === 0 || loopVideo) seconds = 3600;
+            itemFiles.push({ name: file.resourceName, url: contentPath, seconds, loopVideo })
           });
         });
         messages.push({ name: s.name, files: itemFiles });
