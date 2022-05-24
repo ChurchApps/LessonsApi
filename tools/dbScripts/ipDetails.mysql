@@ -1,0 +1,10 @@
+CREATE TABLE `lessons`.`ipDetails` (
+  `id` CHAR(11) NOT NULL,
+  `ipAddress` VARCHAR(45) NULL,
+  `city` VARCHAR(45) NULL,
+  `state` VARCHAR(45) NULL,
+  `country` VARCHAR(45) NULL,
+  `lat` FLOAT NULL,
+  `lon` FLOAT NULL,
+  `isp` VARCHAR(45) NULL,
+  PRIMARY KEY (`id`));

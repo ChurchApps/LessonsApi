@@ -8,6 +8,7 @@ export class Environment extends EnvironmentBase {
 
   static transcodePipeline: string;
   static transcodePreset: string;
+  static ipGeoKey: string;
 
 
 
@@ -26,6 +27,7 @@ export class Environment extends EnvironmentBase {
 
     this.transcodePipeline = data.transcodePipeline;
     this.transcodePreset = data.transcodePreset;
+    this.ipGeoKey = EnvironmentBase.connectionString = process.env.IP_GEO_KEY;
   }
 
 }

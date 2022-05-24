@@ -4,6 +4,7 @@ const { Pool } = require('./dist/apiBase/pool');
 const { TranscodeHelper } = require('./dist/helpers/TranscodeHelper');
 const { Environment } = require('./dist/helpers/Environment');
 const { ZipHelper } = require('./dist/helpers/ZipHelper');
+const { GeoHelper } = require('./dist/helpers/GeoHelper');
 
 Environment.init(process.env.APP_ENV);
 Pool.initPool();
@@ -24,6 +25,7 @@ const videoPingback = async (event, context) => {
 
 const zipBundles = async (event, context) => {
   await ZipHelper.zipPendingBundles();
+  await GeoHelper.lookupMissing();
 }
 
 module.exports.universal = universal;
