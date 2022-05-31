@@ -27,7 +27,7 @@ export class Environment extends EnvironmentBase {
 
     this.transcodePipeline = data.transcodePipeline;
     this.transcodePreset = data.transcodePreset;
-    this.ipGeoKey = EnvironmentBase.connectionString = process.env.IP_GEO_KEY;
+    this.ipGeoKey = process.env.IP_GEO_KEY;
   }
 
 }
