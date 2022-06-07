@@ -10,8 +10,8 @@ export class ProgramRepository {
 
   public async create(program: Program) {
     program.id = UniqueIdHelper.shortId();
-    const sql = "INSERT INTO programs (id, churchId, providerId, name, slug, image, shortDescription, description, videoEmbedUrl, live, aboutSection) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
-    const params = [program.id, program.churchId, program.providerId, program.name, program.slug, program.image, program.shortDescription, program.description, program.videoEmbedUrl, program.live, program.aboutSection];
+    const sql = "INSERT INTO programs (id, churchId, providerId, name, slug, image, shortDescription, description, videoEmbedUrl, live, aboutSection) VALUES (?, ?, (SELECT id FROM providers WHERE churchId = ?), ?, ?, ?, ?, ?, ?, ?, ?);";
+    const params = [program.id, program.churchId, program.churchId, program.name, program.slug, program.image, program.shortDescription, program.description, program.videoEmbedUrl, program.live, program.aboutSection];
     await DB.query(sql, params);
     return program;
   }
