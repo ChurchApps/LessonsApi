@@ -23,6 +23,21 @@ export class DownloadController extends LessonsBaseController {
     });
   }
 
+  @httpGet("/:programId/geo")
+  public async geoData(@requestParam("programId") programId: string, req: express.Request, res: express.Response): Promise<any> {
+    return this.actionWrapper(req, res, async (au) => {
+      const program = await this.repositories.program.load(au.churchId, programId);
+      if (!program) return this.denyAccess(["Access denied"]);
+      else {
+        const startDate = new Date(req.query.startDate.toString());
+        const endDate = new Date(req.query.endDate.toString());
+        endDate.setDate(endDate.getDate() + 1);
+        endDate.setSeconds(endDate.getSeconds() - 1);
+        return await this.repositories.download.geo(programId, startDate, endDate);
+      }
+    });
+  }
+
 
   @httpGet("/:programId/studies")
   public async programStudies(@requestParam("programId") programId: string, req: express.Request, res: express.Response): Promise<any> {
