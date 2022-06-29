@@ -7,6 +7,6 @@ CREATE TABLE `resources` (
   `contentId` char(11) DEFAULT NULL,
   `name` varchar(45) DEFAULT NULL,
   `category` varchar(45) DEFAULT NULL,
-  `loopVideo` TINYINT NULL DEFAULT 0,
+  `loopVideo` BIT NULL DEFAULT 0,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
