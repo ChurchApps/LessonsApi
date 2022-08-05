@@ -43,6 +43,7 @@
     "nodemailer-direct-transport": "^3.3.2",
     "reflect-metadata": "^0.1.13",
     "uuid": "^8.3.2",
+    "vimeo": "^2.1.1",
     "winston": "^3.3.3",
     "winston-cloudwatch": "^3.1.1"
   },

@@ -10,15 +10,15 @@ export class ExternalVideoRepository {
 
   public async create(externalVideo: ExternalVideo) {
     externalVideo.id = UniqueIdHelper.shortId();
-    const sql = "INSERT INTO externalVideos (id, churchId, contentType, contentId, name, videoProvider, videoId) VALUES (?, ?, ?, ?, ?, ?, ?);";
-    const params = [externalVideo.id, externalVideo.churchId, externalVideo.contentType, externalVideo.contentId, externalVideo.name, externalVideo.videoProvider, externalVideo.videoId];
+    const sql = "INSERT INTO externalVideos (id, churchId, contentType, contentId, name, videoProvider, videoId, seconds, loopVideo, download720, download1080, download4k) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
+    const params = [externalVideo.id, externalVideo.churchId, externalVideo.contentType, externalVideo.contentId, externalVideo.name, externalVideo.videoProvider, externalVideo.videoId, externalVideo.seconds, externalVideo.loopVideo, externalVideo.download720, externalVideo.download1080, externalVideo.download4k];
     await DB.query(sql, params);
     return externalVideo;
   }
 
   public async update(externalVideo: ExternalVideo) {
-    const sql = "UPDATE externalVideos SET contentType=?, contentId=?, name=?, videoProvider=?, videoId=? WHERE id=? AND churchId=?";
-    const params = [externalVideo.contentType, externalVideo.contentId, externalVideo.name, externalVideo.videoProvider, externalVideo.videoId, externalVideo.id, externalVideo.churchId];
+    const sql = "UPDATE externalVideos SET contentType=?, contentId=?, name=?, videoProvider=?, videoId=?, seconds=?, loopVideo=?, download720=?, download1080=?, download4k=? WHERE id=? AND churchId=?";
+    const params = [externalVideo.contentType, externalVideo.contentId, externalVideo.name, externalVideo.videoProvider, externalVideo.videoId, externalVideo.seconds, externalVideo.loopVideo, externalVideo.download720, externalVideo.download1080, externalVideo.download4k, externalVideo.id, externalVideo.churchId];
     await DB.query(sql, params);
     return externalVideo;
   }
@@ -33,6 +33,10 @@ export class ExternalVideoRepository {
 
   public loadPublicForLesson(lessonId: string): Promise<ExternalVideo[]> {
     return DB.query("SELECT * FROM externalVideos WHERE id in (SELECT externalVideoId from actions WHERE lessonId=?)", [lessonId]);
+  }
+
+  public loadByIds(ids: string[]): Promise<ExternalVideo[]> {
+    return DB.query("SELECT * FROM externalVideos WHERE id in (?)", [ids]);
   }
 
   public load(churchId: string, id: string): Promise<ExternalVideo> {

@@ -1,7 +1,7 @@
 import { controller, httpPost, httpGet, interfaces, requestParam, httpDelete } from "inversify-express-utils";
 import express from "express";
 import { LessonsBaseController } from "./LessonsBaseController"
-import { Classroom, Download, Lesson, Venue } from "../models"
+import { Action, Classroom, Download, ExternalVideo, Lesson, Venue } from "../models"
 import { Permissions } from '../helpers/Permissions'
 import { PlaylistHelper } from "../helpers/PlaylistHelper";
 import { Environment } from "../helpers";
@@ -21,6 +21,7 @@ export class ClassroomController extends LessonsBaseController {
       const sections = await this.repositories.section.loadForPlaylist(venue.churchId, venue.id, currentSchedule.churchId);
       const actions = await this.repositories.action.loadPlaylistActions(venue.id, currentSchedule.churchId)
       const availableFiles = await PlaylistHelper.loadPlaylistFiles(actions);
+      const availableVideos = await PlaylistHelper.loadPlaylistVideos(actions);
 
       const ipAddress = (req.headers['x-forwarded-for'] || req.socket.remoteAddress).toString().split(",")[0]
       await this.logDownload(venue.lessonId, venue.name, currentSchedule.churchId, ipAddress);
@@ -28,17 +29,22 @@ export class ClassroomController extends LessonsBaseController {
       const messages: any[] = [];
 
       sections.forEach(s => {
-        const sectionActions = ArrayHelper.getAll(actions, "sectionId", s.id);
+        const sectionActions: Action[] = ArrayHelper.getAll(actions, "sectionId", s.id);
         const itemFiles: any[] = [];
         sectionActions.forEach(a => {
-          const files: any[] = PlaylistHelper.getBestFiles(a, availableFiles);
-          files.forEach(file => {
-            const contentPath = (file.contentPath.indexOf("://") === -1) ? Environment.contentRoot + file.contentPath : file.contentPath;
-            let seconds = parseInt(file.seconds, 0);
-            const loopVideo = (file.loopVideo) ? true : false;
-            if (!seconds || seconds === 0 || loopVideo) seconds = 3600;
-            itemFiles.push({ name: file.resourceName, url: contentPath, seconds, loopVideo })
-          });
+          if (a.externalVideoId) {
+            const video: ExternalVideo = ArrayHelper.getOne(availableVideos, "id", a.externalVideoId);
+            if (video) itemFiles.push({ name: video.name, url: video.download720, seconds: video.seconds, loopVideo: video.loopVideo })
+          } else {
+            const files: any[] = PlaylistHelper.getBestFiles(a, availableFiles);
+            files.forEach(file => {
+              const contentPath = (file.contentPath.indexOf("://") === -1) ? Environment.contentRoot + file.contentPath : file.contentPath;
+              let seconds = parseInt(file.seconds, 0);
+              const loopVideo = (file.loopVideo) ? true : false;
+              if (!seconds || seconds === 0 || loopVideo) seconds = 3600;
+              itemFiles.push({ name: file.resourceName, url: contentPath, seconds, loopVideo })
+            });
+          }
         });
         messages.push({ name: s.name, files: itemFiles });
 

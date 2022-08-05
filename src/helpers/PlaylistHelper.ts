@@ -4,6 +4,12 @@ import { Venue, Action } from "../models";
 
 export class PlaylistHelper {
 
+  public static async loadPlaylistVideos(actions: Action[]) {
+    const repo = Repositories.getCurrent();
+    const videoIds: string[] = ArrayHelper.getIds(actions, "externalVideoId");
+    const videos = (videoIds.length === 0) ? [] : await repo.externalVideo.loadByIds(videoIds);
+    return videos;
+  }
 
   public static async loadPlaylistFiles(actions: Action[]) {
     const repo = Repositories.getCurrent();
