@@ -1,0 +1,15 @@
+CREATE TABLE `externalVideos` (
+  `id` char(11) NOT NULL,
+  `churchId` char(11) DEFAULT NULL,
+  `contentType` varchar(45) DEFAULT NULL,
+  `contentId` char(11) DEFAULT NULL,
+  `name` varchar(45) DEFAULT NULL,
+  `videoProvider` varchar(45) DEFAULT NULL,
+  `videoId` varchar(45) DEFAULT NULL,
+  `seconds` float DEFAULT NULL,
+  `loopVideo` bit(1) DEFAULT NULL,
+  `download720` varchar(255) DEFAULT NULL,
+  `download1080` varchar(255) DEFAULT NULL,
+  `download4k` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

@@ -1,4 +1,3 @@
-import { bool } from "aws-sdk/clients/signer";
 import fs from "fs";
 import path from "path";
 
@@ -9,8 +8,7 @@ export class Environment extends EnvironmentBase {
   static transcodePipeline: string;
   static transcodePreset: string;
   static ipGeoKey: string;
-
-
+  static vimeoToken: string;
 
   static init(environment: string) {
     let file = "dev.json";
@@ -28,6 +26,7 @@ export class Environment extends EnvironmentBase {
     this.transcodePipeline = data.transcodePipeline;
     this.transcodePreset = data.transcodePreset;
     this.ipGeoKey = process.env.IP_GEO_KEY;
+    this.vimeoToken = process.env.VIMEO_TOKEN;
   }
 
 }

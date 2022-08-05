@@ -1,7 +1,8 @@
 import {
   FileRepository, LessonRepository, ProviderRepository, SectionRepository, StudyRepository, ProgramRepository, VenueRepository, RoleRepository,
   ActionRepository, ResourceRepository, VariantRepository, AssetRepository, ClassroomRepository, ScheduleRepository, BundleRepository, CustomizationRepository, DownloadRepository,
-  IpDetailRepository
+  IpDetailRepository,
+  ExternalVideoRepository
 } from ".";
 
 
@@ -12,6 +13,7 @@ export class Repositories {
   public classroom: ClassroomRepository;
   public customization: CustomizationRepository;
   public download: DownloadRepository;
+  public externalVideo: ExternalVideoRepository
   public file: FileRepository;
   public ipDetails: IpDetailRepository;
   public lesson: LessonRepository;
@@ -39,6 +41,7 @@ export class Repositories {
     this.customization = new CustomizationRepository();
     this.download = new DownloadRepository();
     this.ipDetails = new IpDetailRepository();
+    this.externalVideo = new ExternalVideoRepository();
     this.file = new FileRepository();
     this.lesson = new LessonRepository();
     this.provider = new ProviderRepository();
