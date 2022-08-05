@@ -4,6 +4,7 @@ import { LessonsBaseController } from "./LessonsBaseController"
 import { ExternalVideo } from "../models"
 import { Permissions } from '../helpers/Permissions'
 import { ArrayHelper } from "../apiBase";
+import { VimeoHelper } from "../helpers/VimeoHelper";
 
 @controller("/externalVideos")
 export class ExternalVideoController extends LessonsBaseController {
@@ -13,6 +14,13 @@ export class ExternalVideoController extends LessonsBaseController {
     return this.actionWrapperAnon(req, res, async () => {
       const externalVideos: ExternalVideo[] = await this.repositories.externalVideo.loadPublicForLesson(lessonId);
       return externalVideos;
+    });
+  }
+
+  @httpGet("/test")
+  public async test(req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
+    return this.actionWrapperAnon(req, res, async () => {
+      return VimeoHelper.getVideoDetails("736902927");
     });
   }
 
@@ -40,7 +48,21 @@ export class ExternalVideoController extends LessonsBaseController {
         const promises: Promise<ExternalVideo>[] = [];
         req.body.forEach(externalVideo => {
           externalVideo.churchId = au.churchId;
-          promises.push(this.repositories.externalVideo.save(externalVideo));
+          if (externalVideo.videoId) {
+            promises.push(
+              VimeoHelper.getVideoDetails(externalVideo.videoId).then(vimeo => {
+                externalVideo.seconds = vimeo.duration;
+                externalVideo.download720 = vimeo.download720p;
+                externalVideo.download1080 = vimeo.download1080p;
+                externalVideo.download4k = vimeo.downlaod4k;
+                this.repositories.externalVideo.save(externalVideo);
+                return externalVideo;
+              })
+            );
+          } else {
+            promises.push(this.repositories.externalVideo.save(externalVideo));
+          }
+
         });
         const result = await Promise.all(promises);
         return result;
