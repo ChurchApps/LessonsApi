@@ -32,7 +32,7 @@ export class ExternalVideoRepository {
   }
 
   public loadPublicForLesson(lessonId: string): Promise<ExternalVideo[]> {
-    return DB.query("SELECT * FROM externalVideos WHERE id in (SELECT externalVideoId FROM resources WHERE id in (SELECT resourceId from actions WHERE lessonId=?))", [lessonId]);
+    return DB.query("SELECT * FROM externalVideos WHERE id in (SELECT externalVideoId from actions WHERE lessonId=?)", [lessonId]);
   }
 
   public load(churchId: string, id: string): Promise<ExternalVideo> {
