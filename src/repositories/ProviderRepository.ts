@@ -23,6 +23,14 @@ export class ProviderRepository {
     return provider;
   }
 
+  public loadStats(): Promise<Provider> {
+    const sql = "select "
+      + "(select count(*) from providers) as providers, "
+      + "(select count(*) from studies where live=1) as studies, "
+      + "(select count(*) from lessons where live=1) as lessons"
+    return DB.queryOne(sql, []);
+  }
+
   public loadPublic(id: string): Promise<Provider> {
     return DB.queryOne("SELECT * FROM providers WHERE id=?", [id]);
   }
