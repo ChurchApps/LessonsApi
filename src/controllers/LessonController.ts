@@ -40,6 +40,14 @@ export class LessonController extends LessonsBaseController {
     });
   }
 
+  @httpGet("/public/ids")
+  public async getPublicByIds(req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
+    return this.actionWrapperAnon(req, res, async () => {
+      const ids = req.query.ids.toString().split(",");
+      return await this.repositories.lesson.loadPublicByIds(ids);
+    });
+  }
+
   @httpGet("/public/:id")
   public async getPublic(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
     return this.actionWrapperAnon(req, res, async () => {

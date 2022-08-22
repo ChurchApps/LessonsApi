@@ -29,6 +29,14 @@ export class StudyController extends LessonsBaseController {
     return this.actionWrapperAnon(req, res, async () => {
       return await this.repositories.study.loadPublicBySlug(programId, slug)
     });
+
+  }
+  @httpGet("/public/ids")
+  public async getPublicByIds(req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
+    return this.actionWrapperAnon(req, res, async () => {
+      const ids = req.query.ids.toString().split(",");
+      return await this.repositories.study.loadPublicByIds(ids);
+    });
   }
 
   @httpGet("/public/:id")

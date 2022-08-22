@@ -39,6 +39,10 @@ export class LessonRepository {
     return DB.queryOne("SELECT * FROM lessons WHERE studyId=? AND slug=? and live=1", [studyId, slug]);
   }
 
+  public loadPublicByIds(ids: string[]): Promise<Lesson[]> {
+    return DB.query("SELECT * FROM lessons WHERE id IN (?) and live=1", [ids]);
+  }
+
   public loadPublic(id: string): Promise<Lesson> {
     return DB.queryOne("SELECT * FROM lessons WHERE id=? and live=1", [id]);
   }
