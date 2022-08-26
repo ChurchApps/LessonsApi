@@ -23,6 +23,13 @@ export class LessonRepository {
     return lesson;
   }
 
+  public tempLessonsNeedingVideoFiles(): Promise<Lesson[]> {
+    const sql = "select l.* from lessons l"
+      + " left join externalVideos ev on ev.contentType='lesson' and ev.contentId=l.id"
+      + " where l.churchId='L8fupS4MSOo' and l.videoEmbedUrl is not null and ev.id is null"
+    return DB.query(sql, []);
+  }
+
   public loadByStudyId(churchId: string, studyId: string): Promise<Lesson[]> {
     return DB.query("SELECT * FROM lessons WHERE churchId=? AND studyId=? ORDER BY sort", [churchId, studyId]);
   }

@@ -20,7 +20,34 @@ export class ExternalVideoController extends LessonsBaseController {
   @httpGet("/test")
   public async test(req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
     return this.actionWrapperAnon(req, res, async () => {
-      return VimeoHelper.getVideoDetails("736902927");
+      /*
+      const lessons = await this.repositories.lesson.tempLessonsNeedingVideoFiles();
+
+      for (const lesson of lessons) {
+        try {
+          const videoId = lesson.videoEmbedUrl.replace("https://player.vimeo.com/video/", "").split("?")[0];
+          const vimeo = await VimeoHelper.getVideoDetails(videoId);
+          const ev: ExternalVideo = {
+            churchId: lesson.churchId,
+            contentId: lesson.id,
+            contentType: "lesson",
+            videoProvider: "vimeo",
+            videoId,
+            download1080: vimeo.download1080p,
+            download4k: vimeo.downlaod4k,
+            download720: vimeo.download720p,
+            name: lesson.name + " Video",
+            seconds: vimeo.duration,
+            loopVideo: false
+          }
+          await this.repositories.externalVideo.save(ev);
+        } catch (e) {
+          console.log(e);
+
+        }
+      }
+      */
+      return { status: "success" }
     });
   }
 
