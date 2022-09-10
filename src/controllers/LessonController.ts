@@ -1,9 +1,10 @@
 import { controller, httpPost, httpGet, interfaces, requestParam, httpDelete } from "inversify-express-utils";
 import express from "express";
 import { LessonsBaseController } from "./LessonsBaseController"
-import { Lesson } from "../models"
+import { Action, Lesson, Program, Role, Section, Study, Venue } from "../models"
 import { Permissions } from '../helpers/Permissions'
 import { Environment, FileHelper } from "../helpers"
+import { ArrayHelper } from "../apiBase";
 
 @controller("/lessons")
 export class LessonController extends LessonsBaseController {
@@ -33,10 +34,31 @@ export class LessonController extends LessonsBaseController {
     });
   }
 
-  @httpGet("/public/slug/:studyId/:slug")
-  public async getPublicBySlug(@requestParam("studyId") studyId: string, @requestParam("slug") slug: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
+  public async appendSections(venue: Venue, allSections: Section[], allRoles: Role[], allActions: Action[]) {
+    venue.sections = ArrayHelper.getAll(allSections, "venueId", venue.id);
+    venue.sections.forEach(s => {
+      s.roles = ArrayHelper.getAll(allRoles, "sectionId", s.id);
+      s.roles.forEach(r => {
+        r.actions = ArrayHelper.getAll(allActions, "roleId", r.id);
+      });
+    });
+  }
+
+  @httpGet("/public/slug/:programSlug/:studySlug/:slug")
+  public async getPublicBySlug(@requestParam("programSlug") programSlug: string, @requestParam("studySlug") studySlug: string, @requestParam("slug") slug: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
     return this.actionWrapperAnon(req, res, async () => {
-      return await this.repositories.lesson.loadPublicBySlug(studyId, slug)
+      const program = await this.repositories.program.loadPublicBySlug(programSlug);
+      const study = await this.repositories.study.loadPublicBySlug(program.id, studySlug);
+      const lesson = await this.repositories.lesson.loadPublicBySlug(study.id, slug);
+
+      const venues = await this.repositories.venue.loadPublicByLessonId(lesson.id);
+      const sections = await this.repositories.section.loadByLessonId(lesson.id);
+      const roles = await this.repositories.role.loadByLessonId(lesson.id);
+      const actions = await this.repositories.action.loadByLessonId(lesson.id);
+      venues.forEach(v => this.appendSections(v, sections, roles, actions));
+
+      const result: { lesson: Lesson, study: Study, program: Program, venues: Venue[] } = { lesson, study, program, venues }
+      return result;
     });
   }
 

@@ -27,6 +27,7 @@ export class VenueController extends LessonsBaseController {
     });
   }
 
+  /*Unused?*/
   @httpGet("/public/lesson/:lessonId")
   public async getPublicForLesson(@requestParam("lessonId") lessonId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
     return this.actionWrapperAnon(req, res, async () => {
@@ -86,7 +87,7 @@ export class VenueController extends LessonsBaseController {
     });
   }
 
-  private async appendSections(venue: Venue, allSections: Section[], allRoles: Role[], allActions: Action[]) {
+  public async appendSections(venue: Venue, allSections: Section[], allRoles: Role[], allActions: Action[]) {
     venue.sections = ArrayHelper.getAll(allSections, "venueId", venue.id);
 
     venue.sections.forEach(s => {
