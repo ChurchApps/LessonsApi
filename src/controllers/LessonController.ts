@@ -44,12 +44,12 @@ export class LessonController extends LessonsBaseController {
 
       let venues: Venue[] = null;
       let bundles: Bundle[] = null;
-      const resources: Resource[] = null;
+      let resources: Resource[] = null;
       let externalVideos: ExternalVideo[] = null;
       const promises: Promise<any>[] = [];
       promises.push(this.getVenues(lesson.id).then(v => venues = v));
       promises.push(this.getBundles(lesson.id).then(b => bundles = b));
-      promises.push(this.getResources(lesson.id).then(v => venues = v));
+      promises.push(this.getResources(lesson.id).then(r => resources = r));
       promises.push(this.repositories.externalVideo.loadPublicForLesson(lesson.id).then(ev => externalVideos = ev));;
       await Promise.all(promises);
 
