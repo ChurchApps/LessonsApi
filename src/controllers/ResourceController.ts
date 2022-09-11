@@ -9,6 +9,7 @@ import { ArrayHelper, FileHelper } from "../apiBase";
 @controller("/resources")
 export class ResourceController extends LessonsBaseController {
 
+  /*
   @httpGet("/public/lesson/:lessonId")
   public async getPublicForLesson(@requestParam("lessonId") lessonId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
     return this.actionWrapperAnon(req, res, async () => {
@@ -25,7 +26,7 @@ export class ResourceController extends LessonsBaseController {
       resources.forEach(r => this.appendVariantsAssets(r, variants, assets, files));
       return resources;
     });
-  }
+  }*/
 
   @httpGet("/:id")
   public async get(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
@@ -92,6 +93,7 @@ export class ResourceController extends LessonsBaseController {
     });
   }
 
+  /*
   private async appendVariantsAssets(resource: Resource, allVariants: Variant[], allAssets: Asset[], allFiles: File[]) {
     resource.variants = ArrayHelper.getAll(allVariants, "resourceId", resource.id);
     resource.assets = ArrayHelper.getAll(allAssets, "resourceId", resource.id);
@@ -99,7 +101,7 @@ export class ResourceController extends LessonsBaseController {
     resource.variants.forEach(v => v.file = ArrayHelper.getOne(allFiles, "id", v.fileId));
     resource.assets.forEach(a => a.file = ArrayHelper.getOne(allFiles, "id", a.fileId));
 
-  }
+  }*/
 
   private async checkMoveFiles(resource: Resource) {
     const existingResource = await this.repositories.resource.load(resource.churchId, resource.id);

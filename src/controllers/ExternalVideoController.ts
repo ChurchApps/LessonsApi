@@ -8,15 +8,15 @@ import { VimeoHelper } from "../helpers/VimeoHelper";
 
 @controller("/externalVideos")
 export class ExternalVideoController extends LessonsBaseController {
-
-  @httpGet("/public/lesson/:lessonId")
-  public async getPublicForLesson(@requestParam("lessonId") lessonId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
-    return this.actionWrapperAnon(req, res, async () => {
-      const externalVideos: ExternalVideo[] = await this.repositories.externalVideo.loadPublicForLesson(lessonId);
-      return externalVideos;
-    });
-  }
-
+  /*
+    @httpGet("/public/lesson/:lessonId")
+    public async getPublicForLesson(@requestParam("lessonId") lessonId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
+      return this.actionWrapperAnon(req, res, async () => {
+        const externalVideos: ExternalVideo[] = await this.repositories.externalVideo.loadPublicForLesson(lessonId);
+        return externalVideos;
+      });
+    }
+  */
   @httpGet("/test")
   public async test(req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
     return this.actionWrapperAnon(req, res, async () => {

@@ -1,7 +1,7 @@
 import { controller, httpPost, httpGet, interfaces, requestParam, httpDelete } from "inversify-express-utils";
 import express from "express";
 import { LessonsBaseController } from "./LessonsBaseController"
-import { Action, Lesson, Program, Role, Section, Study, Venue } from "../models"
+import { Action, Asset, Bundle, ExternalVideo, File, Lesson, Program, Resource, Role, Section, Study, Variant, Venue } from "../models"
 import { Permissions } from '../helpers/Permissions'
 import { Environment, FileHelper } from "../helpers"
 import { ArrayHelper } from "../apiBase";
@@ -34,15 +34,6 @@ export class LessonController extends LessonsBaseController {
     });
   }
 
-  public async appendSections(venue: Venue, allSections: Section[], allRoles: Role[], allActions: Action[]) {
-    venue.sections = ArrayHelper.getAll(allSections, "venueId", venue.id);
-    venue.sections.forEach(s => {
-      s.roles = ArrayHelper.getAll(allRoles, "sectionId", s.id);
-      s.roles.forEach(r => {
-        r.actions = ArrayHelper.getAll(allActions, "roleId", r.id);
-      });
-    });
-  }
 
   @httpGet("/public/slug/:programSlug/:studySlug/:slug")
   public async getPublicBySlug(@requestParam("programSlug") programSlug: string, @requestParam("studySlug") studySlug: string, @requestParam("slug") slug: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
@@ -51,13 +42,18 @@ export class LessonController extends LessonsBaseController {
       const study = await this.repositories.study.loadPublicBySlug(program.id, studySlug);
       const lesson = await this.repositories.lesson.loadPublicBySlug(study.id, slug);
 
-      const venues = await this.repositories.venue.loadPublicByLessonId(lesson.id);
-      const sections = await this.repositories.section.loadByLessonId(lesson.id);
-      const roles = await this.repositories.role.loadByLessonId(lesson.id);
-      const actions = await this.repositories.action.loadByLessonId(lesson.id);
-      venues.forEach(v => this.appendSections(v, sections, roles, actions));
+      let venues: Venue[] = null;
+      let bundles: Bundle[] = null;
+      const resources: Resource[] = null;
+      let externalVideos: ExternalVideo[] = null;
+      const promises: Promise<any>[] = [];
+      promises.push(this.getVenues(lesson.id).then(v => venues = v));
+      promises.push(this.getBundles(lesson.id).then(b => bundles = b));
+      promises.push(this.getResources(lesson.id).then(v => venues = v));
+      promises.push(this.repositories.externalVideo.loadPublicForLesson(lesson.id).then(ev => externalVideos = ev));;
+      await Promise.all(promises);
 
-      const result: { lesson: Lesson, study: Study, program: Program, venues: Venue[] } = { lesson, study, program, venues }
+      const result = { lesson, study, program, venues, bundles, resources, externalVideos }
       return result;
     });
   }
@@ -136,6 +132,61 @@ export class LessonController extends LessonsBaseController {
       const photoUpdated = new Date();
       lesson.image = Environment.contentRoot + key + "?dt=" + photoUpdated.getTime().toString();
     });
+  }
+
+  private async getVenues(lessonId: string) {
+    const venues = await this.repositories.venue.loadPublicByLessonId(lessonId);
+    const sections = await this.repositories.section.loadByLessonId(lessonId);
+    const roles = await this.repositories.role.loadByLessonId(lessonId);
+    const actions = await this.repositories.action.loadByLessonId(lessonId);
+    venues.forEach(v => this.appendSections(v, sections, roles, actions));
+    return venues;
+  }
+
+  public async appendSections(venue: Venue, allSections: Section[], allRoles: Role[], allActions: Action[]) {
+    venue.sections = ArrayHelper.getAll(allSections, "venueId", venue.id);
+    venue.sections.forEach(s => {
+      s.roles = ArrayHelper.getAll(allRoles, "sectionId", s.id);
+      s.roles.forEach(r => {
+        r.actions = ArrayHelper.getAll(allActions, "roleId", r.id);
+      });
+    });
+  }
+
+  private async getBundles(lessonId: string) {
+    const bundles: Bundle[] = await this.repositories.bundle.loadPublicForLesson(lessonId);
+    if (bundles.length === 0) return bundles;
+    const fileIds = ArrayHelper.getIds(bundles, "fileId");
+    for (let i = fileIds.length; i >= 0; i--) if (!fileIds[i]) fileIds.splice(i, 1);
+    if (fileIds.length > 0) {
+      const files = await this.repositories.file.loadByIds(bundles[0].churchId, fileIds);
+      bundles.forEach(b => { b.file = ArrayHelper.getOne(files, "id", b.fileId) });
+    }
+    return bundles;
+  }
+
+  private async getResources(lessonId: string) {
+    const resources: Resource[] = await this.repositories.resource.loadPublicForLesson(lessonId);
+    if (resources.length === 0) return resources;
+
+    const resourceIds = ArrayHelper.getIds(resources, "id");
+    const variants = await this.repositories.variant.loadByResourceIds(resources[0].churchId, resourceIds);
+    const assets = await this.repositories.asset.loadByResourceIds(resources[0].churchId, resourceIds);
+
+    const fileIds = ArrayHelper.getIds(variants, "fileId").concat(ArrayHelper.getIds(assets, "fileId"));
+    const files = await this.repositories.file.loadByIds(resources[0].churchId, fileIds);
+
+    resources.forEach(r => this.appendVariantsAssets(r, variants, assets, files));
+    return resources;
+  }
+
+  private async appendVariantsAssets(resource: Resource, allVariants: Variant[], allAssets: Asset[], allFiles: File[]) {
+    resource.variants = ArrayHelper.getAll(allVariants, "resourceId", resource.id);
+    resource.assets = ArrayHelper.getAll(allAssets, "resourceId", resource.id);
+
+    resource.variants.forEach(v => v.file = ArrayHelper.getOne(allFiles, "id", v.fileId));
+    resource.assets.forEach(a => a.file = ArrayHelper.getOne(allFiles, "id", a.fileId));
+
   }
 
 }
