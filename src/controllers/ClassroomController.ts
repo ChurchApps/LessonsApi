@@ -34,7 +34,7 @@ export class ClassroomController extends LessonsBaseController {
         sectionActions.forEach(a => {
           if (a.externalVideoId) {
             const video: ExternalVideo = ArrayHelper.getOne(availableVideos, "id", a.externalVideoId);
-            if (video) itemFiles.push({ name: video.name, url: video.download720, seconds: video.seconds, loopVideo: video.loopVideo })
+            if (video) itemFiles.push({ name: video.name, url: video.play720, seconds: video.seconds, loopVideo: video.loopVideo })
           } else {
             const files: any[] = PlaylistHelper.getBestFiles(a, availableFiles);
             files.forEach(file => {

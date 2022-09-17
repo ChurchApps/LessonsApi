@@ -17,39 +17,67 @@ export class ExternalVideoController extends LessonsBaseController {
       });
     }
   */
-  @httpGet("/test")
-  public async test(req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
-    return this.actionWrapperAnon(req, res, async () => {
-      /*
-      const lessons = await this.repositories.lesson.tempLessonsNeedingVideoFiles();
 
-      for (const lesson of lessons) {
+  @httpGet("/test2")
+  public async test2(req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
+    return this.actionWrapperAnon(req, res, async () => {
+
+      const videos = await this.repositories.externalVideo.tempLoadNeedingUpdate();
+
+      for (const ev of videos) {
         try {
-          const videoId = lesson.videoEmbedUrl.replace("https://player.vimeo.com/video/", "").split("?")[0];
-          const vimeo = await VimeoHelper.getVideoDetails(videoId);
-          const ev: ExternalVideo = {
-            churchId: lesson.churchId,
-            contentId: lesson.id,
-            contentType: "lesson",
-            videoProvider: "vimeo",
-            videoId,
-            download1080: vimeo.download1080p,
-            download4k: vimeo.downlaod4k,
-            download720: vimeo.download720p,
-            name: lesson.name + " Video",
-            seconds: vimeo.duration,
-            loopVideo: false
-          }
+          const vimeo = await VimeoHelper.getVideoDetails(ev.videoId);
+          ev.download1080 = vimeo.download1080p;
+          ev.download4k = vimeo.download4k;
+          ev.download720 = vimeo.download720p;
+          ev.play1080 = vimeo.play1080p;
+          ev.play4k = vimeo.play4k;
+          ev.play720 = vimeo.play720p;
           await this.repositories.externalVideo.save(ev);
         } catch (e) {
           console.log(e);
 
         }
       }
-      */
+
       return { status: "success" }
     });
   }
+
+  /*
+   @httpGet("/test")
+   public async test(req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
+     return this.actionWrapperAnon(req, res, async () => {
+
+       const lessons = await this.repositories.lesson.tempLessonsNeedingVideoFiles();
+
+       for (const lesson of lessons) {
+         try {
+           const videoId = lesson.videoEmbedUrl.replace("https://player.vimeo.com/video/", "").split("?")[0];
+           const vimeo = await VimeoHelper.getVideoDetails(videoId);
+           const ev: ExternalVideo = {
+             churchId: lesson.churchId,
+             contentId: lesson.id,
+             contentType: "lesson",
+             videoProvider: "vimeo",
+             videoId,
+             download1080: vimeo.download1080p,
+             download4k: vimeo.downlaod4k,
+             download720: vimeo.download720p,
+             name: lesson.name + " Video",
+             seconds: vimeo.duration,
+             loopVideo: false
+           }
+           await this.repositories.externalVideo.save(ev);
+         } catch (e) {
+           console.log(e);
+
+         }
+       }
+
+       return { status: "success" }
+     });
+   }*/
 
   @httpGet("/:id")
   public async get(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
@@ -81,8 +109,12 @@ export class ExternalVideoController extends LessonsBaseController {
                 externalVideo.seconds = vimeo.duration;
                 externalVideo.download720 = vimeo.download720p;
                 externalVideo.download1080 = vimeo.download1080p;
-                externalVideo.download4k = vimeo.downlaod4k;
+                externalVideo.download4k = vimeo.download4k;
+                externalVideo.play720 = vimeo.play720p;
+                externalVideo.play1080 = vimeo.play1080p;
+                externalVideo.play4k = vimeo.play4k;
                 this.repositories.externalVideo.save(externalVideo);
+                console.log(JSON.stringify(externalVideo))
                 return externalVideo;
               })
             );

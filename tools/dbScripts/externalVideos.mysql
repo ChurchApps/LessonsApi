@@ -8,8 +8,11 @@ CREATE TABLE `externalVideos` (
   `videoId` varchar(45) DEFAULT NULL,
   `seconds` float DEFAULT NULL,
   `loopVideo` bit(1) DEFAULT NULL,
-  `download720` varchar(255) DEFAULT NULL,
-  `download1080` varchar(255) DEFAULT NULL,
-  `download4k` varchar(255) DEFAULT NULL,
+  `play720` varchar(2048) DEFAULT NULL,
+  `play1080` varchar(2048) DEFAULT NULL,
+  `play4k` varchar(2048) DEFAULT NULL,
+  `download720` varchar(2048) DEFAULT NULL,
+  `download1080` varchar(2048) DEFAULT NULL,
+  `download4k` varchar(2048) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

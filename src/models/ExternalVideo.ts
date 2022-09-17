@@ -8,6 +8,9 @@ export class ExternalVideo {
   public videoId?: string;
   public seconds?: number;
   public loopVideo?: boolean;
+  public play720?: string;
+  public play1080?: string;
+  public play4k?: string;
   public download720?: string;
   public download1080?: string;
   public download4k?: string;
