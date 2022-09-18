@@ -33,6 +33,7 @@ export class ExternalVideoController extends LessonsBaseController {
           ev.play1080 = vimeo.play1080p;
           ev.play4k = vimeo.play4k;
           ev.play720 = vimeo.play720p;
+          ev.thumbnail = vimeo.thumbnail;
           await this.repositories.externalVideo.save(ev);
         } catch (e) {
           console.log(e);
@@ -113,6 +114,7 @@ export class ExternalVideoController extends LessonsBaseController {
                 externalVideo.play720 = vimeo.play720p;
                 externalVideo.play1080 = vimeo.play1080p;
                 externalVideo.play4k = vimeo.play4k;
+                externalVideo.thumbnail = vimeo.thumbnail;
                 this.repositories.externalVideo.save(externalVideo);
                 console.log(JSON.stringify(externalVideo))
                 return externalVideo;

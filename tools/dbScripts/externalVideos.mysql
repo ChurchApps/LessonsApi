@@ -14,5 +14,6 @@ CREATE TABLE `externalVideos` (
   `download720` varchar(2048) DEFAULT NULL,
   `download1080` varchar(2048) DEFAULT NULL,
   `download4k` varchar(2048) DEFAULT NULL,
+  `thumbnail` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

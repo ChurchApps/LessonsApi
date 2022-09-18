@@ -10,15 +10,15 @@ export class ExternalVideoRepository {
 
   public async create(externalVideo: ExternalVideo) {
     externalVideo.id = UniqueIdHelper.shortId();
-    const sql = "INSERT INTO externalVideos (id, churchId, contentType, contentId, name, videoProvider, videoId, seconds, loopVideo, download720, download1080, download4k, play720, play1080, play4k) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
-    const params = [externalVideo.id, externalVideo.churchId, externalVideo.contentType, externalVideo.contentId, externalVideo.name, externalVideo.videoProvider, externalVideo.videoId, externalVideo.seconds, externalVideo.loopVideo, externalVideo.download720, externalVideo.download1080, externalVideo.download4k, externalVideo.play720, externalVideo.play1080, externalVideo.play4k];
+    const sql = "INSERT INTO externalVideos (id, churchId, contentType, contentId, name, videoProvider, videoId, seconds, loopVideo, download720, download1080, download4k, play720, play1080, play4k, thumbnail) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
+    const params = [externalVideo.id, externalVideo.churchId, externalVideo.contentType, externalVideo.contentId, externalVideo.name, externalVideo.videoProvider, externalVideo.videoId, externalVideo.seconds, externalVideo.loopVideo, externalVideo.download720, externalVideo.download1080, externalVideo.download4k, externalVideo.play720, externalVideo.play1080, externalVideo.play4k, externalVideo.thumbnail];
     await DB.query(sql, params);
     return externalVideo;
   }
 
   public async update(externalVideo: ExternalVideo) {
-    const sql = "UPDATE externalVideos SET contentType=?, contentId=?, name=?, videoProvider=?, videoId=?, seconds=?, loopVideo=?, download720=?, download1080=?, download4k=?, play720=?, play1080=?, play4k=? WHERE id=? AND churchId=?";
-    const params = [externalVideo.contentType, externalVideo.contentId, externalVideo.name, externalVideo.videoProvider, externalVideo.videoId, externalVideo.seconds, externalVideo.loopVideo, externalVideo.download720, externalVideo.download1080, externalVideo.play4k, externalVideo.play720, externalVideo.play1080, externalVideo.download4k, externalVideo.id, externalVideo.churchId];
+    const sql = "UPDATE externalVideos SET contentType=?, contentId=?, name=?, videoProvider=?, videoId=?, seconds=?, loopVideo=?, download720=?, download1080=?, download4k=?, play720=?, play1080=?, play4k=?, thumbnail=? WHERE id=? AND churchId=?";
+    const params = [externalVideo.contentType, externalVideo.contentId, externalVideo.name, externalVideo.videoProvider, externalVideo.videoId, externalVideo.seconds, externalVideo.loopVideo, externalVideo.download720, externalVideo.download1080, externalVideo.play4k, externalVideo.play720, externalVideo.play1080, externalVideo.download4k, externalVideo.thumbnail, externalVideo.id, externalVideo.churchId];
     await DB.query(sql, params);
     return externalVideo;
   }
@@ -44,7 +44,7 @@ export class ExternalVideoRepository {
   }
 
   public tempLoadNeedingUpdate(): Promise<ExternalVideo[]> {
-    return DB.query("select * from externalVideos where play720 is null", []);
+    return DB.query("select * from externalVideos where thumbnail is null", []);
   }
 
   public delete(churchId: string, id: string): Promise<ExternalVideo> {
