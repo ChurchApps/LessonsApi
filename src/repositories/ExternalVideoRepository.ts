@@ -44,7 +44,7 @@ export class ExternalVideoRepository {
   }
 
   public tempLoadNeedingUpdate(): Promise<ExternalVideo[]> {
-    return DB.query("select * from externalVideos where thumbnail is null", []);
+    return DB.query("select * from externalVideos", []);
   }
 
   public delete(churchId: string, id: string): Promise<ExternalVideo> {
