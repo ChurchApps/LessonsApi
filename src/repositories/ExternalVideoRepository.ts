@@ -43,8 +43,8 @@ export class ExternalVideoRepository {
     return DB.queryOne("SELECT * FROM externalVideos WHERE id=? and churchId=?", [id, churchId]);
   }
 
-  public tempLoadNeedingUpdate(): Promise<ExternalVideo[]> {
-    return DB.query("select * from externalVideos limit 50", []);
+  public tempLoadNeedingUpdate(offset: string): Promise<ExternalVideo[]> {
+    return DB.query("select * from externalVideos limit 50, ?", [offset]);
   }
 
   public delete(churchId: string, id: string): Promise<ExternalVideo> {
