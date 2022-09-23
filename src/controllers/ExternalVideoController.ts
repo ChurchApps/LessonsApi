@@ -22,7 +22,7 @@ export class ExternalVideoController extends LessonsBaseController {
   public async test2(req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
     return this.actionWrapperAnon(req, res, async () => {
 
-      const videos = await this.repositories.externalVideo.tempLoadNeedingUpdate();
+      const videos = await this.repositories.externalVideo.tempLoadNeedingUpdate("160");
 
       for (const ev of videos) {
         try {
