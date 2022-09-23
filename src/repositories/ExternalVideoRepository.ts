@@ -44,7 +44,7 @@ export class ExternalVideoRepository {
   }
 
   public tempLoadNeedingUpdate(): Promise<ExternalVideo[]> {
-    return DB.query("select * from externalVideos limit 40 offset 200", []);
+    return DB.query("select * from externalVideos limit 40 offset 240", []);
   }
 
   public delete(churchId: string, id: string): Promise<ExternalVideo> {
