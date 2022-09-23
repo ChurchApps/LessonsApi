@@ -22,7 +22,7 @@ export class ExternalVideoController extends LessonsBaseController {
   public async test2(req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
     return this.actionWrapperAnon(req, res, async () => {
 
-      const videos = await this.repositories.externalVideo.tempLoadNeedingUpdate("160");
+      const videos = await this.repositories.externalVideo.tempLoadNeedingUpdate();
 
       for (const ev of videos) {
         try {
@@ -44,61 +44,6 @@ export class ExternalVideoController extends LessonsBaseController {
       return { status: "success" }
     });
   }
-
-  @httpGet("/test80")
-  public async test80(req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
-    return this.actionWrapperAnon(req, res, async () => {
-
-      const videos = await this.repositories.externalVideo.tempLoadNeedingUpdate("80");
-
-      for (const ev of videos) {
-        try {
-          const vimeo = await VimeoHelper.getVideoDetails(ev.videoId);
-          ev.download1080 = vimeo.download1080p;
-          ev.download4k = vimeo.download4k;
-          ev.download720 = vimeo.download720p;
-          ev.play1080 = vimeo.play1080p;
-          ev.play4k = vimeo.play4k;
-          ev.play720 = vimeo.play720p;
-          ev.thumbnail = vimeo.thumbnail;
-          await this.repositories.externalVideo.save(ev);
-        } catch (e) {
-          console.log(e);
-
-        }
-      }
-
-      return { status: "success" }
-    });
-  }
-
-  @httpGet("/test120")
-  public async test120(req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
-    return this.actionWrapperAnon(req, res, async () => {
-
-      const videos = await this.repositories.externalVideo.tempLoadNeedingUpdate("120");
-
-      for (const ev of videos) {
-        try {
-          const vimeo = await VimeoHelper.getVideoDetails(ev.videoId);
-          ev.download1080 = vimeo.download1080p;
-          ev.download4k = vimeo.download4k;
-          ev.download720 = vimeo.download720p;
-          ev.play1080 = vimeo.play1080p;
-          ev.play4k = vimeo.play4k;
-          ev.play720 = vimeo.play720p;
-          ev.thumbnail = vimeo.thumbnail;
-          await this.repositories.externalVideo.save(ev);
-        } catch (e) {
-          console.log(e);
-
-        }
-      }
-
-      return { status: "success" }
-    });
-  }
-
 
   /*
    @httpGet("/test")
