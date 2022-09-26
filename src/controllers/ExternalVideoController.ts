@@ -26,15 +26,7 @@ export class ExternalVideoController extends LessonsBaseController {
 
       for (const ev of videos) {
         try {
-          const vimeo = await VimeoHelper.getVideoDetails(ev.videoId);
-          ev.download1080 = vimeo.download1080p;
-          ev.download4k = vimeo.download4k;
-          ev.download720 = vimeo.download720p;
-          ev.play1080 = vimeo.play1080p;
-          ev.play4k = vimeo.play4k;
-          ev.play720 = vimeo.play720p;
-          ev.thumbnail = vimeo.thumbnail;
-          await this.repositories.externalVideo.save(ev);
+          await this.updateVimeoLinks(ev);
         } catch (e) {
           console.log(e);
 
@@ -43,6 +35,20 @@ export class ExternalVideoController extends LessonsBaseController {
 
       return { status: "success" }
     });
+  }
+
+  private async updateVimeoLinks(ev: ExternalVideo) {
+    const vimeo = await VimeoHelper.getVideoDetails(ev.videoId);
+    ev.download1080 = vimeo.download1080p;
+    ev.download4k = vimeo.download4k;
+    ev.download720 = vimeo.download720p;
+    ev.play1080 = vimeo.play1080p;
+    ev.play4k = vimeo.play4k;
+    ev.play720 = vimeo.play720p;
+    ev.thumbnail = vimeo.thumbnail;
+    ev.downloadsExpire = vimeo.downloadsExpire;
+    await this.repositories.externalVideo.save(ev);
+    return ev;
   }
 
   /*
@@ -84,7 +90,11 @@ export class ExternalVideoController extends LessonsBaseController {
   public async get(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
     return this.actionWrapper(req, res, async (au) => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
-      else return await this.repositories.externalVideo.load(au.churchId, id)
+      else {
+        let result = await this.repositories.externalVideo.load(au.churchId, id);
+        if (result.downloadsExpire < new Date()) result = await this.updateVimeoLinks(result);
+        return result;
+      }
     });
   }
 

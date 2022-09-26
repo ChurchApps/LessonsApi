@@ -15,4 +15,5 @@ export class ExternalVideo {
   public download1080?: string;
   public download4k?: string;
   public thumbnail?: string;
+  public downloadsExpire: Date;
 }

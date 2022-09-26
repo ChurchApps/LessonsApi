@@ -17,7 +17,8 @@ export class VimeoHelper {
       play720p: this.getFileDetails(resp, "720p"),
       play1080p: this.getFileDetails(resp, "1080p"),
       play4k: this.getFileDetails(resp, "4k"),
-      thumbnail: this.getPictureDetails(resp, 640)
+      thumbnail: this.getPictureDetails(resp, 640),
+      downloadsExpire: this.getDownloadExpiration(resp)
     }
     return result;
   }
@@ -42,6 +43,14 @@ export class VimeoHelper {
     let result = ""
     resp.data.download.forEach((f: any) => {
       if (f.rendition === rendition) result = f.link;
+    });
+    return result;
+  }
+
+  private static getDownloadExpiration(resp: any) {
+    let result = new Date();
+    resp.data.download.forEach((f: any) => {
+      if (f.rendition === "720p") result = new Date(f.expires);
     });
     return result;
   }
