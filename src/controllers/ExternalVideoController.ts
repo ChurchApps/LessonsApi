@@ -86,13 +86,21 @@ export class ExternalVideoController extends LessonsBaseController {
      });
    }*/
 
+  @httpGet("/public/:id")
+  public async getPublic(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
+    return this.actionWrapperAnon(req, res, async () => {
+      let result = await this.repositories.externalVideo.loadPublic(id);
+      if (result.downloadsExpire < new Date()) result = await this.updateVimeoLinks(result);
+      return result;
+    });
+  }
+
   @httpGet("/:id")
   public async get(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
     return this.actionWrapper(req, res, async (au) => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
       else {
-        let result = await this.repositories.externalVideo.load(au.churchId, id);
-        if (result.downloadsExpire < new Date()) result = await this.updateVimeoLinks(result);
+        const result = await this.repositories.externalVideo.load(au.churchId, id);
         return result;
       }
     });

@@ -43,6 +43,10 @@ export class ExternalVideoRepository {
     return DB.queryOne("SELECT * FROM externalVideos WHERE id=? and churchId=?", [id, churchId]);
   }
 
+  public loadPublic(id: string): Promise<ExternalVideo> {
+    return DB.queryOne("SELECT * FROM externalVideos WHERE id=?", [id]);
+  }
+
   public tempLoadNeedingUpdate(): Promise<ExternalVideo[]> {
     return DB.query("select * from externalVideos where downloadsExpire is null", []);
   }
