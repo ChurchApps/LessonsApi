@@ -14,16 +14,35 @@ export class ZipHelper {
     return new AWS.S3({ apiVersion: "2006-03-01" });
   }
 
+  static async checkFileExists(key: string) {
+    const exists = await this.S3()
+      .headObject({ Bucket: Environment.s3Bucket, Key: key })
+      .promise()
+      .then(() => true,
+        err => {
+          if (err.code === 'NotFound') return false;
+          throw err;
+        }
+      );
+    return exists;
+  }
 
   static async zipFiles(zipKey: string, files: { name: string, key: string, stream?: any }[]) {
+
+    const verifiedFiles: { name: string, key: string, stream?: any }[] = [];
+    for (const f of files) {
+      if (await this.checkFileExists(f.key)) verifiedFiles.push(f);
+    }
+
+
     return new Promise((resolve, reject) => {
 
       try {
 
-        files.forEach(f => {
+        for (const f of verifiedFiles) {
           const params: AWS.S3.GetObjectRequest = { Bucket: Environment.s3Bucket, Key: f.key };
           f.stream = this.S3().getObject(params).createReadStream();
-        });
+        }
 
         const streamPassThrough = new Stream.PassThrough()
         const uploadParams: AWS.S3.PutObjectRequest = { Bucket: Environment.s3Bucket, ACL: "public-read", Body: streamPassThrough, ContentType: "application/zip", Key: zipKey }
@@ -46,7 +65,7 @@ export class ZipHelper {
         })
 
         archive.pipe(streamPassThrough);
-        files.forEach(f => { archive.append(f.stream, { name: f.name }) });
+        verifiedFiles.forEach(f => { archive.append(f.stream, { name: f.name }) });
         archive.finalize();
       } catch (ex) {
         reject(ex);
