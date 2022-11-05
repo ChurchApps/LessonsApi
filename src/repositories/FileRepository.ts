@@ -18,8 +18,8 @@ export class FileRepository {
   }
 
   public async update(file: File) {
-    const sql = "UPDATE files SET fileName=?, contentPath=?, fileType=?, size=?, seconds=?, dateModified=NOW(), thumbPath=? WHERE id=? AND churchId=?";
-    const params = [file.fileName, file.contentPath, file.fileType, file.size, file.seconds, file.id, file.thumbPath, file.churchId];
+    const sql = "UPDATE files SET fileName=?, contentPath=?, fileType=?, size=?, seconds=?, dateModified=?, thumbPath=? WHERE id=? AND churchId=?";
+    const params = [file.fileName, file.contentPath, file.fileType, file.size, file.seconds, file.dateModified, file.thumbPath, file.id, file.churchId];
     await DB.query(sql, params);
     return file;
   }
