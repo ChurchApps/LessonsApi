@@ -28,18 +28,32 @@ export class FileRepository {
     return DB.queryOne("SELECT * FROM files WHERE id=? AND churchId=?", [id, churchId]);
   }
 
-
   public loadByIds(churchId: string, ids: string[]): Promise<File[]> {
     const sql = "SELECT * FROM files WHERE churchId=? AND id IN (" + ArrayHelper.fillArray("?", ids.length) + ")";
     return DB.query(sql, [churchId].concat(ids));
   }
 
-  public loadAll(churchId: string): Promise<File> {
-    return DB.queryOne("SELECT * FROM files WHERE churchId=?", [churchId]);
+  public loadForChurch(churchId: string): Promise<File[]> {
+    return DB.query("SELECT * FROM files WHERE churchId=?", [churchId]);
+  }
+
+  public loadAll(): Promise<File[]> {
+    return DB.query("SELECT * FROM files", []);
   }
 
   public delete(churchId: string, id: string): Promise<File> {
     return DB.query("DELETE FROM files WHERE id=? AND churchId=?", [id, churchId]);
+  }
+
+  public cleanUp(): Promise<File> {
+    const sql = "DELETE FROM files WHERE id NOT IN ("
+      + " SELECT fileId FROM bundles where fileId is not null"
+      + " UNION ALL"
+      + " SELECT fileId FROM assets where fileId is not null"
+      + " UNION ALL"
+      + " SELECT fileId FROM variants where fileId is not null"
+      + " )"
+    return DB.query(sql, []);
   }
 
 

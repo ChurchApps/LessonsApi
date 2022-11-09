@@ -9,6 +9,29 @@ import { Environment } from "../helpers";
 @controller("/files")
 export class FileController extends LessonsBaseController {
 
+  @httpGet("/cleanup")
+  public async getCleanup(req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
+    return this.actionWrapperAnon(req, res, async () => {
+      this.repositories.file.cleanUp();
+      const paths = await this.getOrphanedFiles();
+      for (const p of paths) await FileHelper.remove(p);
+      return { paths };
+    });
+  }
+
+  private async getOrphanedFiles() {
+    const paths = await FileHelper.list("files/");
+    const files: File[] = await this.repositories.file.loadAll();
+    for (let i = paths.length; i >= 0; i--) {
+      let match = false;
+      files.forEach(f => {
+        if (f.contentPath?.indexOf(paths[i]) > -1) match = true;
+      });
+      if (match) paths.splice(i, 1);
+    }
+    return paths;
+  }
+
   @httpGet("/:id")
   public async get(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
     return this.actionWrapper(req, res, async (au) => {
@@ -17,9 +40,9 @@ export class FileController extends LessonsBaseController {
   }
 
   @httpGet("/")
-  public async getAll(@requestParam("studyId") studyId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
+  public async getAll(req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
     return this.actionWrapperAnon(req, res, async () => {
-      return await this.repositories.file.loadAll(studyId);
+      return await this.repositories.file.loadAll();
     });
   }
 
