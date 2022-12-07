@@ -113,13 +113,15 @@ export class ZipHelper {
     const zipName = "files/bundles/" + bundle.id + "/" + bundle.name + ".zip";
     let success = true;
     try {
+      // Note: We save this first to ensure this doesn't get stuck in a loop and run up bandwidth costs if anythign fails or times out.
+      bundle.pendingUpdate = false;
+      await Repositories.getCurrent().bundle.save(bundle);
+      // End note
       await ZipHelper.zipFiles(zipName, zipFiles)
       console.log("done zipping");
     } catch {
       success = false;
       console.log("failed to zip");
-      bundle.pendingUpdate = false;
-      await Repositories.getCurrent().bundle.save(bundle);
     }
     if (success) {
       let file: File = null;
