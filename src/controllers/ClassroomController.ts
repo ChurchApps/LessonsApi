@@ -51,7 +51,7 @@ export class ClassroomController extends LessonsBaseController {
 
       });
 
-      return { messages, lessonName: lesson.name, lessonTitle: lesson.title, venueName: venue.name };
+      return { messages, lessonName: lesson.name, lessonTitle: lesson.title, lessonImage: lesson.image, venueName: venue.name };
     });
   }
 
