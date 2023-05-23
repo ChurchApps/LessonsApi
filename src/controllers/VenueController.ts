@@ -1,12 +1,68 @@
 import { controller, httpPost, httpGet, interfaces, requestParam, httpDelete } from "inversify-express-utils";
 import express from "express";
 import { LessonsBaseController } from "./LessonsBaseController"
-import { Venue, Section, Action, Role } from "../models"
+import { Venue, Section, Action, Role, ExternalVideo, Lesson, Download } from "../models"
 import { Permissions } from '../helpers/Permissions'
 import { ArrayHelper } from "../apiBase";
+import { Environment } from "../helpers";
+import { PlaylistHelper } from "../helpers/PlaylistHelper";
 
 @controller("/venues")
 export class VenueController extends LessonsBaseController {
+
+  public async logDownload(lessonId: string, venueName: string, churchId: string, ipAddress: string) {
+    const download: Download = {
+      lessonId,
+      churchId,
+      ipAddress,
+      downloadDate: new Date(),
+      fileName: "Playlist: " + venueName
+    }
+    const existing = await this.repositories.download.loadExisting(download)
+    if (!existing) await this.repositories.download.save(download);
+  }
+
+  @httpGet("/playlist/:venueId")
+  public async getPlaylist(@requestParam("venueId") venueId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
+    return this.actionWrapperAnon(req, res, async () => {
+      const venue: Venue = await this.repositories.venue.loadPublic(venueId);
+      const lesson: Lesson = await this.repositories.lesson.loadPublic(venue.lessonId);
+      const sections = await this.repositories.section.loadForPlaylist(venue.churchId, venue.id, venue.churchId);
+      const actions = await this.repositories.action.loadPlaylistActions(venue.id, venue.churchId)
+      const availableFiles = await PlaylistHelper.loadPlaylistFiles(actions);
+      const availableVideos = await PlaylistHelper.loadPlaylistVideos(actions);
+
+      const ipAddress = (req.headers['x-forwarded-for'] || req.socket.remoteAddress).toString().split(",")[0]
+      await this.logDownload(venue.lessonId, venue.name, venue.churchId, ipAddress);
+
+      const messages: any[] = [];
+
+      sections.forEach(s => {
+        const sectionActions: Action[] = ArrayHelper.getAll(actions, "sectionId", s.id);
+        const itemFiles: any[] = [];
+        sectionActions.forEach(a => {
+          if (a.externalVideoId) {
+            const video: ExternalVideo = ArrayHelper.getOne(availableVideos, "id", a.externalVideoId);
+            if (video) itemFiles.push({ name: video.name, url: video.play720, seconds: video.seconds, loopVideo: video.loopVideo })
+          } else {
+            const files: any[] = PlaylistHelper.getBestFiles(a, availableFiles);
+            files.forEach(file => {
+              const contentPath = (file.contentPath.indexOf("://") === -1) ? Environment.contentRoot + file.contentPath : file.contentPath;
+              let seconds = parseInt(file.seconds, 0);
+              const loopVideo = (file.loopVideo) ? true : false;
+              if (!seconds || seconds === 0 || loopVideo) seconds = 3600;
+              itemFiles.push({ name: file.resourceName, url: contentPath, seconds, loopVideo })
+            });
+          }
+        });
+        messages.push({ name: s.name, files: itemFiles });
+
+
+      });
+
+      return { messages, lessonName: lesson.name, lessonTitle: lesson.title, lessonImage: lesson.image, lessonDescription: lesson.description, venueName: venue.name };
+    });
+  }
 
   @httpGet("/:id")
   public async get(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
