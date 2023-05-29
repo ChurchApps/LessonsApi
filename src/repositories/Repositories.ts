@@ -1,8 +1,7 @@
 import {
-  FileRepository, LessonRepository, ProviderRepository, SectionRepository, StudyRepository, ProgramRepository, VenueRepository, RoleRepository,
+  FileRepository, LessonRepository, ProviderRepository, SectionRepository, StudyRepository, StudyCategoryRepository, ProgramRepository, VenueRepository, RoleRepository,
   ActionRepository, ResourceRepository, VariantRepository, AssetRepository, ClassroomRepository, ScheduleRepository, BundleRepository, CustomizationRepository, DownloadRepository,
-  IpDetailRepository,
-  ExternalVideoRepository
+  IpDetailRepository, ExternalVideoRepository
 } from ".";
 
 
@@ -24,6 +23,7 @@ export class Repositories {
   public schedule: ScheduleRepository;
   public section: SectionRepository;
   public study: StudyRepository;
+  public studyCategory: StudyCategoryRepository;
   public variant: VariantRepository;
   public venue: VenueRepository;
 
@@ -51,6 +51,7 @@ export class Repositories {
     this.schedule = new ScheduleRepository();
     this.section = new SectionRepository();
     this.study = new StudyRepository();
+    this.studyCategory = new StudyCategoryRepository();
     this.variant = new VariantRepository();
     this.venue = new VenueRepository();
   }

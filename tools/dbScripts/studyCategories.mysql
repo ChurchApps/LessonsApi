@@ -1,0 +1,8 @@
+CREATE TABLE `studyCategories` (
+  `id` char(11) NOT NULL,
+  `programId` char(11) DEFAULT NULL,
+  `studyId` char(11) DEFAULT NULL,
+  `categoryName` varchar(255) DEFAULT NULL,
+  `sort` float DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
