@@ -10,4 +10,6 @@ export class Program {
   public videoEmbedUrl: string;
   public live?: boolean;
   public aboutSection?: string;
+  public age?: string;
+  public sort?: number;
 }

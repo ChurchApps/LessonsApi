@@ -47,6 +47,10 @@ export class StudyRepository {
     return DB.query("SELECT * FROM studies WHERE id IN (?) and live=1", [ids]);
   }
 
+  public loadPublicAll(): Promise<Study[]> {
+    return DB.query("SELECT * FROM studies WHERE live=1", []);
+  }
+
   public loadPublic(id: string): Promise<Study> {
     return DB.queryOne("SELECT * FROM studies WHERE id=? AND live=1 ORDER BY sort", [id]);
   }
