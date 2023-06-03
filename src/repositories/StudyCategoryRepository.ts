@@ -27,6 +27,10 @@ export class StudyCategoryRepository {
     return DB.query("SELECT * FROM studyCategories WHERE programId=? AND categoryName=? ORDER BY sort", [programId, categoryName]);
   }
 
+  public loadPublicByProgram(programId:string): Promise<StudyCategory[]> {
+    return DB.query("SELECT * FROM studyCategories WHERE programId=? ORDER BY sort", [programId]);
+  }
+
   public loadCategoryNames(programId:string): Promise<StudyCategory[]> {
     return DB.query("SELECT categoryName FROM studyCategories WHERE programId=? GROUP BY categoryName ORDER BY categoryName", [programId]);
   }

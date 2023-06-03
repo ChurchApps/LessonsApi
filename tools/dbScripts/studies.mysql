@@ -7,7 +7,7 @@ CREATE TABLE `studies` (
   `name` varchar(255) DEFAULT NULL,
   `slug` varchar(45) DEFAULT NULL,
   `image` varchar(1000) DEFAULT NULL,
-  `shortDescription` varchar(255) DEFAULT NULL,
+  `shortDescription` varchar(1000) DEFAULT NULL,
   `description` text,
   `videoEmbedUrl` varchar(255) DEFAULT NULL,
   `sort` int(11) DEFAULT NULL,

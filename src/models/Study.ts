@@ -11,4 +11,5 @@ export class Study {
   public sort?: number;
   public live?: boolean;
 
+  public lessonCount?: number;
 }

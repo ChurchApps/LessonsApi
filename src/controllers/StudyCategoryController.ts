@@ -20,6 +20,13 @@ export class StudyCategoryController extends LessonsBaseController {
     });
   }
 
+  @httpGet("/public/program/:programId")
+  public async getPublicForProgram(@requestParam("programId") programId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
+    return this.actionWrapperAnon(req, res, async () => {
+      return this.repositories.studyCategory.loadPublicByProgram(programId);
+    });
+  }
+
   @httpGet("/:programId")
   public async getByCategoryName(@requestParam("programId") programId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
     return this.actionWrapper(req, res, async (au) => {

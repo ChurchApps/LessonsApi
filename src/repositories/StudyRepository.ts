@@ -28,7 +28,11 @@ export class StudyRepository {
   }
 
   public loadPublicByProgramId(programId: string): Promise<Study[]> {
-    return DB.query("SELECT * FROM studies WHERE programId=? AND live=1 ORDER BY sort", [programId]);
+    const sql = "SELECT *"
+    + " , (SELECT COUNT(*) FROM lessons WHERE studyId=s.id) AS lessonCount"
+    + " FROM studies s"
+    + " WHERE programId=? AND live=1 ORDER BY sort"
+    return DB.query(sql, [programId]);
   }
 
   public loadPublicByProgramIds(programIds: string[]): Promise<Study[]> {
