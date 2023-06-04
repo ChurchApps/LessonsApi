@@ -42,21 +42,27 @@ export class LessonController extends LessonsBaseController {
       const study = await this.repositories.study.loadPublicBySlug(program.id, studySlug);
       const lesson = await this.repositories.lesson.loadPublicBySlug(study.id, slug);
 
-      let venues: Venue[] = null;
-      let bundles: Bundle[] = null;
-      let resources: Resource[] = null;
-      let externalVideos: ExternalVideo[] = null;
-      const promises: Promise<any>[] = [];
-      promises.push(this.getVenues(lesson.id).then(v => venues = v));
-      promises.push(this.getBundles(lesson.id).then(b => bundles = b));
-      promises.push(this.getResources(lesson.id).then(r => resources = r));
-      promises.push(this.repositories.externalVideo.loadPublicForLesson(lesson.id).then(ev => externalVideos = ev));;
-      await Promise.all(promises);
-
-      const result = { lesson, study, program, venues, bundles, resources, externalVideos }
-      return result;
+      return await this.getExpandedLessonData(program, study, lesson);
     });
   }
+
+  private async getExpandedLessonData(program: Program, study: Study, lesson: Lesson)
+  {
+    let venues: Venue[] = null;
+    let bundles: Bundle[] = null;
+    let resources: Resource[] = null;
+    let externalVideos: ExternalVideo[] = null;
+    const promises: Promise<any>[] = [];
+    promises.push(this.getVenues(lesson.id).then(v => venues = v));
+    promises.push(this.getBundles(lesson.id).then(b => bundles = b));
+    promises.push(this.getResources(lesson.id).then(r => resources = r));
+    promises.push(this.repositories.externalVideo.loadPublicForLesson(lesson.id).then(ev => externalVideos = ev));;
+    await Promise.all(promises);
+
+    const result = { lesson, study, program, venues, bundles, resources, externalVideos }
+    return result;
+  }
+
 
   @httpGet("/public/ids")
   public async getPublicByIds(req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
@@ -69,7 +75,11 @@ export class LessonController extends LessonsBaseController {
   @httpGet("/public/:id")
   public async getPublic(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
     return this.actionWrapperAnon(req, res, async () => {
-      return await this.repositories.lesson.loadPublic(id)
+      const lesson = await this.repositories.lesson.loadPublic(id);
+      const study = await this.repositories.study.loadPublic(lesson.studyId);
+      const program = await this.repositories.program.loadPublic(study.programId);
+
+      return await this.getExpandedLessonData(program, study, lesson);
     });
   }
 
