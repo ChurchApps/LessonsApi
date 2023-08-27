@@ -4,7 +4,7 @@ import { LessonsBaseController } from "./LessonsBaseController"
 import { Resource, Asset, Variant, File } from "../models"
 import { Permissions } from '../helpers/Permissions'
 import { Environment, FilesHelper, ZipHelper } from "../helpers";
-import { ArrayHelper, FileHelper } from "../apiBase";
+import { ArrayHelper, FileStorageHelper } from "@churchapps/apihelper";
 
 @controller("/resources")
 export class ResourceController extends LessonsBaseController {
@@ -124,7 +124,7 @@ export class ResourceController extends LessonsBaseController {
       for (const file of files) {
         const oldS3 = "files/" + oldContentType + "/" + oldContentId + "/" + resourceId + "/" + file.fileName;
         const newS3 = "files/" + newContentType + "/" + newContentId + "/" + resourceId + "/" + file.fileName;
-        await FileHelper.move(oldS3, newS3);
+        await FileStorageHelper.move(oldS3, newS3);
         file.dateModified = new Date();
         file.contentPath = Environment.contentRoot + "/" + newS3 + "?dt=" + file.dateModified.getTime().toString();
         await this.repositories.file.save(file);

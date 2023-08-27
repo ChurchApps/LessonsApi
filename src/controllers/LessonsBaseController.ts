@@ -1,5 +1,5 @@
 import { Repositories } from "../repositories";
-import { CustomBaseController } from "../apiBase/controllers"
+import { CustomBaseController } from "@churchapps/apihelper"
 
 export class LessonsBaseController extends CustomBaseController {
     public repositories: Repositories;

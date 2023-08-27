@@ -1,7 +1,7 @@
 import { controller, httpPost, interfaces } from "inversify-express-utils";
 import express from "express";
 import { LessonsBaseController } from "./LessonsBaseController"
-import { LoggingHelper } from "../apiBase";
+import { LoggingHelper } from "@churchapps/apihelper";
 
 @controller("/pingback")
 export class PingbackController extends LessonsBaseController {

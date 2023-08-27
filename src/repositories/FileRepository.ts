@@ -1,7 +1,7 @@
-import { DB } from "../apiBase/db";
+import { DB } from "@churchapps/apihelper"
 import { File } from "../models";
 import { UniqueIdHelper } from "../helpers";
-import { ArrayHelper } from "../apiBase";
+import { ArrayHelper } from "@churchapps/apihelper";
 
 export class FileRepository {
 

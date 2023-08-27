@@ -2,7 +2,7 @@ import AWS from "aws-sdk";
 import { Repositories } from "../repositories/Repositories";
 import { File, Variant, Resource } from "../models";
 import { Environment, FilesHelper } from ".";
-import { AwsHelper } from "../apiBase";
+import { AwsHelper } from "@churchapps/apihelper";
 
 export class TranscodeHelper {
 

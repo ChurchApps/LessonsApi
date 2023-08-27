@@ -1,5 +1,5 @@
 import { Repositories } from "../repositories";
-import { ArrayHelper } from "../apiBase/helpers";
+import { ArrayHelper } from "@churchapps/apihelper";
 import { Venue, Action } from "../models";
 
 export class PlaylistHelper {

@@ -3,7 +3,7 @@ import express from "express";
 import { LessonsBaseController } from "./LessonsBaseController"
 import { Program } from "../models"
 import { Permissions } from '../helpers/Permissions'
-import { Environment, FileHelper } from "../helpers"
+import { Environment, FileStorageHelper } from "../helpers"
 
 @controller("/programs")
 export class ProgramController extends LessonsBaseController {
@@ -95,7 +95,7 @@ export class ProgramController extends LessonsBaseController {
   private async saveImage(program: Program) {
     const base64 = program.image.split(',')[1];
     const key = "/programs/" + program.id + ".png";
-    return FileHelper.store(key, "image/png", Buffer.from(base64, 'base64')).then(async () => {
+    return FileStorageHelper.store(key, "image/png", Buffer.from(base64, 'base64')).then(async () => {
       const photoUpdated = new Date();
       program.image = Environment.contentRoot + key + "?dt=" + photoUpdated.getTime().toString();
     });

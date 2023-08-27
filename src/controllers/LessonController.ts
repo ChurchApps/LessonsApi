@@ -3,8 +3,8 @@ import express from "express";
 import { LessonsBaseController } from "./LessonsBaseController"
 import { Action, Asset, Bundle, ExternalVideo, File, Lesson, Program, Resource, Role, Section, Study, Variant, Venue } from "../models"
 import { Permissions } from '../helpers/Permissions'
-import { Environment, FileHelper } from "../helpers"
-import { ArrayHelper } from "../apiBase";
+import { Environment, FileStorageHelper } from "../helpers"
+import { ArrayHelper } from "@churchapps/apihelper";
 
 @controller("/lessons")
 export class LessonController extends LessonsBaseController {
@@ -138,7 +138,7 @@ export class LessonController extends LessonsBaseController {
   private async saveImage(lesson: Lesson) {
     const base64 = lesson.image.split(',')[1];
     const key = "/lessons/" + lesson.id + ".png";
-    return FileHelper.store(key, "image/png", Buffer.from(base64, 'base64')).then(async () => {
+    return FileStorageHelper.store(key, "image/png", Buffer.from(base64, 'base64')).then(async () => {
       const photoUpdated = new Date();
       lesson.image = Environment.contentRoot + key + "?dt=" + photoUpdated.getTime().toString();
     });

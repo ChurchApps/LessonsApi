@@ -1,4 +1,4 @@
-import { DB } from "../apiBase/db";
+import { DB } from "@churchapps/apihelper"
 import { StudyCategory } from "../models";
 import { UniqueIdHelper, MySqlHelper } from "../helpers";
 

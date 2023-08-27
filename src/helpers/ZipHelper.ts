@@ -4,7 +4,7 @@ import { File, Variant, Bundle } from "../models";
 import { Environment, FilesHelper } from ".";
 import { Stream } from "stream";
 import Archiver from "archiver"
-import { ArrayHelper, FileHelper } from "../apiBase";
+import { ArrayHelper, FileStorageHelper } from "@churchapps/apihelper";
 
 
 export class ZipHelper {
@@ -129,7 +129,7 @@ export class ZipHelper {
         file = await Repositories.getCurrent().file.load(bundle.churchId, bundle.fileId);
         const oldKey = file.contentPath.split("?")[0].replace(Environment.contentRoot + "/", "");
         if (oldKey !== zipName) {
-          await FileHelper.remove(oldKey);
+          await FileStorageHelper.remove(oldKey);
           await Repositories.getCurrent().file.delete(bundle.churchId, file.id);
           file = null;
         }

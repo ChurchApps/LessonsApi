@@ -5,7 +5,7 @@ import { Action, Classroom, Download, ExternalVideo, Lesson, Venue } from "../mo
 import { Permissions } from '../helpers/Permissions'
 import { PlaylistHelper } from "../helpers/PlaylistHelper";
 import { Environment } from "../helpers";
-import { ArrayHelper } from "../apiBase";
+import { ArrayHelper } from "@churchapps/apihelper";
 
 @controller("/classrooms")
 export class ClassroomController extends LessonsBaseController {
