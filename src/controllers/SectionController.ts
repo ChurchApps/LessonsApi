@@ -3,7 +3,7 @@ import express from "express";
 import { LessonsBaseController } from "./LessonsBaseController"
 import { Section, Venue, Action } from "../models"
 import { Permissions } from '../helpers/Permissions'
-import { ArrayHelper } from "../apiBase";
+import { ArrayHelper } from "@churchapps/apihelper";
 
 @controller("/sections")
 export class SectionController extends LessonsBaseController {

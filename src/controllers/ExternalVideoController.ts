@@ -3,7 +3,7 @@ import express from "express";
 import { LessonsBaseController } from "./LessonsBaseController"
 import { ExternalVideo } from "../models"
 import { Permissions } from '../helpers/Permissions'
-import { ArrayHelper } from "../apiBase";
+import { ArrayHelper } from "@churchapps/apihelper";
 import { VimeoHelper } from "../helpers/VimeoHelper";
 
 @controller("/externalVideos")

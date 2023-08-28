@@ -4,7 +4,7 @@ import { LessonsBaseController } from "./LessonsBaseController"
 import { Bundle, Resource } from "../models"
 import { Permissions } from '../helpers/Permissions'
 import { FilesHelper } from "../helpers";
-import { ArrayHelper } from "../apiBase";
+import { ArrayHelper } from "@churchapps/apihelper";
 import { ZipHelper } from "../helpers/ZipHelper";
 
 

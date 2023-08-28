@@ -3,7 +3,7 @@ import express from "express";
 import { LessonsBaseController } from "./LessonsBaseController"
 import { File } from "../models"
 import { Permissions } from '../helpers/Permissions'
-import { AwsHelper, FileHelper } from "../apiBase";
+import { AwsHelper, FileStorageHelper } from "@churchapps/apihelper";
 import { Environment } from "../helpers";
 
 @controller("/files")
@@ -14,13 +14,13 @@ export class FileController extends LessonsBaseController {
     return this.actionWrapperAnon(req, res, async () => {
       this.repositories.file.cleanUp();
       const paths = await this.getOrphanedFiles();
-      for (const p of paths) await FileHelper.remove(p);
+      for (const p of paths) await FileStorageHelper.remove(p);
       return { paths };
     });
   }
 
   private async getOrphanedFiles() {
-    const paths = await FileHelper.list("files/");
+    const paths = await FileStorageHelper.list("files/");
     const files: File[] = await this.repositories.file.loadAll();
     for (let i = paths.length; i >= 0; i--) {
       let match = false;
@@ -100,13 +100,13 @@ export class FileController extends LessonsBaseController {
     {
       const existingFile = await this.repositories.file.load(file.churchId, file.id)
       const oldKey = "/files/" + bundle.contentType + "/" + bundle.contentId + "/" + resource.id + "/" + existingFile.fileName;
-      if (oldKey !== key) await FileHelper.remove(oldKey);
+      if (oldKey !== key) await FileStorageHelper.remove(oldKey);
     }
 
     if (file.fileContents) {
       const base64 = file.fileContents.split(',')[1];
       const buffer = Buffer.from(base64, 'base64');
-      await FileHelper.store(key, file.fileType, buffer);
+      await FileStorageHelper.store(key, file.fileType, buffer);
     }
 
     const fileUpdated = new Date();
