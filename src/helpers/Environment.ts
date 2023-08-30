@@ -20,7 +20,7 @@ export class Environment extends EnvironmentBase {
 
     const json = fs.readFileSync(physicalPath, "utf8");
     const data = JSON.parse(json);
-    this.populateBase(data, environment);
+    this.populateBase(data, "lessonsApi", environment);
 
     this.transcodePipeline = data.transcodePipeline;
     this.transcodePreset = data.transcodePreset;
