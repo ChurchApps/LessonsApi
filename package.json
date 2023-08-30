@@ -23,7 +23,7 @@
   "keywords": [],
   "author": "Live Church Solutions",
   "dependencies": {
-    "@churchapps/apihelper": "^0.0.1",
+    "@churchapps/apihelper": "^0.0.2",
     "archiver": "^5.3.0",
     "aws-serverless-express": "^3.4.0",
     "axios": "^0.24.0",

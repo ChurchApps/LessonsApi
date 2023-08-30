@@ -1,7 +1,6 @@
 import fs from "fs";
 import path from "path";
-
-import { EnvironmentBase } from "@churchapps/apihelper";
+import {AwsHelper, EnvironmentBase} from "@churchapps/apihelper";
 
 export class Environment extends EnvironmentBase {
 
@@ -10,7 +9,7 @@ export class Environment extends EnvironmentBase {
   static ipGeoKey: string;
   static vimeoToken: string;
 
-  static init(environment: string) {
+  static async init(environment: string) {
     let file = "dev.json";
     if (environment === "staging") file = "staging.json";
     if (environment === "prod") file = "prod.json";
@@ -21,12 +20,12 @@ export class Environment extends EnvironmentBase {
 
     const json = fs.readFileSync(physicalPath, "utf8");
     const data = JSON.parse(json);
-    this.populateBase(data);
+    this.populateBase(data, environment);
 
     this.transcodePipeline = data.transcodePipeline;
     this.transcodePreset = data.transcodePreset;
-    this.ipGeoKey = process.env.IP_GEO_KEY;
-    this.vimeoToken = process.env.VIMEO_TOKEN;
+    this.ipGeoKey = process.env.IP_GEO_KEY || await AwsHelper.readParameter(`/${environment}/ipGeoKey`);
+    this.vimeoToken = process.env.VIMEO_TOKEN || await AwsHelper.readParameter(`/${environment}/vimeoToken`);
   }
 
 }
