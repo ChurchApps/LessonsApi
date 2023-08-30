@@ -6,8 +6,10 @@ const { Environment } = require('./dist/helpers/Environment');
 const { ZipHelper } = require('./dist/helpers/ZipHelper');
 const { GeoHelper } = require('./dist/helpers/GeoHelper');
 
-Environment.init(process.env.APP_ENV);
-Pool.initPool();
+Environment.init(process.env.APP_ENV).then(() => { 
+  Pool.initPool();
+});
+
 
 const universal = function universal(event, context) {
   init().then(app => {

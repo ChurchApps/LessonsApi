@@ -51,6 +51,7 @@
     "rimraf": "^3.0.2",
     "serverless": "^2.70.0",
     "serverless-layers": "^2.5.1",
+    "serverless-plugin-utils": "^0.2.0",
     "ts-node": "^10.4.0",
     "tslint": "^6.1.2",
     "typescript": "^5.2.2"

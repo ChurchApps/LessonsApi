@@ -1,28 +1,31 @@
 service: lessons-api
 
 provider:
- name: aws
- runtime: nodejs14.x
- memorySize: 1024
- timeout: 10
- region: us-east-2
-
+  name: aws
+  runtime: nodejs14.x
+  memorySize: 1024
+  timeout: 10
+  region: us-east-2
+  iam:
+    role: arn:aws:iam::428019619026:role/ChurchAppsRole
+  environment:
+    APP_ENV: ${lower(${opt:stage, self:provider.stage})}
 
 functions:
- api:
-   handler: lambda.universal
-   events:
-     - http: ANY {proxy+}
-     - http: ANY /
- videoPingback:
-   handler: lambda.videoPingback
- zipBundles:
-   handler: lambda.zipBundles
-
+  api:
+    handler: lambda.universal
+    events:
+      - http: ANY {proxy+}
+      - http: ANY /
+  videoPingback:
+    handler: lambda.videoPingback
+  zipBundles:
+    handler: lambda.zipBundles
 
 plugins:
   - serverless-layers
-  
+  - serverless-plugin-utils
+
 custom:
   serverless-layers:
     dependenciesPath: ./package.json
