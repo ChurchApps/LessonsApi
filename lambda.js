@@ -6,15 +6,16 @@ const { Environment } = require('./dist/helpers/Environment');
 const { ZipHelper } = require('./dist/helpers/ZipHelper');
 const { GeoHelper } = require('./dist/helpers/GeoHelper');
 
-Environment.init(process.env.APP_ENV).then(() => { 
-  Pool.initPool();
-});
+
 
 
 const universal = function universal(event, context) {
-  init().then(app => {
-    const server = createServer(app);
-    return proxy(server, event, context);
+  Environment.init(process.env.APP_ENV).then(() => { 
+    init().then(app => {
+      const server = createServer(app);
+      return proxy(server, event, context);
+    });
+    Pool.initPool();
   });
 
 }
