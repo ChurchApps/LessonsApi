@@ -8,25 +8,29 @@ const { GeoHelper } = require('./dist/helpers/GeoHelper');
 
 
 
+const checkPool = async () => {
+  if (!Environment.connectionString) {
+    await Environment.init(process.env.APP_ENV)
+    Pool.initPool();
+  }
+}
 
 const universal = function universal(event, context) {
-  Environment.init(process.env.APP_ENV).then(() => { 
+  checkPool().then(() => {
     init().then(app => {
       const server = createServer(app);
       return proxy(server, event, context);
     });
-    Pool.initPool();
   });
-
 }
 
-
 const videoPingback = async (event, context) => {
-  console.log(JSON.stringify(event));
+  await checkPool();
   await TranscodeHelper.handlePingback(event);
 }
 
 const zipBundles = async (event, context) => {
+  await checkPool();
   await ZipHelper.zipPendingBundles();
   await GeoHelper.lookupMissing();
 }
