@@ -1,6 +1,9 @@
 service: lessons-api
 
 custom:
+  serverless-layers:
+    dependenciesPath: ./package.json
+    layersDeploymentBucket: "lcs-layers"
   env: ${lower(${opt:stage, self:provider.stage})}
   vpcSettings:
     staging: ~
@@ -36,8 +39,3 @@ functions:
 plugins:
   - serverless-layers
   - serverless-plugin-utils
-
-custom:
-  serverless-layers:
-    dependenciesPath: ./package.json
-    layersDeploymentBucket: "lcs-layers"
