@@ -31,7 +31,7 @@ functions:
     handler: lambda.videoPingback
   zipBundles:
     handler: lambda.zipBundles
-    vpc: {switch(${self:custom.env}, ${self:custom.vpcSettings})}
+    vpc: ${switch(${self:custom.env}, ${self:custom.vpcSettings})}
 
 plugins:
   - serverless-layers
