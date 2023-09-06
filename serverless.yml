@@ -1,5 +1,15 @@
 service: lessons-api
 
+custom:
+  env: ${lower(${opt:stage, self:provider.stage})}
+  vpcSettings:
+    staging: ~
+    prod:
+      securityGroupIds:
+        - sg-052314a1eec2f2567
+      subnetIds:
+        - subnet-01a6b61d749d10c46
+
 provider:
   name: aws
   runtime: nodejs16.x
@@ -9,7 +19,7 @@ provider:
   iam:
     role: arn:aws:iam::428019619026:role/ChurchAppsRole
   environment:
-    APP_ENV: ${lower(${opt:stage, self:provider.stage})}
+    APP_ENV: ${self:custom.env}
 
 functions:
   api:
@@ -21,6 +31,7 @@ functions:
     handler: lambda.videoPingback
   zipBundles:
     handler: lambda.zipBundles
+    vpc: {switch(${self:custom.env}, ${self:custom.vpcSettings})}
 
 plugins:
   - serverless-layers
