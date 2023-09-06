@@ -15,7 +15,7 @@ custom:
 
 provider:
   name: aws
-  runtime: nodejs16.x
+  runtime: nodejs18.x
   memorySize: 1024
   timeout: 10
   region: us-east-2
