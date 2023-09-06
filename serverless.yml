@@ -6,12 +6,12 @@ custom:
     layersDeploymentBucket: "lcs-layers"
   env: ${lower(${opt:stage, self:provider.stage})}
   vpcSettings:
-    staging: ~
     prod:
       securityGroupIds:
         - sg-052314a1eec2f2567
       subnetIds:
         - subnet-01a6b61d749d10c46
+    current: ${ternary( ${self:custom.env}, prod, ${self:custom.vpcSettings.prod}, ~ )}
 
 provider:
   name: aws
@@ -30,11 +30,13 @@ functions:
     events:
       - http: ANY {proxy+}
       - http: ANY /
+    vpc: ${self:custom.vpcSettings.current}
   videoPingback:
     handler: lambda.videoPingback
+    vpc: ${self:custom.vpcSettings.current}
   zipBundles:
     handler: lambda.zipBundles
-    vpc: ${switch(${self:custom.env}, ${self:custom.vpcSettings})}
+    vpc: ${self:custom.vpcSettings.current}
 
 plugins:
   - serverless-layers
