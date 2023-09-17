@@ -19,3 +19,5 @@ export { StudyController } from "./StudyController"
 export { StudyCategoryController } from "./StudyCategoryController"
 export { VariantController } from "./VariantController"
 export { VenueController } from "./VenueController"
+
+export { TempController } from "./TempController"

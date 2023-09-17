@@ -39,7 +39,7 @@ export class ProgramRepository {
     return DB.queryOne("SELECT * FROM programs WHERE id=? and live=1", [id]);
   }
 
-  public loadPublicAll(): Promise<Program> {
+  public loadPublicAll(): Promise<Program[]> {
     return DB.query("SELECT * FROM programs WHERE live=1 ORDER BY sort", []);
   }
 

@@ -58,6 +58,9 @@ export class LessonRepository {
     return DB.queryOne("SELECT * FROM lessons WHERE id=? AND churchId=?", [id, churchId]);
   }
 
+  public loadPublicAll(): Promise<Lesson[]> {
+    return DB.query("SELECT * FROM lessons WHERE live=1 ORDER BY sort", []);
+  }
 
   public loadAll(churchId: string): Promise<Lesson[]> {
     return DB.query("SELECT * FROM lessons WHERE churchId=? ORDER BY sort", [churchId]);

@@ -45,6 +45,9 @@ export class VenueRepository {
     return DB.queryOne("SELECT * FROM venues WHERE id=?", [id]);
   }
 
+  public loadPublicAll(): Promise<Venue[]> {
+    return DB.query("SELECT * FROM venues order by name", []);
+  }
 
   public load(churchId: string, id: string): Promise<Venue> {
     return DB.queryOne("SELECT * FROM venues WHERE id=? AND churchId=?", [id, churchId]);
