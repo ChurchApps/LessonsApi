@@ -34,15 +34,17 @@ export class ClassroomController extends LessonsBaseController {
         sectionActions.forEach(a => {
           if (a.externalVideoId) {
             const video: ExternalVideo = ArrayHelper.getOne(availableVideos, "id", a.externalVideoId);
-            let seconds = video.seconds;
-            const loopVideo = (video.loopVideo) ? true : false;
-            if (!seconds || seconds === 0 || loopVideo) seconds = 3600;
-            if (video) itemFiles.push({ name: video.name, url: video.play720, seconds, loopVideo: video.loopVideo })
+            if (video) {
+              let seconds = video.seconds;
+              const loopVideo = (video.loopVideo) ? true : false;
+              if (!seconds || seconds === 0 || loopVideo) seconds = 3600;
+              itemFiles.push({ name: video.name, url: video.play720, seconds, loopVideo: video.loopVideo })
+            }
           } else {
             const files: any[] = PlaylistHelper.getBestFiles(a, availableFiles);
             files.forEach(file => {
               const contentPath = (file.contentPath.indexOf("://") === -1) ? Environment.contentRoot + file.contentPath : file.contentPath;
-              let seconds = parseInt(file.seconds, 0);
+              let seconds = parseInt(file?.seconds || 0, 0);
               const loopVideo = (file.loopVideo) ? true : false;
               if (!seconds || seconds === 0 || loopVideo) seconds = 3600;
               itemFiles.push({ name: file.resourceName, url: contentPath, seconds, loopVideo })
