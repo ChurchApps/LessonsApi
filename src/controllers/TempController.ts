@@ -20,13 +20,13 @@ export class TempController extends LessonsBaseController {
       const result = { programs: [] }
 
       programs.forEach(program => {
-        const p = { name: program.name, description:program.shortDescription || program.description || "", image:program.image, studies: [] }
+        const p = { id:program.id, name: program.name, description:program.shortDescription || program.description || "", image:program.image, studies: [] }
         ArrayHelper.getAll(studies, "programId", program.id).forEach(study => {
-          const s = { name: study.name, description: study.shortDescription || study.description || "", image: study.image, lessons: [] }
+          const s = { id: study.id, name: study.name, description: study.shortDescription || study.description || "", image: study.image, lessons: [] }
           ArrayHelper.getAll(lessons, "studyId", study.id).forEach(lesson => {
-            const l = { name: lesson.title, description:lesson.description, image:lesson.image, venues:[] }
+            const l = { id: lesson.id, name: lesson.title, description:lesson.description, image:lesson.image, venues:[] }
             ArrayHelper.getAll(venues, "lessonId", lesson.id).forEach(venue => {
-              l.venues.push({ name: venue.name, apiUrl: "https://api.lessons.church/temp/venue/" + venue.id + "?authToken=12345" })
+              l.venues.push({ id: venue.id, name: venue.name, apiUrl: "https://api.lessons.church/temp/venue/" + venue.id })
             });
             s.lessons.push(l)
           })
