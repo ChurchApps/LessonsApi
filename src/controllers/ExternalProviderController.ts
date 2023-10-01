@@ -3,9 +3,19 @@ import express from "express";
 import { LessonsBaseController } from "./LessonsBaseController"
 import { Provider } from "../models"
 import { Permissions } from '../helpers/Permissions'
+import { ExternalProviderHelper } from "../helpers/ExternalProviderHelper";
 
 @controller("/externalProviders")
 export class ExternalProviderController extends LessonsBaseController {
+
+
+  @httpGet("/:id/venue/:venueId")
+  public async getPublicExternal(@requestParam("id") id: string, @requestParam("venueId") venueId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
+    return this.actionWrapperAnon(req, res, async () => {
+      const lessonData = await ExternalProviderHelper.loadExternalData(id, venueId);
+      return lessonData;
+    });
+  }
 
   @httpGet("/:id")
   public async get(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {

@@ -23,6 +23,10 @@ export class ExternalProviderRepository {
     return externalProvider;
   }
 
+  public loadPublic(id: string): Promise<ExternalProvider> {
+    return DB.queryOne("SELECT * FROM externalProviders WHERE id=?", [id]);
+  }
+
   public load(churchId: string, id: string): Promise<ExternalProvider> {
     return DB.queryOne("SELECT * FROM externalProviders WHERE id=? AND churchId=?", [id, churchId]);
   }

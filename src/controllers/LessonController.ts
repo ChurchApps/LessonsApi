@@ -5,6 +5,7 @@ import { Action, Asset, Bundle, ExternalVideo, File, Lesson, Program, Resource, 
 import { Permissions } from '../helpers/Permissions'
 import { Environment, FileStorageHelper } from "../helpers"
 import { ArrayHelper } from "@churchapps/apihelper";
+import { ExternalProviderHelper } from "src/helpers/ExternalProviderHelper";
 
 @controller("/lessons")
 export class LessonController extends LessonsBaseController {
