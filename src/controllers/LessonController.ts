@@ -5,7 +5,7 @@ import { Action, Asset, Bundle, ExternalVideo, File, Lesson, Program, Resource, 
 import { Permissions } from '../helpers/Permissions'
 import { Environment, FileStorageHelper } from "../helpers"
 import { ArrayHelper } from "@churchapps/apihelper";
-import { ExternalProviderHelper } from "src/helpers/ExternalProviderHelper";
+import { LessonFeedHelper } from "../helpers/LessonFeedHelper";
 
 @controller("/lessons")
 export class LessonController extends LessonsBaseController {
@@ -64,6 +64,18 @@ export class LessonController extends LessonsBaseController {
     });
   }
 
+  @httpGet("/public/slugAlt/:programSlug/:studySlug/:slug")
+  public async getPublicBySlugAlt(@requestParam("programSlug") programSlug: string, @requestParam("studySlug") studySlug: string, @requestParam("slug") slug: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
+    return this.actionWrapperAnon(req, res, async () => {
+      const program = await this.repositories.program.loadPublicBySlug(programSlug);
+      const study = await this.repositories.study.loadPublicBySlug(program.id, studySlug);
+      const lesson = await this.repositories.lesson.loadPublicBySlug(study.id, slug);
+
+      const data = await this.getExpandedLessonData(program, study, lesson);
+      const result = await LessonFeedHelper.convertToFeed(data.lesson, data.study, data.program, data.venues[0], data.bundles, data.resources, data.externalVideos);
+      return result;
+    });
+  }
 
   @httpGet("/public/slug/:programSlug/:studySlug/:slug")
   public async getPublicBySlug(@requestParam("programSlug") programSlug: string, @requestParam("studySlug") studySlug: string, @requestParam("slug") slug: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
