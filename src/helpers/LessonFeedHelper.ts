@@ -130,18 +130,20 @@ export class LessonFeedHelper {
 
     const result:FeedDownload[] = [];
     bundles.forEach(b => {
-      const fd:FeedDownload = {
-        name: b.name,
-        files: [
-          {
-            name: b.file.fileName,
-            url: b.file.contentPath,
-            bytes: b.file.size,
-            fileType: b.file.fileType
-          }
-        ]
+      if (b.file) {
+        const fd:FeedDownload = {
+          name: b.name,
+          files: [
+            {
+              name: b.file.fileName,
+              url: b.file.contentPath,
+              bytes: b.file.size,
+              fileType: b.file.fileType
+            }
+          ]
+        }
+        result.push(fd);
       }
-      result.push(fd);
     });
     externalVideos.forEach(v => {
       const fd:FeedDownload = {
