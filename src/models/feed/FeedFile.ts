@@ -8,5 +8,6 @@ export class FeedFile {
   public thumbnail?: string;
   public loop?: boolean;
 
+  public expires?: Date;
   public id?: string;
 }

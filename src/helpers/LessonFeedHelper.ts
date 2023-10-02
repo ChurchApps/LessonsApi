@@ -169,6 +169,8 @@ export class LessonFeedHelper {
     const file:FeedFile = {
       url: video.download1080 || video.download720,
       name: video.name,
+      id: video.id,
+      expires: video.downloadsExpire
     }
     if (video.thumbnail) file.thumbnail = video.thumbnail;
     if (download) {
