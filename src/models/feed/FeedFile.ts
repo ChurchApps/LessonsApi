@@ -7,4 +7,6 @@ export class FeedFile {
   public seconds?: number;
   public thumbnail?: string;
   public loop?: boolean;
+
+  public id?: string;
 }

@@ -10,7 +10,9 @@ export class FeedVenue {
   public studySlug?: string;
   public programName?: string;
   public programSlug?: string;
+  public programAbout?: string;
   public downloads?: FeedDownload[];
   public sections?: FeedSection[];
 
+  public lessonId?: string;
 }

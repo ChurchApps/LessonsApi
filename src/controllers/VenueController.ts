@@ -6,6 +6,7 @@ import { Permissions } from '../helpers/Permissions'
 import { ArrayHelper } from "@churchapps/apihelper";
 import { Environment } from "../helpers";
 import { PlaylistHelper } from "../helpers/PlaylistHelper";
+import { LessonFeedHelper } from "../helpers/LessonFeedHelper";
 
 @controller("/venues")
 export class VenueController extends LessonsBaseController {
@@ -71,6 +72,23 @@ export class VenueController extends LessonsBaseController {
   public async get(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
     return this.actionWrapper(req, res, async (au) => {
       return await this.repositories.venue.load(au.churchId, id);
+    });
+  }
+
+  @httpGet("/public/feed/:id")
+  public async getPublicFeed(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
+    return this.actionWrapperAnon(req, res, async () => {
+      const venue = await this.repositories.venue.loadPublic(id);
+      const lesson = await this.repositories.lesson.loadPublic(venue.lessonId);
+      const study = await this.repositories.study.loadPublic(lesson.studyId);
+      const program = await this.repositories.program.loadPublic(study.programId);
+
+      const data = await LessonFeedHelper.getExpandedLessonData(program, study, lesson);
+
+      const expandedVenue = ArrayHelper.getOne(data.venues, "id", venue.id);
+
+      const result = await LessonFeedHelper.convertToFeed(data.lesson, data.study, data.program, expandedVenue, data.bundles, data.resources, data.externalVideos);
+      return result;
     });
   }
 
