@@ -5,10 +5,41 @@ import { Action, Asset, Bundle, ExternalVideo, File, Lesson, Program, Resource, 
 import { Permissions } from '../helpers/Permissions'
 import { Environment, FileStorageHelper } from "../helpers"
 import { ArrayHelper } from "@churchapps/apihelper";
+import { LessonFeedHelper } from "../helpers/LessonFeedHelper";
+import { FeedVenue } from "src/models/feed";
 
 @controller("/lessons")
 export class LessonController extends LessonsBaseController {
 
+  @httpGet("/public/tree")
+  public async getPublicForProgram(req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
+    return this.actionWrapperAnon(req, res, async () => {
+
+      const programs = await this.repositories.program.loadPublicAll();
+      const studies = await this.repositories.study.loadPublicAll();
+      const lessons = await this.repositories.lesson.loadPublicAll();
+      const venues = await this.repositories.venue.loadPublicAll();
+      const result = { programs: [] }
+
+      programs.forEach(program => {
+        const p = { id:program.id, name: program.name, description:program.shortDescription || program.description || "", image:program.image, studies: [] }
+        ArrayHelper.getAll(studies, "programId", program.id).forEach(study => {
+          const s = { id: study.id, name: study.name, description: study.shortDescription || study.description || "", image: study.image, lessons: [] }
+          ArrayHelper.getAll(lessons, "studyId", study.id).forEach(lesson => {
+            const l = { id: lesson.id, name: lesson.title, description:lesson.description, image:lesson.image, venues:[] }
+            ArrayHelper.getAll(venues, "lessonId", lesson.id).forEach(venue => {
+              l.venues.push({ id: venue.id, name: venue.name, apiUrl: "https://api.lessons.church/temp/venue/" + venue.id })
+            });
+            s.lessons.push(l)
+          })
+          p.studies.push(s)
+        });
+        result.programs.push(p);
+      });
+
+      return result;
+    });
+  }
 
   @httpGet("/public/study/:studyId")
   public async getPublicForStudy(@requestParam("studyId") studyId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
@@ -34,6 +65,23 @@ export class LessonController extends LessonsBaseController {
     });
   }
 
+  @httpGet("/public/slugAlt/:programSlug/:studySlug/:slug")
+  public async getPublicBySlugAlt(@requestParam("programSlug") programSlug: string, @requestParam("studySlug") studySlug: string, @requestParam("slug") slug: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
+    return this.actionWrapperAnon(req, res, async () => {
+      const program = await this.repositories.program.loadPublicBySlug(programSlug);
+      const study = await this.repositories.study.loadPublicBySlug(program.id, studySlug);
+      const lesson = await this.repositories.lesson.loadPublicBySlug(study.id, slug);
+
+      const data = await LessonFeedHelper.getExpandedLessonData(program, study, lesson);
+
+      const venues:FeedVenue[] = [];
+      data.venues.forEach(v => {
+        venues.push(LessonFeedHelper.convertToFeed(data.lesson, data.study, data.program, v, data.bundles, data.resources, data.externalVideos));
+      });
+      const result = { venues }
+      return result;
+    });
+  }
 
   @httpGet("/public/slug/:programSlug/:studySlug/:slug")
   public async getPublicBySlug(@requestParam("programSlug") programSlug: string, @requestParam("studySlug") studySlug: string, @requestParam("slug") slug: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
@@ -42,26 +90,10 @@ export class LessonController extends LessonsBaseController {
       const study = await this.repositories.study.loadPublicBySlug(program.id, studySlug);
       const lesson = await this.repositories.lesson.loadPublicBySlug(study.id, slug);
 
-      return await this.getExpandedLessonData(program, study, lesson);
+      return await LessonFeedHelper.getExpandedLessonData(program, study, lesson);
     });
   }
 
-  private async getExpandedLessonData(program: Program, study: Study, lesson: Lesson)
-  {
-    let venues: Venue[] = null;
-    let bundles: Bundle[] = null;
-    let resources: Resource[] = null;
-    let externalVideos: ExternalVideo[] = null;
-    const promises: Promise<any>[] = [];
-    promises.push(this.getVenues(lesson.id).then(v => venues = v));
-    promises.push(this.getBundles(lesson.id).then(b => bundles = b));
-    promises.push(this.getResources(lesson.id).then(r => resources = r));
-    promises.push(this.repositories.externalVideo.loadPublicForLesson(lesson.id).then(ev => externalVideos = ev));;
-    await Promise.all(promises);
-
-    const result = { lesson, study, program, venues, bundles, resources, externalVideos }
-    return result;
-  }
 
 
   @httpGet("/public/ids")
@@ -79,7 +111,7 @@ export class LessonController extends LessonsBaseController {
       const study = await this.repositories.study.loadPublic(lesson.studyId);
       const program = await this.repositories.program.loadPublic(study.programId);
 
-      return await this.getExpandedLessonData(program, study, lesson);
+      return await LessonFeedHelper.getExpandedLessonData(program, study, lesson);
     });
   }
 
@@ -144,59 +176,6 @@ export class LessonController extends LessonsBaseController {
     });
   }
 
-  private async getVenues(lessonId: string) {
-    const venues = await this.repositories.venue.loadPublicByLessonId(lessonId);
-    const sections = await this.repositories.section.loadByLessonId(lessonId);
-    const roles = await this.repositories.role.loadByLessonId(lessonId);
-    const actions = await this.repositories.action.loadByLessonId(lessonId);
-    venues.forEach(v => this.appendSections(v, sections, roles, actions));
-    return venues;
-  }
 
-  public async appendSections(venue: Venue, allSections: Section[], allRoles: Role[], allActions: Action[]) {
-    venue.sections = ArrayHelper.getAll(allSections, "venueId", venue.id);
-    venue.sections.forEach(s => {
-      s.roles = ArrayHelper.getAll(allRoles, "sectionId", s.id);
-      s.roles.forEach(r => {
-        r.actions = ArrayHelper.getAll(allActions, "roleId", r.id);
-      });
-    });
-  }
-
-  private async getBundles(lessonId: string) {
-    const bundles: Bundle[] = await this.repositories.bundle.loadPublicForLesson(lessonId);
-    if (bundles.length === 0) return bundles;
-    const fileIds = ArrayHelper.getIds(bundles, "fileId");
-    for (let i = fileIds.length; i >= 0; i--) if (!fileIds[i]) fileIds.splice(i, 1);
-    if (fileIds.length > 0) {
-      const files = await this.repositories.file.loadByIds(bundles[0].churchId, fileIds);
-      bundles.forEach(b => { b.file = ArrayHelper.getOne(files, "id", b.fileId) });
-    }
-    return bundles;
-  }
-
-  private async getResources(lessonId: string) {
-    const resources: Resource[] = await this.repositories.resource.loadPublicForLesson(lessonId);
-    if (resources.length === 0) return resources;
-
-    const resourceIds = ArrayHelper.getIds(resources, "id");
-    const variants = await this.repositories.variant.loadByResourceIds(resources[0].churchId, resourceIds);
-    const assets = await this.repositories.asset.loadByResourceIds(resources[0].churchId, resourceIds);
-
-    const fileIds = ArrayHelper.getIds(variants, "fileId").concat(ArrayHelper.getIds(assets, "fileId"));
-    const files = await this.repositories.file.loadByIds(resources[0].churchId, fileIds);
-
-    resources.forEach(r => this.appendVariantsAssets(r, variants, assets, files));
-    return resources;
-  }
-
-  private async appendVariantsAssets(resource: Resource, allVariants: Variant[], allAssets: Asset[], allFiles: File[]) {
-    resource.variants = ArrayHelper.getAll(allVariants, "resourceId", resource.id);
-    resource.assets = ArrayHelper.getAll(allAssets, "resourceId", resource.id);
-
-    resource.variants.forEach(v => v.file = ArrayHelper.getOne(allFiles, "id", v.fileId));
-    resource.assets.forEach(a => a.file = ArrayHelper.getOne(allFiles, "id", a.fileId));
-
-  }
 
 }
