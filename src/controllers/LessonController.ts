@@ -11,6 +11,8 @@ import { FeedVenue } from "src/models/feed";
 @controller("/lessons")
 export class LessonController extends LessonsBaseController {
 
+
+
   @httpGet("/public/tree")
   public async getPublicForProgram(req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
     return this.actionWrapperAnon(req, res, async () => {
@@ -28,7 +30,7 @@ export class LessonController extends LessonsBaseController {
           ArrayHelper.getAll(lessons, "studyId", study.id).forEach(lesson => {
             const l = { id: lesson.id, name: lesson.title, description:lesson.description, image:lesson.image, venues:[] }
             ArrayHelper.getAll(venues, "lessonId", lesson.id).forEach(venue => {
-              l.venues.push({ id: venue.id, name: venue.name, apiUrl: "https://api.lessons.church/temp/venue/" + venue.id })
+              l.venues.push({ id: venue.id, name: venue.name, apiUrl: "https://api.lessons.church/venues/public/feed/" + venue.id })
             });
             s.lessons.push(l)
           })

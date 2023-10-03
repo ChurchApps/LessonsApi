@@ -9,35 +9,7 @@ import { Environment } from "../helpers";
 @controller("/temp")
 export class TempController extends LessonsBaseController {
 
-  @httpGet("/lessons")
-  public async getPublicForProgram(req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
-    return this.actionWrapperAnon(req, res, async () => {
 
-      const programs = await this.repositories.program.loadPublicAll();
-      const studies = await this.repositories.study.loadPublicAll();
-      const lessons = await this.repositories.lesson.loadPublicAll();
-      const venues = await this.repositories.venue.loadPublicAll();
-      const result = { programs: [] }
-
-      programs.forEach(program => {
-        const p = { id:program.id, name: program.name, description:program.shortDescription || program.description || "", image:program.image, studies: [] }
-        ArrayHelper.getAll(studies, "programId", program.id).forEach(study => {
-          const s = { id: study.id, name: study.name, description: study.shortDescription || study.description || "", image: study.image, lessons: [] }
-          ArrayHelper.getAll(lessons, "studyId", study.id).forEach(lesson => {
-            const l = { id: lesson.id, name: lesson.title, description:lesson.description, image:lesson.image, venues:[] }
-            ArrayHelper.getAll(venues, "lessonId", lesson.id).forEach(venue => {
-              l.venues.push({ id: venue.id, name: venue.name, apiUrl: "https://api.lessons.church/temp/venue/" + venue.id })
-            });
-            s.lessons.push(l)
-          })
-          p.studies.push(s)
-        });
-        result.programs.push(p);
-      });
-
-      return result;
-    });
-  }
 
   @httpGet("/venue/:venueId")
   public async getPublicForVenue(@requestParam("venueId") venueId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
