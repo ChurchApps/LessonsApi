@@ -98,7 +98,7 @@ export class ClassroomController extends LessonsBaseController {
     };
 
     actionData.sections.forEach((section:any) => {
-      const actions = ArrayHelper.getAll(section.actions, "actionType", "Play");
+      const actions = ArrayHelper.getAll(section.actions, "actionType", "play");
       if (actions.length>0)
       {
         const message = { name:section.name, files:[] };
