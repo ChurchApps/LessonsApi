@@ -84,6 +84,7 @@ export class LessonFeedHelper {
   static convertToFeed(lesson:Lesson, study:Study, program:Program, venue:Venue, bundles:Bundle[], resources:Resource[], externalVideos:ExternalVideo[]) {
     const result:FeedVenue = {
       name: venue.name,
+      id: venue.id,
       lessonId: lesson.id,
       lessonName: lesson.name,
       lessonDescription: lesson.description,

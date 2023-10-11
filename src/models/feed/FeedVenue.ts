@@ -3,6 +3,7 @@ import { FeedSection } from "./FeedSection";
 
 export class FeedVenue {
   public name?: string;
+  public id?: string;
   public lessonName?: string;
   public lessonImage?: string;
   public lessonDescription?: string;
