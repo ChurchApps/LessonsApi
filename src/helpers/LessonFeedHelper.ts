@@ -107,6 +107,7 @@ export class LessonFeedHelper {
 
       if (section.materials) fs.materials = section.materials;
 
+      let lastRole = "";
       section.roles.forEach(role => {
         role.actions.forEach(action => {
           if (action.actionType!=="Download")
@@ -114,6 +115,10 @@ export class LessonFeedHelper {
             const fa:FeedAction = {
               actionType: action.actionType.toLowerCase(),
               content: action.content,
+            }
+            if (role.name!==lastRole) {
+              lastRole = role.name;
+              fa.role = role.name;
             }
             if (fa.actionType==="play") fa.files = this.convertFiles(action, bundles, resources, externalVideos, false);
             fs.actions.push(fa);
