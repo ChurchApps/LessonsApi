@@ -116,7 +116,7 @@ export class LessonFeedHelper {
               actionType: action.actionType.toLowerCase(),
               content: action.content,
             }
-            if (role.name!==lastRole) {
+            if (role.name!==lastRole && role.name) {
               lastRole = role.name;
               fa.role = role.name;
             }
