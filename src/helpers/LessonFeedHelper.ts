@@ -124,8 +124,8 @@ export class LessonFeedHelper {
             fs.actions.push(fa);
           }
         });
-        result.sections.push(fs);
       });
+      result.sections.push(fs);
     });
 
     result.downloads = this.populateDownloads(bundles, externalVideos);
