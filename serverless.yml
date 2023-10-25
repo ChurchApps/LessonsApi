@@ -16,8 +16,8 @@ custom:
 provider:
   name: aws
   runtime: nodejs18.x
-  memorySize: 1024
-  timeout: 10
+  memorySize: 2048
+  timeout: 60
   region: us-east-2
   iam:
     role: arn:aws:iam::428019619026:role/ChurchAppsRole
