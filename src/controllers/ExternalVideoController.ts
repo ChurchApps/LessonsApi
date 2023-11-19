@@ -3,7 +3,6 @@ import express from "express";
 import { LessonsBaseController } from "./LessonsBaseController"
 import { ExternalVideo } from "../models"
 import { Permissions } from '../helpers/Permissions'
-import { ArrayHelper } from "@churchapps/apihelper";
 import { VimeoHelper } from "../helpers/VimeoHelper";
 
 @controller("/externalVideos")
@@ -26,7 +25,7 @@ export class ExternalVideoController extends LessonsBaseController {
 
       for (const ev of videos) {
         try {
-          await this.updateVimeoLinks(ev);
+          await VimeoHelper.updateVimeoLinks(ev);
         } catch (e) {
           console.log(e);
 
@@ -37,19 +36,7 @@ export class ExternalVideoController extends LessonsBaseController {
     });
   }
 
-  private async updateVimeoLinks(ev: ExternalVideo) {
-    const vimeo = await VimeoHelper.getVideoDetails(ev.videoId);
-    ev.download1080 = vimeo.download1080p;
-    ev.download4k = vimeo.download4k;
-    ev.download720 = vimeo.download720p;
-    ev.play1080 = vimeo.play1080p;
-    ev.play4k = vimeo.play4k;
-    ev.play720 = vimeo.play720p;
-    ev.thumbnail = vimeo.thumbnail;
-    ev.downloadsExpire = vimeo.downloadsExpire;
-    await this.repositories.externalVideo.save(ev);
-    return ev;
-  }
+
 
   /*
    @httpGet("/test")
@@ -91,7 +78,7 @@ export class ExternalVideoController extends LessonsBaseController {
     return this.actionWrapperAnon(req, res, async () => {
       let result = await this.repositories.externalVideo.loadPublic(id);
       console.log(result);
-      if (result.downloadsExpire < new Date()) result = await this.updateVimeoLinks(result);
+      if (result.downloadsExpire < new Date()) result = await VimeoHelper.updateVimeoLinks(result);
       return result;
     });
   }

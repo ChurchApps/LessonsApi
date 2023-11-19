@@ -7,6 +7,7 @@ import { Environment, FileStorageHelper } from "../helpers"
 import { ArrayHelper } from "@churchapps/apihelper";
 import { LessonFeedHelper } from "../helpers/LessonFeedHelper";
 import { FeedVenue } from "src/models/feed";
+import { VimeoHelper } from "../helpers/VimeoHelper";
 
 @controller("/lessons")
 export class LessonController extends LessonsBaseController {
@@ -75,6 +76,12 @@ export class LessonController extends LessonsBaseController {
       const lesson = await this.repositories.lesson.loadPublicBySlug(study.id, slug);
 
       const data = await LessonFeedHelper.getExpandedLessonData(program, study, lesson);
+
+      const promises:Promise<ExternalVideo>[] = [];
+      data.externalVideos.forEach(ev => {
+        if (ev.downloadsExpire < new Date()) promises.push(VimeoHelper.updateVimeoLinks(ev));
+      });
+      if (promises.length>0) await Promise.all(promises);
 
       const venues:FeedVenue[] = [];
       data.venues.forEach(v => {

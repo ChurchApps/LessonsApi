@@ -1,7 +1,24 @@
 import Axios from "axios"
 import { Environment } from "./Environment";
+import { ExternalVideo } from "../models";
+import { Repositories } from "../repositories";
 
 export class VimeoHelper {
+
+  public static async updateVimeoLinks(ev: ExternalVideo) {
+    if (!Environment.vimeoToken) return ev;
+    const vimeo = await VimeoHelper.getVideoDetails(ev.videoId);
+    ev.download1080 = vimeo.download1080p;
+    ev.download4k = vimeo.download4k;
+    ev.download720 = vimeo.download720p;
+    ev.play1080 = vimeo.play1080p;
+    ev.play4k = vimeo.play4k;
+    ev.play720 = vimeo.play720p;
+    ev.thumbnail = vimeo.thumbnail;
+    ev.downloadsExpire = vimeo.downloadsExpire;
+    await Repositories.getCurrent().externalVideo.save(ev);
+    return ev;
+  }
 
   private static getAxiosConfig() {
     return { headers: { Authorization: "Bearer " + Environment.vimeoToken } }
