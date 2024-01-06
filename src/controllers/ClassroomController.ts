@@ -11,7 +11,7 @@ import { ExternalProviderHelper } from "../helpers/ExternalProviderHelper";
 @controller("/classrooms")
 export class ClassroomController extends LessonsBaseController {
 
-  private async loadPlaylistInternal(currentSchedule:Schedule, ipAddress: string)
+  private async loadPlaylistInternal(currentSchedule:Schedule, ipAddress: string, resolution: "720" | "1080")
   {
     const venue: Venue = await this.repositories.venue.loadPublic(currentSchedule.venueId);
     if (!venue) throw new Error(("Could not load venue: " + currentSchedule.venueId));
@@ -34,7 +34,7 @@ export class ClassroomController extends LessonsBaseController {
             let seconds = video.seconds;
             const loopVideo = (video.loopVideo) ? true : false;
             if (!seconds || seconds === 0 || loopVideo) seconds = 3600;
-            itemFiles.push({ name: video.name, url: video.play720, seconds, loopVideo: video.loopVideo })
+            itemFiles.push({ name: video.name, url: resolution === "1080" ? video.play1080 : video.play720, seconds, loopVideo: video.loopVideo })
           }
         } else {
           const files: any[] = PlaylistHelper.getBestFiles(a, availableFiles);
@@ -123,11 +123,13 @@ export class ClassroomController extends LessonsBaseController {
   @httpGet("/playlist/:classroomId")
   public async getPlaylist(@requestParam("classroomId") classroomId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
     return this.actionWrapperAnon(req, res, async () => {
+      let resolution: "720" | "1080" = "720";
+      if (req.query.resolution && req.query.resolution === "1080") resolution = "1080";
       const currentSchedule = await this.repositories.schedule.loadCurrent(classroomId);
       if (!currentSchedule) throw new Error(("Could not load schedule"));
       const ipAddress = (req.headers['x-forwarded-for'] || req.socket.remoteAddress).toString().split(",")[0]
       if (currentSchedule.externalProviderId) return this.loadPlaylistExternal(currentSchedule);
-      else return this.loadPlaylistInternal(currentSchedule, ipAddress);
+      else return this.loadPlaylistInternal(currentSchedule, ipAddress, resolution);
     });
   }
 
