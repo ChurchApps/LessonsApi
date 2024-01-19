@@ -12,7 +12,7 @@ export class ExternalProviderController extends LessonsBaseController {
   @httpGet("/:id/venue/:venueId")
   public async getPublicExternal(@requestParam("id") id: string, @requestParam("venueId") venueId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
     return this.actionWrapperAnon(req, res, async () => {
-      const lessonData = await ExternalProviderHelper.loadExternalData(id, venueId);
+      const lessonData = await ExternalProviderHelper.loadExternalDataById(id, venueId);
       return lessonData;
     });
   }
