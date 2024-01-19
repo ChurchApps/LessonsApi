@@ -32,6 +32,8 @@ export class VenueController extends LessonsBaseController {
       const actions = await this.repositories.action.loadPlaylistActions(venue.id, venue.churchId)
       const availableFiles = await PlaylistHelper.loadPlaylistFiles(actions);
       const availableVideos = await PlaylistHelper.loadPlaylistVideos(actions);
+      let resolution: "720" | "1080" = "720";
+      if (req.query.resolution && req.query.resolution === "1080") resolution = "1080";
 
       const ipAddress = (req.headers['x-forwarded-for'] || req.socket.remoteAddress).toString().split(",")[0]
       await this.logDownload(venue.lessonId, venue.name, venue.churchId, ipAddress);
@@ -46,7 +48,7 @@ export class VenueController extends LessonsBaseController {
             const video: ExternalVideo = ArrayHelper.getOne(availableVideos, "id", a.externalVideoId);
             if (video) {
               if (req.query.mode === "web") itemFiles.push({ name: video.name, url: video.videoProvider.toLowerCase() + ":" + video.videoId, seconds: video.seconds, loopVideo: video.loopVideo })
-              else itemFiles.push({ name: video.name, url: video.play720, seconds: video.seconds, loopVideo: video.loopVideo })
+              else itemFiles.push({ name: video.name, url: resolution === "1080" ? video.play1080 : video.play720, seconds: video.seconds, loopVideo: video.loopVideo })
             }
           } else {
             const files: any[] = PlaylistHelper.getBestFiles(a, availableFiles);
