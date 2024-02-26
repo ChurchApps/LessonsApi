@@ -39,7 +39,7 @@ export class ExternalProviderHelper {
     return result;
   }
 
-  public static async loadExternalData(externalProviderId:string, programId:string, studyId:string, lessonId:string, venueId:string)  
+  public static async loadExternalData(externalProviderId:string, programId:string, studyId:string, lessonId:string, venueId:string)
   {
     const ep = await Repositories.getCurrent().externalProvider.loadPublic(externalProviderId);
     const data = (await axios.get(ep.apiUrl)).data;

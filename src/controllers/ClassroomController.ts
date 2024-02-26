@@ -64,7 +64,7 @@ export class ClassroomController extends LessonsBaseController {
 
   }
 
-  
+
 
   @httpGet("/playlist/:classroomId")
   public async getPlaylist(@requestParam("classroomId") classroomId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
