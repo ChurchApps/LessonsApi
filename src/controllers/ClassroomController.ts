@@ -60,65 +60,11 @@ export class ClassroomController extends LessonsBaseController {
   private async loadPlaylistExternal(currentSchedule:Schedule)
   {
     const data = await ExternalProviderHelper.loadExternalData(currentSchedule.externalProviderId, currentSchedule.programId, currentSchedule.studyId, currentSchedule.lessonId, currentSchedule.venueId);
-    return this.convertToMessages(data);
-
-    /*const ep = await this.repositories.externalProvider.load(currentSchedule.churchId, currentSchedule.externalProviderId);
-    const data = (await axios.get(ep.apiUrl)).data
-
-    let venueApiUrl = "";
-    const program = ArrayHelper.getOne(data.programs, "id", currentSchedule.programId);
-    if (program) {
-      const study = ArrayHelper.getOne(program.studies, "id", currentSchedule.studyId);
-      if (study) {
-        const lesson = ArrayHelper.getOne(study.lessons, "id", currentSchedule.lessonId);
-        if (lesson) {
-          const venue = ArrayHelper.getOne(lesson.venues, "id", currentSchedule.venueId);
-          if (venue) venueApiUrl = venue.apiUrl;
-        }
-      }
-    }
-
-    if (!venueApiUrl) throw new Error(("Could not load venue: " + currentSchedule.venueId));
-    else {
-      const result = (await axios.get(venueApiUrl)).data
-      return this.convertToMessages(result);
-    }*/
+    return ExternalProviderHelper.convertToMessages(data);
 
   }
 
-  private convertToMessages(actionData:any)
-  {
-    const result = {
-      lessonName:actionData.lessonName,
-      lessonTitle:actionData.lessonTitle,
-      lessonImage:actionData.lessonImage,
-      lessonDescription:actionData.lessonDescription,
-      venueName:"",
-      messages:[]
-    };
-
-    actionData.sections.forEach((section:any) => {
-      const actions = ArrayHelper.getAll(section.actions, "actionType", "play");
-      if (actions.length>0)
-      {
-        const message = { name:section.name, files:[] };
-        actions.forEach(a => {
-          a.files.forEach((f:any) => {
-            const file = {
-              name:f.name,
-              url:f.url,
-              seconds:f.seconds || 3600,
-              loopVideo:f.loopVideo || false
-            };
-            message.files.push(file);
-          });
-        });
-        result.messages.push(message);
-      }
-    });
-
-    return result;
-  }
+  
 
   @httpGet("/playlist/:classroomId")
   public async getPlaylist(@requestParam("classroomId") classroomId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {

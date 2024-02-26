@@ -12,7 +12,8 @@ export class ExternalProviderController extends LessonsBaseController {
   @httpGet("/playlist/:externalProviderId/:programId/:studyId/:lessonId/:venueId")
   public async getExternalPlaylist(@requestParam("externalProviderId") externalProviderId: string, @requestParam("programId") programId: string, @requestParam("studyId") studyId: string, @requestParam("lessonId") lessonId: string, @requestParam("venueId") venueId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
     return this.actionWrapperAnon(req, res, async () => {
-      return ExternalProviderHelper.loadExternalData(externalProviderId, programId, studyId, lessonId, venueId);
+      const data = ExternalProviderHelper.loadExternalData(externalProviderId, programId, studyId, lessonId, venueId);
+      return ExternalProviderHelper.convertToMessages(data);
     });
   }
 
