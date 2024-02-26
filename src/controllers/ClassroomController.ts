@@ -125,7 +125,8 @@ export class ClassroomController extends LessonsBaseController {
     return this.actionWrapperAnon(req, res, async () => {
       let resolution: "720" | "1080" = "720";
       if (req.query.resolution && req.query.resolution === "1080") resolution = "1080";
-      const currentSchedule = await this.repositories.schedule.loadCurrent(classroomId);
+      const date = req.query.date ? new Date(req.query.date.toString()) : new Date();
+      const currentSchedule = await this.repositories.schedule.loadCurrent(classroomId, date);
       if (!currentSchedule) throw new Error(("Could not load schedule"));
       const ipAddress = (req.headers['x-forwarded-for'] || req.socket.remoteAddress).toString().split(",")[0]
       if (currentSchedule.externalProviderId) return this.loadPlaylistExternal(currentSchedule);
