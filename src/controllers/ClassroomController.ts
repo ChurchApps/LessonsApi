@@ -59,7 +59,7 @@ export class ClassroomController extends LessonsBaseController {
 
   private async loadPlaylistExternal(currentSchedule:Schedule)
   {
-    const data = await ExternalProviderHelper.loadExternalData(currentSchedule);
+    const data = await ExternalProviderHelper.loadExternalData(currentSchedule.externalProviderId, currentSchedule.programId, currentSchedule.studyId, currentSchedule.lessonId, currentSchedule.venueId);
     return this.convertToMessages(data);
 
     /*const ep = await this.repositories.externalProvider.load(currentSchedule.churchId, currentSchedule.externalProviderId);

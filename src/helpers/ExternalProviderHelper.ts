@@ -5,24 +5,24 @@ import { ArrayHelper } from ".";
 
 export class ExternalProviderHelper {
 
-  public static async loadExternalData(schedule:Schedule)
+  public static async loadExternalData(externalProviderId:string, programId:string, studyId:string, lessonId:string, venueId:string)  
   {
-    const ep = await Repositories.getCurrent().externalProvider.loadPublic(schedule.externalProviderId);
+    const ep = await Repositories.getCurrent().externalProvider.loadPublic(externalProviderId);
     const data = (await axios.get(ep.apiUrl)).data;
     let venue = null;
 
-    const program = ArrayHelper.getOne(data.programs, "id", schedule.programId);
+    const program = ArrayHelper.getOne(data.programs, "id", programId);
     if (program) {
-      const study = ArrayHelper.getOne(program.studies, "id", schedule.studyId);
+      const study = ArrayHelper.getOne(program.studies, "id", studyId);
       if (study) {
-        const lesson = ArrayHelper.getOne(study.lessons, "id", schedule.lessonId);
+        const lesson = ArrayHelper.getOne(study.lessons, "id", lessonId);
         if (lesson) {
-          venue = ArrayHelper.getOne(lesson.venues, "id", schedule.venueId);
+          venue = ArrayHelper.getOne(lesson.venues, "id", venueId);
         }
       }
     }
 
-    if (!venue) throw new Error(("Could not load venue: " + schedule.venueId));
+    if (!venue) throw new Error(("Could not load venue: " + venueId));
     else {
       const result = (await axios.get(venue.apiUrl)).data;
       return result;

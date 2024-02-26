@@ -9,6 +9,13 @@ import axios from "axios";
 @controller("/externalProviders")
 export class ExternalProviderController extends LessonsBaseController {
 
+  @httpGet("/playlist/:externalProviderId/:programId/:studyId/:lessonId/:venueId")
+  public async getExternalPlaylist(@requestParam("externalProviderId") externalProviderId: string, @requestParam("programId") programId: string, @requestParam("studyId") studyId: string, @requestParam("lessonId") lessonId: string, @requestParam("venueId") venueId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
+    return this.actionWrapperAnon(req, res, async () => {
+      return ExternalProviderHelper.loadExternalData(externalProviderId, programId, studyId, lessonId, venueId);
+    });
+  }
+
   @httpGet("/:id/lessons")
   public async getPublicLessons(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
     return this.actionWrapperAnon(req, res, async () => {
@@ -17,7 +24,6 @@ export class ExternalProviderController extends LessonsBaseController {
       return data;
     });
   }
-
 
   @httpGet("/:id/venue/:venueId")
   public async getPublicExternal(@requestParam("id") id: string, @requestParam("venueId") venueId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
