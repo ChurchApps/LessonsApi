@@ -11,6 +11,14 @@ import { LessonFeedHelper } from "../helpers/LessonFeedHelper";
 @controller("/venues")
 export class VenueController extends LessonsBaseController {
 
+  @httpGet("/timeline")
+  public async getPosts(req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
+    return this.actionWrapper(req, res, async (au) => {
+      const venueIds = req.query.venueIds ? req.query.venueIds.toString().split(",") : [];
+      return await this.repositories.venue.loadTimeline(venueIds);
+    });
+  }
+
   public async logDownload(lessonId: string, venueName: string, churchId: string, ipAddress: string) {
     const download: Download = {
       lessonId,

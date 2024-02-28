@@ -4,6 +4,19 @@ import { UniqueIdHelper } from "../helpers";
 
 export class VenueRepository {
 
+  public async loadTimeline(venueIds: string[]) {
+    const sql = "select 'venue' as postType, v.id as postId, s.name as studyName, l.name, l.description, l.image, concat('/', p.slug, '/', s.slug, '/', l.slug) as slug"
+    + " from venues v"
+    + " inner join lessons l on l.id=v.lessonId"
+    + " inner join studies s on s.id=l.studyId"
+    + " inner join programs p on p.id=s.programId"
+    + " where v.id in (?)";
+
+    const params = venueIds;
+    const result = await DB.query(sql, params);
+    return result;
+  }
+
   public save(venue: Venue) {
     if (UniqueIdHelper.isMissing(venue.id)) return this.create(venue); else return this.update(venue);
   }

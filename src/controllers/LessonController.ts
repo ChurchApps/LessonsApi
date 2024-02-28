@@ -13,7 +13,6 @@ import { VimeoHelper } from "../helpers/VimeoHelper";
 export class LessonController extends LessonsBaseController {
 
 
-
   @httpGet("/public/tree")
   public async getPublicForProgram(req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
     return this.actionWrapperAnon(req, res, async () => {
