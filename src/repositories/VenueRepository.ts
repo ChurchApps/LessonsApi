@@ -12,7 +12,7 @@ export class VenueRepository {
     + " inner join programs p on p.id=s.programId"
     + " where v.id in (?)";
 
-    const params = venueIds;
+    const params = [venueIds];
     const result = await DB.query(sql, params);
     return result;
   }
