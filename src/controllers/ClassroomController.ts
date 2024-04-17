@@ -64,14 +64,18 @@ export class ClassroomController extends LessonsBaseController {
 
   }
 
-
+  private getCurrentCentralTime() {
+    const d = new Date();
+    const utc = d.getTime() + (d.getTimezoneOffset() * 60000);
+    return new Date(utc + (3600000 * -6));
+  }
 
   @httpGet("/playlist/:classroomId")
   public async getPlaylist(@requestParam("classroomId") classroomId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
     return this.actionWrapperAnon(req, res, async () => {
       let resolution: "720" | "1080" = "720";
       if (req.query.resolution && req.query.resolution === "1080") resolution = "1080";
-      const date = req.query.date ? new Date(req.query.date.toString()) : new Date();
+      const date = req.query.date ? new Date(req.query.date.toString()) : this.getCurrentCentralTime();
       const currentSchedule = await this.repositories.schedule.loadCurrent(classroomId, date);
       if (!currentSchedule) throw new Error(("Could not load schedule"));
       const ipAddress = (req.headers['x-forwarded-for'] || req.socket.remoteAddress).toString().split(",")[0]
