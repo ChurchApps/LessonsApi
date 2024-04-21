@@ -2,5 +2,7 @@ CREATE TABLE `classrooms` (
   `id` char(11) NOT NULL,
   `churchId` char(11) DEFAULT NULL,
   `name` varchar(45) DEFAULT NULL,
+  `recentGroupId` char(11) DEFAULT NULL,
+  `upcomingGroupId` char(11) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+);

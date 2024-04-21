@@ -10,15 +10,15 @@ export class ClassroomRepository {
 
   public async create(classroom: Classroom) {
     classroom.id = UniqueIdHelper.shortId();
-    const sql = "INSERT INTO classrooms (id, churchId, name) VALUES (?, ?, ?);";
-    const params = [classroom.id, classroom.churchId, classroom.name];
+    const sql = "INSERT INTO classrooms (id, churchId, name, recentGroupId, upcomingGroupId) VALUES (?, ?, ?, ?, ?);";
+    const params = [classroom.id, classroom.churchId, classroom.name, classroom.recentGroupId, classroom.upcomingGroupId];
     await DB.query(sql, params);
     return classroom;
   }
 
   public async update(classroom: Classroom) {
-    const sql = "UPDATE classrooms SET name=? WHERE id=? AND churchId=?";
-    const params = [classroom.name, classroom.id, classroom.churchId];
+    const sql = "UPDATE classrooms SET name=?, recentGroupId=?, upcomingGroupId=? WHERE id=? AND churchId=?";
+    const params = [classroom.name, classroom.recentGroupId, classroom.upcomingGroupId, classroom.id, classroom.churchId];
     await DB.query(sql, params);
     return classroom;
   }
