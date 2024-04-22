@@ -85,13 +85,6 @@ export class ClassroomController extends LessonsBaseController {
   }
 
 
-  @httpGet("/:id")
-  public async get(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
-    return this.actionWrapperAnon(req, res, async () => {
-      return await this.repositories.classroom.load(id)
-    });
-  }
-
   @httpGet("/")
   public async getAll(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
     return this.actionWrapper(req, res, async (au) => {
@@ -99,10 +92,24 @@ export class ClassroomController extends LessonsBaseController {
     });
   }
 
+  @httpGet("/person")
+  public async getForPerson(@requestParam("churchId") churchId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
+    return this.actionWrapper(req, res, async (au) => {
+      return await this.repositories.classroom.loadForPerson(au.churchId, au.groupIds, req.query.upcoming === "1");
+    });
+  }
+
   @httpGet("/public/church/:churchId")
   public async getForChurch(@requestParam("churchId") churchId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
     return this.actionWrapperAnon(req, res, async () => {
       return await this.repositories.classroom.loadByChurchId(churchId)
+    });
+  }
+
+  @httpGet("/:id")
+  public async get(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
+    return this.actionWrapperAnon(req, res, async () => {
+      return await this.repositories.classroom.load(id)
     });
   }
 
