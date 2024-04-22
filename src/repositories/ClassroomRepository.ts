@@ -23,10 +23,9 @@ export class ClassroomRepository {
     return classroom;
   }
 
-  public loadForPerson(churchId: string, groupIds:string[], upcoming:boolean): Promise<Classroom[]> {
-    let sql = "SELECT * FROM classrooms WHERE churchId=? AND recentGroupId IN (?) ORDER BY name";
-    if (upcoming) sql = "SELECT * FROM classrooms WHERE churchId=? AND upcomingGroupId IN (?) ORDER BY name";
-    return DB.query(sql, [churchId, groupIds]);
+  public loadForPerson(churchId: string, groupIds:string[]): Promise<Classroom[]> {
+    const sql = "SELECT * FROM classrooms WHERE churchId=? AND (recentGroupId IN (?) OR upcomingGroupId IN (?)) ORDER BY name";
+    return DB.query(sql, [churchId, groupIds, groupIds]);
   }
 
   public loadByChurchId(churchId: string): Promise<Classroom[]> {
