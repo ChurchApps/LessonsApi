@@ -28,7 +28,7 @@ export class ProgramRepository {
   }
 
   public loadPublicByProviderId(providerId: string): Promise<Program[]> {
-    return DB.query("SELECT * FROM programs WHERE providerId=? and live=1", [providerId]);
+    return DB.query("SELECT * FROM programs WHERE providerId=?", [providerId]);
   }
 
   public load(churchId: string, id: string): Promise<Program> {
