@@ -17,7 +17,11 @@ export class LessonController extends LessonsBaseController {
   public async getPublicForProgram(req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
     return this.actionWrapperAnon(req, res, async () => {
 
-      const programs = await this.repositories.program.loadPublicAll();
+      const providerId = req.query.providerId as string;
+
+      const programs = (providerId)
+        ? await this.repositories.program.loadPublicByProviderId(providerId)
+        : await this.repositories.program.loadPublicAll();
       const studies = await this.repositories.study.loadPublicAll();
       const lessons = await this.repositories.lesson.loadPublicAll();
       const venues = await this.repositories.venue.loadPublicAll();

@@ -27,6 +27,10 @@ export class ProgramRepository {
     return DB.query("SELECT * FROM programs WHERE churchId=? AND providerId=?", [churchId, providerId]);
   }
 
+  public loadPublicByProviderId(providerId: string): Promise<Program[]> {
+    return DB.query("SELECT * FROM programs WHERE providerId=? and live=1", [providerId]);
+  }
+
   public load(churchId: string, id: string): Promise<Program> {
     return DB.queryOne("SELECT * FROM programs WHERE id=? and churchId=?", [id, churchId]);
   }
@@ -40,7 +44,7 @@ export class ProgramRepository {
   }
 
   public loadPublicAll(): Promise<Program[]> {
-    return DB.query("SELECT * FROM programs WHERE live=1 ORDER BY sort", []);
+    return DB.query("SELECT p.* FROM programs p inner join providers pr on pr.id=p.providerId WHERE p.live=1 and pr.live=1 ORDER BY p.sort", []);
   }
 
   public loadAll(churchId: string): Promise<Program> {
