@@ -175,7 +175,8 @@ export class LessonFeedHelper {
 
   private static convertVideoFile(video:ExternalVideo, download:boolean) {
     const file:FeedFile = {
-      url: video.download1080 || video.download720,
+      // url: video.download1080 || video.download720,
+      url: "https://api.lessons.church/externalVideos/download/" + video.id,
       name: video.name,
       id: video.id,
       expires: video.downloadsExpire
