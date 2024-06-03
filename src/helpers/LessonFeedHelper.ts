@@ -102,6 +102,8 @@ export class LessonFeedHelper {
     venue.sections.forEach(section => {
       const fs:FeedSection = {
         name: section.name,
+        id: section.id,
+        sort: section.sort,
         actions: []
       }
 
@@ -115,6 +117,9 @@ export class LessonFeedHelper {
             const fa:FeedAction = {
               actionType: action.actionType.toLowerCase(),
               content: action.content,
+              id: action.id,
+              sort: action.sort,
+              roleId: action.roleId,
             }
             if (role.name!==lastRole && role.name) {
               lastRole = role.name;
