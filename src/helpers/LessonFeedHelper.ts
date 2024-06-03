@@ -119,7 +119,7 @@ export class LessonFeedHelper {
               content: action.content,
               id: action.id,
               sort: action.sort,
-              roleId: action.roleId
+              roleId: action.roleId,
             }
             if (role.name!==lastRole && role.name) {
               lastRole = role.name;
