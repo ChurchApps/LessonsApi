@@ -1,3 +1,6 @@
+export { AddOn } from "./AddOn"
+export { AddOnPlaylist } from "./AddOnPlaylist"
+export { AddOnPlaylistItem } from "./AddOnPlaylistItem"
 export { Action } from "./Action"
 export { Asset } from "./Asset"
 export { Bundle } from "./Bundle"

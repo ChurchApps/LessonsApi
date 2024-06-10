@@ -1,3 +1,6 @@
+export { AddOnRepository } from "./AddOnRepository"
+export { AddOnPlaylistRepository } from "./AddOnPlaylistRepository"
+export { AddOnPlaylistItemRepository } from "./AddOnPlaylistItemRepository"
 export { ActionRepository } from "./ActionRepository"
 export { AssetRepository } from "./AssetRepository"
 export { BundleRepository } from "./BundleRepository"

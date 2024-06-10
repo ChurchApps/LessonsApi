@@ -1,3 +1,6 @@
+export { AddOnController } from "./AddOnController"
+export { AddOnPlaylistController } from "./AddOnPlaylistController"
+export { AddOnPlaylistItemController } from "./AddOnPlaylistItemController"
 export { ActionController } from "./ActionController"
 export { AssetController } from "./AssetController"
 export { BundleController } from "./BundleController"
