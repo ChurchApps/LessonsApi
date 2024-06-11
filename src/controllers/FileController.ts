@@ -68,6 +68,18 @@ export class FileController extends LessonsBaseController {
     });
   }
 
+  @httpPost("/postUrl/content/:contentType/:contentId")
+  public async getUploadUrManual(@requestParam("contentType") contentType: string, @requestParam("contentId") contentId: string, req: express.Request<{}, {}, { fileName: string }>, res: express.Response): Promise<interfaces.IHttpActionResult> {
+    return this.actionWrapper(req, res, async (au) => {
+      if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
+      else {
+        const key = "/files/" + contentType + "/" + contentId + "/" + req.body.fileName;
+        const result = (Environment.fileStore === "S3") ? await AwsHelper.S3PresignedUrl(key) : {};
+        return result;
+      }
+    });
+  }
+
   @httpPost("/postUrl")
   public async getUploadUrl(req: express.Request<{}, {}, { resourceId: string, fileName: string }>, res: express.Response): Promise<interfaces.IHttpActionResult> {
     return this.actionWrapper(req, res, async (au) => {
