@@ -16,6 +16,13 @@ export class AddOnController extends LessonsBaseController {
     });
   }
 
+  @httpGet("/public")
+  public async loadPublic(req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
+    return this.actionWrapperAnon(req, res, async () => {
+      return await this.repositories.addOn.loadPublic();
+    });
+  }
+
   @httpGet("/")
   public async getAll(req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
     return this.actionWrapper(req, res, async (au) => {

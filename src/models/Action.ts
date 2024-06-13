@@ -9,4 +9,5 @@ export class Action {
   public resourceId: string;
   public assetId: string;
   public externalVideoId: string;
+  public addOnId?: string;
 }
