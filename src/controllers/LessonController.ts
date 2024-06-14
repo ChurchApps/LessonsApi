@@ -88,7 +88,7 @@ export class LessonController extends LessonsBaseController {
 
       const venues:FeedVenue[] = [];
       data.venues.forEach(v => {
-        venues.push(LessonFeedHelper.convertToFeed(data.lesson, data.study, data.program, v, data.bundles, data.resources, data.externalVideos));
+        venues.push(LessonFeedHelper.convertToFeed(data.lesson, data.study, data.program, v, data.bundles, data.resources, data.externalVideos, data.addOns));
       });
       const result = { venues }
       return result;
