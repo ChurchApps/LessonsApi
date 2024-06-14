@@ -105,13 +105,22 @@ export class FileController extends LessonsBaseController {
 
 
   private async saveFile(file: File) {
-    const resource = await this.repositories.resource.load(file.churchId, file.resourceId);
-    const bundle = await this.repositories.bundle.load(file.churchId, resource.bundleId);
-    const key = "/files/" + bundle.contentType + "/" + bundle.contentId + "/" + resource.id + "/" + file.fileName;
+		let path = "";
+
+    if (file.resourceId)
+    {
+			const resource = await this.repositories.resource.load(file.churchId, file.resourceId);
+			const bundle = await this.repositories.bundle.load(file.churchId, resource.bundleId);
+			path = "/files/" + bundle.contentType + "/" + bundle.contentId + "/" + resource.id + "/"
+    } else {
+			path = "/files/" + file.contentType + "/" + file.contentId + "/";
+		}
+		const key = path + file.fileName;
+
     if (file.id) // delete existing uploadFile
     {
       const existingFile = await this.repositories.file.load(file.churchId, file.id)
-      const oldKey = "/files/" + bundle.contentType + "/" + bundle.contentId + "/" + resource.id + "/" + existingFile.fileName;
+      const oldKey = path + existingFile.fileName;
       if (oldKey !== key) await FileStorageHelper.remove(oldKey);
     }
 
