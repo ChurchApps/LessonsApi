@@ -1,0 +1,11 @@
+CREATE TABLE `addOns` (
+  `id` char(11) NOT NULL,
+  `churchId` char(11) DEFAULT NULL,
+  `providerId` char(11) DEFAULT NULL,
+  `category` varchar(45) DEFAULT NULL,
+  `name` varchar(45) DEFAULT NULL,
+  `image` varchar(1000) DEFAULT NULL,
+  `addOnType` varchar(45) DEFAULT NULL,
+  `fileId` char(11) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+);
