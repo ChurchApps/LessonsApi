@@ -28,6 +28,11 @@ export class FileRepository {
     return DB.queryOne("SELECT * FROM files WHERE id=? AND churchId=?", [id, churchId]);
   }
 
+  public loadPublicByIds(ids: string[]): Promise<File[]> {
+    const sql = "SELECT * FROM files WHERE id IN (" + ArrayHelper.fillArray("?", ids.length) + ")";
+    return DB.query(sql, ids);
+  }
+
   public loadByIds(churchId: string, ids: string[]): Promise<File[]> {
     const sql = "SELECT * FROM files WHERE churchId=? AND id IN (" + ArrayHelper.fillArray("?", ids.length) + ")";
     return DB.query(sql, [churchId].concat(ids));

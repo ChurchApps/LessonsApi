@@ -1,3 +1,5 @@
+import { File } from "./File";
+
 export class AddOn {
   public id?: string;
   public churchId?: string;
@@ -7,4 +9,6 @@ export class AddOn {
   public image?: string;
   public addOnType?: string;
   public fileId?: string;
+
+  public file?: File;
 }

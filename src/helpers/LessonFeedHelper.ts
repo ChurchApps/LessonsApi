@@ -1,5 +1,5 @@
 import { FeedAction, FeedDownload, FeedFile, FeedSection, FeedVenue } from "../models/feed";
-import { Action, Asset, Bundle, ExternalVideo, File, Lesson, Program, Resource, Role, Section, Study, Variant, Venue } from "../models";
+import { Action, AddOn, Asset, Bundle, ExternalVideo, File, Lesson, Program, Resource, Role, Section, Study, Variant, Venue } from "../models";
 import { ArrayHelper } from "@churchapps/apihelper";
 import { Repositories } from "../repositories";
 
@@ -11,15 +11,17 @@ export class LessonFeedHelper {
     let venues: Venue[] = null;
     let bundles: Bundle[] = null;
     let resources: Resource[] = null;
+    let addOns: AddOn[] = null;
     let externalVideos: ExternalVideo[] = null;
     const promises: Promise<any>[] = [];
     promises.push(this.getVenues(lesson.id).then(v => venues = v));
     promises.push(this.getBundles(lesson.id).then(b => bundles = b));
     promises.push(this.getResources(lesson.id).then(r => resources = r));
-    promises.push(Repositories.getCurrent().externalVideo.loadPublicForLesson(lesson.id).then(ev => externalVideos = ev));;
+    promises.push(this.getAddOns(lesson.id).then(a => addOns = a));
+    promises.push(Repositories.getCurrent().externalVideo.loadPublicForLesson(lesson.id).then(ev => externalVideos = ev));
     await Promise.all(promises);
 
-    const result = { lesson, study, program, venues, bundles, resources, externalVideos }
+    const result = { lesson, study, program, venues, bundles, resources, externalVideos, addOns }
     return result;
   }
 
@@ -60,6 +62,15 @@ export class LessonFeedHelper {
     return resources;
   }
 
+  private static async getAddOns(lessonId: string) {
+    const addOns: AddOn[] = await Repositories.getCurrent().addOn.loadPublicForLesson(lessonId);
+    if (addOns.length === 0) return addOns;
+    const fileIds = ArrayHelper.getIds(addOns, "fileId");
+    const files = await Repositories.getCurrent().file.loadPublicByIds(fileIds);
+
+    addOns.forEach(a => { a.file = ArrayHelper.getOne(files, "id", a.fileId); });
+    return addOns;
+  }
 
   private static async appendSections(venue: Venue, allSections: Section[], allRoles: Role[], allActions: Action[]) {
     venue.sections = ArrayHelper.getAll(allSections, "venueId", venue.id);
@@ -81,7 +92,7 @@ export class LessonFeedHelper {
 
   }
 
-  static convertToFeed(lesson:Lesson, study:Study, program:Program, venue:Venue, bundles:Bundle[], resources:Resource[], externalVideos:ExternalVideo[]) {
+  static convertToFeed(lesson:Lesson, study:Study, program:Program, venue:Venue, bundles:Bundle[], resources:Resource[], externalVideos:ExternalVideo[], addOns:AddOn[]) {
     const result:FeedVenue = {
       name: venue.name,
       id: venue.id,
@@ -125,7 +136,8 @@ export class LessonFeedHelper {
               lastRole = role.name;
               fa.role = role.name;
             }
-            if (fa.actionType==="play") fa.files = this.convertFiles(action, bundles, resources, externalVideos, false);
+            if (fa.actionType==="play" || fa.actionType==="add-on") fa.files = this.convertFiles(action, bundles, resources, externalVideos, addOns, false);
+            if (fa.actionType==="add-on") fa.actionType = "play";
             fs.actions.push(fa);
           }
         });
@@ -167,14 +179,23 @@ export class LessonFeedHelper {
 
   }
 
-  private static convertFiles(action: Action, bundles:Bundle[], resources:Resource[], externalVideos:ExternalVideo[], download:boolean) {
+  private static convertFiles(action: Action, bundles:Bundle[], resources:Resource[], externalVideos:ExternalVideo[], addOns:AddOn[], download:boolean) {
     const result:FeedFile[] = [];
-    const video: ExternalVideo = ArrayHelper.getOne(externalVideos || [], "id", action.externalVideoId);
+    const externalVideoId = action.externalVideoId;
+
+
     const resource: Resource = ArrayHelper.getOne(resources || [], "id", action.resourceId);
     const asset = (action.assetId && resource) ? ArrayHelper.getOne(resource?.assets || [], "id", action.assetId) : null;
+    const addOn:AddOn = ArrayHelper.getOne(addOns || [], "id", action.addOnId);
+    if (addOn) {
+      // externalVideoId = addOn.externalVideoId;
+    }
+    const video: ExternalVideo = ArrayHelper.getOne(externalVideos || [], "id", externalVideoId);
+
     if (asset) result.push(this.convertAssetFile(asset, resource, download));
     else if (resource) this.convertResourceFiles(resource, download).forEach(f => result.push(f));
     else if (video) result.push(this.convertVideoFile(video, download));
+    else if (addOn) result.push(this.convertAddOnFile(addOn));
     return result;
   }
 
@@ -208,6 +229,18 @@ export class LessonFeedHelper {
       file.bytes = asset?.file?.size;
       file.fileType = asset?.file?.fileType;
     }
+    return file;
+  }
+
+  private static convertAddOnFile(addOn:AddOn) {
+    const file:FeedFile = {
+      url: addOn?.file?.contentPath,
+      name: addOn?.name,
+      bytes: addOn?.file?.size,
+      fileType: addOn?.file?.fileType,
+      id: addOn?.file?.id
+    }
+    if (addOn?.image) file.thumbnail = addOn.image;
     return file;
   }
 

@@ -9,6 +9,13 @@ import { Environment } from "../helpers";
 @controller("/addOns")
 export class AddOnController extends LessonsBaseController {
 
+  @httpGet("/public")
+  public async loadPublic(req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
+    return this.actionWrapperAnon(req, res, async () => {
+      return await this.repositories.addOn.loadPublic();
+    });
+  }
+
   @httpGet("/:id")
   public async get(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
     return this.actionWrapper(req, res, async () => {
@@ -36,7 +43,7 @@ export class AddOnController extends LessonsBaseController {
           const a = addOn;
           const saveFunction = async () => {
             if (a.image && a.image.startsWith("data:image/")) {
-                if (!a.id) await this.repositories.lesson.save(a);  // save first to generate an id
+                if (!a.id) await this.repositories.addOn.save(a);  // save first to generate an id
                 await this.saveImage(a);
             }
             return await this.repositories.addOn.save(a);

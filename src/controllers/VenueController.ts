@@ -97,7 +97,7 @@ export class VenueController extends LessonsBaseController {
 
       const expandedVenue = ArrayHelper.getOne(data.venues, "id", venue.id);
 
-      const result = await LessonFeedHelper.convertToFeed(data.lesson, data.study, data.program, expandedVenue, data.bundles, data.resources, data.externalVideos);
+      const result = await LessonFeedHelper.convertToFeed(data.lesson, data.study, data.program, expandedVenue, data.bundles, data.resources, data.externalVideos, data.addOns);
       return result;
     });
   }

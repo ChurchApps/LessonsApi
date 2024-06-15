@@ -1,15 +1,14 @@
-DROP TABLE IF EXISTS `actions`;
-
 CREATE TABLE `actions` (
-  `id` char(11) NOT NULL,
-  `churchId` char(11) DEFAULT NULL,
-  `lessonId` char(11) DEFAULT NULL,
-  `roleId` char(11) DEFAULT NULL,
+  `id` char(11) CHARACTER SET latin1 NOT NULL,
+  `churchId` char(11) CHARACTER SET latin1 DEFAULT NULL,
+  `lessonId` char(11) CHARACTER SET latin1 DEFAULT NULL,
+  `roleId` char(11) CHARACTER SET latin1 DEFAULT NULL,
   `actionType` varchar(45) DEFAULT NULL,
   `content` text,
   `sort` int(11) DEFAULT NULL,
-  `resourceId` char(11) DEFAULT NULL,
-  `assetId` char(11) DEFAULT NULL,
+  `resourceId` char(11) CHARACTER SET latin1 DEFAULT NULL,
+  `assetId` char(11) CHARACTER SET latin1 DEFAULT NULL,
   `externalVideoId` char(11) DEFAULT NULL,
+  `addOnId` char(11) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+);

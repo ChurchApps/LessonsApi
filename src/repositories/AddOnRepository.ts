@@ -23,8 +23,16 @@ export class AddOnRepository {
     return addOn;
   }
 
+  public loadPublic(): Promise<AddOn[]> {
+    return DB.query("SELECT * FROM addOns order by category, name", []);
+  }
+
   public loadAll(churchId: string): Promise<AddOn[]> {
     return DB.query("SELECT * FROM addOns WHERE churchId=? order by category, name", [churchId]);
+  }
+
+  public loadPublicForLesson(lessonId: string): Promise<AddOn[]> {
+    return DB.query("SELECT * FROM addOns WHERE id in (SELECT addOnId from actions WHERE lessonId=?)", [lessonId]);
   }
 
   public load(id: string): Promise<AddOn> {
