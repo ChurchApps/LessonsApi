@@ -97,7 +97,7 @@ export class LessonFeedHelper {
       name: venue.name,
       id: venue.id,
       lessonId: lesson.id,
-      lessonName: lesson.name,
+      lessonName: lesson.title,
       lessonDescription: lesson.description,
       lessonImage: lesson.image,
       studyName: study.name,
