@@ -42,7 +42,7 @@ export class VimeoHelper {
 
   private static getPictureDetails(resp: any, width: number) {
     let result = ""
-    resp.data.pictures.sizes.forEach((s: any) => {
+    resp.data.pictures.sizes?.forEach((s: any) => {
       if (s.width === width) result = s.link_with_play_button;
     });
     return result;
@@ -50,7 +50,7 @@ export class VimeoHelper {
 
   private static getFileDetails(resp: any, rendition: string) {
     let result = ""
-    resp.data.files.forEach((f: any) => {
+    resp.data.files?.forEach((f: any) => {
       if (f.rendition === rendition) result = f.link;
     });
     return result;
@@ -58,7 +58,7 @@ export class VimeoHelper {
 
   private static getDownloadDetails(resp: any, rendition: string) {
     let result = ""
-    resp.data.download.forEach((f: any) => {
+    resp.data.download?.forEach((f: any) => {
       if (f.rendition === rendition) result = f.link;
     });
     return result;
@@ -66,7 +66,7 @@ export class VimeoHelper {
 
   private static getDownloadExpiration(resp: any) {
     let result = new Date();
-    resp.data.download.forEach((f: any) => {
+    resp.data.download?.forEach((f: any) => {
       if (f.rendition === "720p") result = new Date(f.expires);
     });
     return result;
