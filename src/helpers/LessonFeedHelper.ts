@@ -187,10 +187,12 @@ export class LessonFeedHelper {
     const resource: Resource = ArrayHelper.getOne(resources || [], "id", action.resourceId);
     const asset = (action.assetId && resource) ? ArrayHelper.getOne(resource?.assets || [], "id", action.assetId) : null;
     const addOn:AddOn = ArrayHelper.getOne(addOns || [], "id", action.addOnId);
+    let video: ExternalVideo = ArrayHelper.getOne(externalVideos || [], "id", externalVideoId);
+
     if (addOn) {
-      // externalVideoId = addOn.externalVideoId;
+      video = ArrayHelper.getOne(externalVideos || [], "contentId", addOn.id);
     }
-    const video: ExternalVideo = ArrayHelper.getOne(externalVideos || [], "id", externalVideoId);
+    
 
     if (asset) result.push(this.convertAssetFile(asset, resource, download));
     else if (resource) this.convertResourceFiles(resource, download).forEach(f => result.push(f));
