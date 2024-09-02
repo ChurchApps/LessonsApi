@@ -52,8 +52,9 @@ export class VenueController extends LessonsBaseController {
         const sectionActions: Action[] = ArrayHelper.getAll(actions, "sectionId", s.id);
         const itemFiles: any[] = [];
         sectionActions.forEach(a => {
-          if (a.externalVideoId) {
-            const video: ExternalVideo = ArrayHelper.getOne(availableVideos, "id", a.externalVideoId);
+          if (a.externalVideoId || a.actionType==="Add-on") {
+            let video: ExternalVideo = ArrayHelper.getOne(availableVideos, "id", a.externalVideoId);
+            if (!video && a.actionType === "Add-on") video = ArrayHelper.getOne(availableVideos, "contentId", a.addOnId);
             if (video) {
               if (req.query.mode === "web") itemFiles.push({ name: video.name, url: video.videoProvider.toLowerCase() + ":" + video.videoId, seconds: video.seconds, loopVideo: video.loopVideo })
               else itemFiles.push({ name: video.name, url: resolution === "1080" ? video.play1080 : video.play720, seconds: video.seconds, loopVideo: video.loopVideo })

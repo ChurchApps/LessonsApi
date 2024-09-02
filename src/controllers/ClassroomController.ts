@@ -28,8 +28,9 @@ export class ClassroomController extends LessonsBaseController {
       const sectionActions: Action[] = ArrayHelper.getAll(actions, "sectionId", s.id);
       const itemFiles: any[] = [];
       sectionActions.forEach(a => {
-        if (a.externalVideoId) {
-          const video: ExternalVideo = ArrayHelper.getOne(availableVideos, "id", a.externalVideoId);
+        if (a.externalVideoId || a.actionType === "Add-on") {
+          let video: ExternalVideo = ArrayHelper.getOne(availableVideos, "id", a.externalVideoId);
+          if (!video && a.actionType === "Add-on") video = ArrayHelper.getOne(availableVideos, "id", a.addOnId);
           if (video) {
             let seconds = video.seconds;
             const loopVideo = (video.loopVideo) ? true : false;

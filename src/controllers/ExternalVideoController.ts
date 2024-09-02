@@ -133,7 +133,6 @@ export class ExternalVideoController extends LessonsBaseController {
                 externalVideo.play4k = vimeo.play4k;
                 externalVideo.thumbnail = vimeo.thumbnail;
                 this.repositories.externalVideo.save(externalVideo);
-                console.log(JSON.stringify(externalVideo))
                 return externalVideo;
               })
             );

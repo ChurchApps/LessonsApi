@@ -192,7 +192,7 @@ export class LessonFeedHelper {
     if (addOn) {
       video = ArrayHelper.getOne(externalVideos || [], "contentId", addOn.id);
     }
-    
+
 
     if (asset) result.push(this.convertAssetFile(asset, resource, download));
     else if (resource) this.convertResourceFiles(resource, download).forEach(f => result.push(f));

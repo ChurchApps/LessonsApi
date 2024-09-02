@@ -27,7 +27,7 @@ export class ActionRepository {
     const sql = "select a.*, s.id as sectionId "
       + " from sections s"
       + " inner join roles r on r.sectionId=s.id"
-      + " inner join actions a on a.roleId=r.id and a.actionType='Play'"
+      + " inner join actions a on a.roleId=r.id and a.actionType in ('Play', 'Add-on')"
       + " left join customizations c on c.churchId=? AND c.venueId=s.venueId AND c.action='remove' AND c.contentId IN (s.id, r.id, a.id)"
       + " left join customizations ac on ac.churchId=? AND ac.venueId=s.venueId AND ac.action='sort' AND ac.contentId=a.id"
       + " left join customizations rc on rc.churchId=? AND rc.venueId=s.venueId AND rc.action='sort' AND rc.contentId=r.id"
