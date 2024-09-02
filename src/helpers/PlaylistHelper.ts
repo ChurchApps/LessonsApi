@@ -11,7 +11,7 @@ export class PlaylistHelper {
 
     const addOnIds: string[] = ArrayHelper.getIds(actions, "addOnId");
     console.log("addOnIds", addOnIds);
-    const addOnVideos = (addOnIds.length === 0) ? [] : await repo.externalVideo.loadByContentTypeIds(actions[0].churchId, "addOn", addOnIds);
+    const addOnVideos = (addOnIds.length === 0) ? [] : await repo.externalVideo.loadByContentTypeIds("addOn", addOnIds);
     console.log("addOnVideos", addOnVideos);
     videos.push(...addOnVideos);
 
