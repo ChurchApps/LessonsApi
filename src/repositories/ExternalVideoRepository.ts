@@ -27,6 +27,10 @@ export class ExternalVideoRepository {
     return DB.query("SELECT * FROM externalVideos WHERE churchId=? AND contentType=? AND contentId=? order by name", [churchId, contentType, contentId]);
   }
 
+  public loadByContentTypeIds(churchId: string, contentType: string, contentIds: string[]): Promise<ExternalVideo[]> {
+    return DB.query("SELECT * FROM externalVideos WHERE churchId=? AND contentType=? AND contentId IN (?) order by name", [churchId, contentType, contentIds]);
+  }
+
   public loadPendingUpdate(limit: number): Promise<ExternalVideo[]> {
     return DB.query("SELECT * FROM externalVideos WHERE pendingUpdate=1 limit " + limit.toString(), []);
   }

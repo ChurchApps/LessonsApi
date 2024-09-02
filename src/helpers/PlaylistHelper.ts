@@ -1,6 +1,6 @@
 import { Repositories } from "../repositories";
 import { ArrayHelper } from "@churchapps/apihelper";
-import { Venue, Action } from "../models";
+import { Action } from "../models";
 
 export class PlaylistHelper {
 
@@ -8,6 +8,12 @@ export class PlaylistHelper {
     const repo = Repositories.getCurrent();
     const videoIds: string[] = ArrayHelper.getIds(actions, "externalVideoId");
     const videos = (videoIds.length === 0) ? [] : await repo.externalVideo.loadByIds(videoIds);
+
+    const addOnIds: string[] = ArrayHelper.getIds(actions, "addOnId");
+    const addOnVideos = (addOnIds.length === 0) ? [] : await repo.externalVideo.loadByContentTypeIds(actions[0].churchId, "addOn", addOnIds);
+    videos.push(...addOnVideos);
+    
+
     return videos;
   }
 
