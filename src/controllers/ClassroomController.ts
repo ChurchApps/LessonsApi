@@ -30,7 +30,7 @@ export class ClassroomController extends LessonsBaseController {
       sectionActions.forEach(a => {
         if (a.externalVideoId || a.actionType === "Add-on") {
           let video: ExternalVideo = ArrayHelper.getOne(availableVideos, "id", a.externalVideoId);
-          if (!video && a.actionType === "Add-on") video = ArrayHelper.getOne(availableVideos, "id", a.addOnId);
+          if (!video && a.actionType === "Add-on") video = ArrayHelper.getOne(availableVideos, "contentId", a.addOnId);
           if (video) {
             let seconds = video.seconds;
             const loopVideo = (video.loopVideo) ? true : false;
