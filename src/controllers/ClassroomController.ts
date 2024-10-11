@@ -94,8 +94,9 @@ export class ClassroomController extends LessonsBaseController {
   }
 
   @httpGet("/person")
-  public async getForPerson(@requestParam("churchId") churchId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
+  public async getForPerson(req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
     return this.actionWrapper(req, res, async (au) => {
+      if (!au.groupIds || au.groupIds.length === 0) return [];
       return await this.repositories.classroom.loadForPerson(au.churchId, au.groupIds);
     });
   }
