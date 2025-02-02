@@ -92,6 +92,7 @@ export class BundleController extends LessonsBaseController {
         for (const r of resources) await this.deleteResource(r.churchId, r.id);
         await FilesHelper.deleteBundleFolder(au.churchId, id);
         await this.repositories.bundle.delete(au.churchId, id);
+        return this.json({});
       }
     });
   }
