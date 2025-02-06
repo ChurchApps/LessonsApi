@@ -75,6 +75,7 @@ export class AssetController extends LessonsBaseController {
         if (asset.fileId) await FilesHelper.deleteFile(au.churchId, asset.fileId, asset.resourceId);
         await this.repositories.asset.delete(au.churchId, id);
         await ZipHelper.setBundlePendingResource(asset.churchId, asset.resourceId);
+        return this.json({});
       }
     });
   }

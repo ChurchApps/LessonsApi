@@ -89,6 +89,8 @@ export class ResourceController extends LessonsBaseController {
         const r = await this.repositories.resource.load(au.churchId, id);
         await this.repositories.resource.delete(au.churchId, id);
         await ZipHelper.setBundlePending(au.churchId, r.bundleId);
+
+        return this.json({});
       }
     });
   }

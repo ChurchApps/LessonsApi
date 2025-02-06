@@ -31,7 +31,10 @@ export class AddOnPlaylistItemController extends LessonsBaseController {
   public async delete(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
     return this.actionWrapper(req, res, async (au) => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
-      else await this.repositories.addOnPlaylistItem.delete(au.churchId, id);
+      else {
+        await this.repositories.addOnPlaylistItem.delete(au.churchId, id); 
+        return this.json({});
+      }
     });
   }
 

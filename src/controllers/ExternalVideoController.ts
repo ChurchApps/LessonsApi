@@ -153,6 +153,7 @@ export class ExternalVideoController extends LessonsBaseController {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
       else {
         await this.repositories.externalVideo.delete(au.churchId, id);
+        return this.json({});
       }
     });
   }

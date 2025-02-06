@@ -98,6 +98,7 @@ export class VariantController extends LessonsBaseController {
         if (variant.fileId) await FilesHelper.deleteFile(au.churchId, variant.fileId, variant.resourceId);
         await this.repositories.variant.delete(au.churchId, id);
         await ZipHelper.setBundlePendingResource(variant.churchId, variant.resourceId);
+        return this.json({});
       }
     });
   }
