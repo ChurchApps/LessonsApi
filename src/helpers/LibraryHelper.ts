@@ -56,7 +56,7 @@ export class LibraryHelper {
           name: lesson.name,
           description: lesson.description,
           image: lesson.image,
-          children: []
+          playlists: []
         };
         this.appendVenues(allVenues, lessonNode);
         studyNode.children.push(lessonNode);
@@ -72,7 +72,7 @@ export class LibraryHelper {
           name: venue.name,
           apiUrl: "/venues/playlist/" + venue.id,
         };
-        lessonNode.children.push(venueNode);
+        lessonNode.playlists.push(venueNode);
       }
     });
   }
