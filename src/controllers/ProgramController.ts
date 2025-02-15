@@ -4,10 +4,19 @@ import { LessonsBaseController } from "./LessonsBaseController"
 import { Program } from "../models"
 import { Permissions } from '../helpers/Permissions'
 import { Environment, FileStorageHelper } from "../helpers"
+import { LibraryHelper } from "../helpers/LibraryHelper";
 
 @controller("/programs")
 export class ProgramController extends LessonsBaseController {
 
+
+  @httpGet("/public/tree")
+  public async getPublicTree(req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
+    return this.actionWrapperAnon(req, res, async () => {
+      const result = await LibraryHelper.loadLibrary();
+      return result;
+    });
+  }
 
 
   @httpGet("/public/slug/:slug")

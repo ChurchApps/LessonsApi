@@ -1,0 +1,55 @@
+{
+  "lesson": {
+    "title": "Oh Holy Night - A Reason for Hope",
+    "author": "Lessons.church",
+    "sections": [
+      {
+        "title": "Opening Discussion: Favorite Christmas Songs",
+        "items": [
+          {
+            "type": "question",
+            "questionType": "discussion",
+            "content": "Begin by sharing your favorite Christmas carol with the group."
+          },
+          {
+            "type": "question",
+            "questionType": "discussion",
+            "content": "Reflect on why these songs hold significance during the holiday season."
+          }
+        ]
+      },
+      {
+        "title": "A Reason for Hope",
+        "items": [
+          {
+            "type":"text",
+            "content": "**Key Verse:** {Matthew 1:18-21}"
+          },
+          {
+            "type":"quote",
+            "content": "Long lay the world in sin and error pining, till He appeared and the soul felt its worth."
+          },
+          {
+            "type": "question",
+            "questionType": "discussion",
+            "content": "Discuss what it means to \"pine\" or yearn for hope in a broken world."
+          },
+          {
+            "type": "question",
+            "questionType": "discussion",
+            "content": "Reflect on the angel's message to Joseph: Why is Jesus called \"God saves\"?"
+          },
+          {
+            "type": "subhead",
+            "content": "Discussion Questions"
+          },
+          {
+            "type": "question",
+            "questionType": "discussion",
+            "content": "Reflect on the angel's message to Joseph: Why is Jesus called \"God saves\"?"
+          },
+        ]
+      }
+    ]
+  }
+}
