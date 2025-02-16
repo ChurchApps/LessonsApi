@@ -1,7 +1,8 @@
-import { Lesson, Schedule, Study, Venue } from "../models";
+import { Action, ExternalVideo, File, Lesson, Schedule, Section, Study, Venue } from "../models";
 import { Repositories } from "../repositories"
 import axios from "axios";
-import { ArrayHelper } from ".";
+import { ArrayHelper, Environment } from ".";
+import { PlaylistHelper } from "./PlaylistHelper";
 
 export class LibraryHelper {
 
@@ -76,5 +77,82 @@ export class LibraryHelper {
       }
     });
   }
+
+
+
+
+
+  static getPlaylist = async (venue: Venue, sections: Section[], actions: Action[], availableFiles: File[], availableVideos: ExternalVideo[], stream: boolean, resolution: string) => {
+    const result = {
+      id: venue.id,
+      name: venue.name,
+      prefetch: false,
+      playOrder: "sequential",
+      messages: []
+    };
+
+    sections.forEach(s => {
+      const sectionActions: Action[] = ArrayHelper.getAll(actions, "sectionId", s.id);
+      const itemFiles: any[] = [];
+      sectionActions.forEach(a => {
+        if (a.externalVideoId || a.actionType === "Add-on") {
+          const msg = this.getExternalVideoMessage(a, availableVideos, stream, resolution);
+          if (msg) result.messages.push(msg);
+        } else {
+          result.messages = result.messages.concat(this.getFileMessage(a, availableFiles));
+        }
+      });
+      // result.messages.push({ name: s.name, files: itemFiles });
+    });
+    return result;
+  }
+
+  static getFileMessage = (action: Action, availableFiles: File[]) => {
+    const result: any[] = [];
+    const files: any[] = PlaylistHelper.getBestFiles(action, availableFiles);
+    files.forEach(file => {
+      const contentPath = (file.contentPath.indexOf("://") === -1) ? Environment.contentRoot + file.contentPath : file.contentPath;
+      let seconds = parseInt(file.seconds, 0);
+      const loopVideo = (file.loopVideo) ? true : false;
+      if (!seconds || seconds === 0 || loopVideo) seconds = 3600;
+
+      const msg = {
+        id: file.id,
+        name: file.name || file.fileName || action.content,
+        seconds,
+        type: file.fileType.split("/")[0],
+        thumbnail: file.thumbnail,
+        loop: loopVideo,
+        files: [contentPath]
+      }
+      result.push(msg);
+
+    });
+    return result;
+  }
+
+  static getExternalVideoMessage = (action: Action, availableVideos: ExternalVideo[], stream: boolean, resolution: string) => {
+    let video: ExternalVideo = ArrayHelper.getOne(availableVideos, "id", action.externalVideoId);
+    if (!video && action.actionType === "Add-on") video = ArrayHelper.getOne(availableVideos, "contentId", action.addOnId);
+
+    if (video) {
+      const result = {
+        id: video.id,
+        name: video.name,
+        seconds: video.seconds,
+        type: (stream) ? "stream" : "video",
+        thumbnail: video.thumbnail,
+        loop: video.loopVideo,
+        files: []
+      }
+
+      if (stream) result.files.push(video.videoProvider.toLowerCase() + ":" + video.videoId)
+      else result.files.push(resolution === "1080" ? video.play1080 : video.play720)
+      return result;
+    }
+    return null;
+  }
+
+
 
 }

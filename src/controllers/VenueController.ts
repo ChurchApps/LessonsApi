@@ -7,6 +7,7 @@ import { ArrayHelper } from "@churchapps/apihelper";
 import { Environment } from "../helpers";
 import { PlaylistHelper } from "../helpers/PlaylistHelper";
 import { LessonFeedHelper } from "../helpers/LessonFeedHelper";
+import { LibraryHelper } from "../helpers/LibraryHelper";
 
 @controller("/venues")
 export class VenueController extends LessonsBaseController {
@@ -31,6 +32,25 @@ export class VenueController extends LessonsBaseController {
     if (!existing) await this.repositories.download.save(download);
   }
 
+  @httpGet("/playlistNew/:venueId")
+  public async getPlaylistNew(@requestParam("venueId") venueId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
+    return this.actionWrapperAnon(req, res, async () => {
+      const venue: Venue = await this.repositories.venue.loadPublic(venueId);
+      const lesson: Lesson = await this.repositories.lesson.loadPublic(venue.lessonId);
+      const sections = await this.repositories.section.loadForPlaylist(venue.churchId, venue.id, venue.churchId);
+      const actions = await this.repositories.action.loadPlaylistActions(venue.id, venue.churchId)
+      const availableFiles = await PlaylistHelper.loadPlaylistFiles(actions);
+      const availableVideos = await PlaylistHelper.loadPlaylistVideos(actions);
+      let resolution: "720" | "1080" = "720";
+      if (req.query.resolution && req.query.resolution === "1080") resolution = "1080";
+
+      const ipAddress = (req.headers['x-forwarded-for'] || req.socket.remoteAddress).toString().split(",")[0]
+      await this.logDownload(venue.lessonId, venue.name, venue.churchId, ipAddress);
+      return await LibraryHelper.getPlaylist(venue, sections, actions, availableFiles, availableVideos, req.query.mode === "web", resolution);
+    });
+  }
+
+
   @httpGet("/playlist/:venueId")
   public async getPlaylist(@requestParam("venueId") venueId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
     return this.actionWrapperAnon(req, res, async () => {
@@ -52,7 +72,7 @@ export class VenueController extends LessonsBaseController {
         const sectionActions: Action[] = ArrayHelper.getAll(actions, "sectionId", s.id);
         const itemFiles: any[] = [];
         sectionActions.forEach(a => {
-          if (a.externalVideoId || a.actionType==="Add-on") {
+          if (a.externalVideoId || a.actionType === "Add-on") {
             let video: ExternalVideo = ArrayHelper.getOne(availableVideos, "id", a.externalVideoId);
             if (!video && a.actionType === "Add-on") video = ArrayHelper.getOne(availableVideos, "contentId", a.addOnId);
             if (video) {
