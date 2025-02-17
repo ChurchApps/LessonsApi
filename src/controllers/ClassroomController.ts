@@ -7,12 +7,12 @@ import { PlaylistHelper } from "../helpers/PlaylistHelper";
 import { Environment } from "../helpers";
 import { ArrayHelper } from "@churchapps/apihelper";
 import { ExternalProviderHelper } from "../helpers/ExternalProviderHelper";
+import { LibraryHelper } from "../helpers/LibraryHelper";
 
 @controller("/classrooms")
 export class ClassroomController extends LessonsBaseController {
 
-  private async loadPlaylistInternal(currentSchedule:Schedule, ipAddress: string, resolution: "720" | "1080")
-  {
+  private async loadPlaylistInternal(currentSchedule: Schedule, ipAddress: string, resolution: "720" | "1080") {
     const venue: Venue = await this.repositories.venue.loadPublic(currentSchedule.venueId);
     if (!venue) throw new Error(("Could not load venue: " + currentSchedule.venueId));
     const lesson: Lesson = await this.repositories.lesson.loadPublic(venue.lessonId);
@@ -58,8 +58,7 @@ export class ClassroomController extends LessonsBaseController {
 
 
 
-  private async loadPlaylistExternal(currentSchedule:Schedule)
-  {
+  private async loadPlaylistExternal(currentSchedule: Schedule) {
     const data = await ExternalProviderHelper.loadExternalData(currentSchedule.externalProviderId, currentSchedule.programId, currentSchedule.studyId, currentSchedule.lessonId, currentSchedule.venueId);
     return ExternalProviderHelper.convertToMessages(data);
 
@@ -69,6 +68,34 @@ export class ClassroomController extends LessonsBaseController {
     const d = new Date();
     const utc = d.getTime() + (d.getTimezoneOffset() * 60000);
     return new Date(utc + (3600000 * -6));
+  }
+
+
+  @httpGet("/playlistNew/:classroomId")
+  public async getPlaylistNew(@requestParam("classroomId") classroomId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
+    return this.actionWrapperAnon(req, res, async () => {
+      let resolution: "720" | "1080" = "720";
+      if (req.query.resolution && req.query.resolution === "1080") resolution = "1080";
+      const date = req.query.date ? new Date(req.query.date.toString()) : this.getCurrentCentralTime();
+      const currentSchedule = await this.repositories.schedule.loadCurrent(classroomId, date);
+      if (!currentSchedule) throw new Error(("Could not load schedule"));
+      const ipAddress = (req.headers['x-forwarded-for'] || req.socket.remoteAddress).toString().split(",")[0]
+
+
+      const venue: Venue = await this.repositories.venue.loadPublic(currentSchedule.venueId);
+      if (!venue) throw new Error(("Could not load venue: " + currentSchedule.venueId));
+      const lesson: Lesson = await this.repositories.lesson.loadPublic(venue.lessonId);
+      const sections = await this.repositories.section.loadForPlaylist(venue.churchId, venue.id, currentSchedule.churchId);
+      const actions = await this.repositories.action.loadPlaylistActions(venue.id, currentSchedule.churchId)
+      const availableFiles = await PlaylistHelper.loadPlaylistFiles(actions);
+      const availableVideos = await PlaylistHelper.loadPlaylistVideos(actions);
+      await this.logDownload(venue.lessonId, venue.name, currentSchedule.churchId, ipAddress);
+      return LibraryHelper.getPlaylist(venue, lesson, sections, actions, availableFiles, availableVideos, false, resolution);
+
+
+      // if (currentSchedule.externalProviderId) return this.loadPlaylistExternal(currentSchedule);
+      // else return this.loadPlaylistInternal(currentSchedule, ipAddress, resolution);
+    });
   }
 
   @httpGet("/playlist/:classroomId")

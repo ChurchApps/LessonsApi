@@ -46,7 +46,7 @@ export class VenueController extends LessonsBaseController {
 
       const ipAddress = (req.headers['x-forwarded-for'] || req.socket.remoteAddress).toString().split(",")[0]
       await this.logDownload(venue.lessonId, venue.name, venue.churchId, ipAddress);
-      return await LibraryHelper.getPlaylist(venue, sections, actions, availableFiles, availableVideos, req.query.mode === "web", resolution);
+      return await LibraryHelper.getPlaylist(venue, lesson, sections, actions, availableFiles, availableVideos, req.query.mode === "web", resolution);
     });
   }
 
