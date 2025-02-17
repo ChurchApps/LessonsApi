@@ -110,24 +110,27 @@ export class LibraryHelper {
   static getFileMessage = (action: Action, availableFiles: File[]) => {
     const result: any[] = [];
     const files: any[] = PlaylistHelper.getBestFiles(action, availableFiles);
+    if (files.length === 0) return result;
+
+    const msg = {
+      id: action.id,
+      name: action.content,
+      seconds: 3600,
+      type: (files.length > 0) ? "gallery" : files[0].fileType.split("/")[0],
+      thumbnail: files[0].thumbnail,
+      loop: files[0].loopVideo,
+      files: []
+    }
+
     files.forEach(file => {
       const contentPath = (file.contentPath.indexOf("://") === -1) ? Environment.contentRoot + file.contentPath : file.contentPath;
       let seconds = parseInt(file.seconds, 0);
       const loopVideo = (file.loopVideo) ? true : false;
       if (!seconds || seconds === 0 || loopVideo) seconds = 3600;
-
-      const msg = {
-        id: file.id,
-        name: file.name || file.fileName || action.content,
-        seconds,
-        type: file.fileType.split("/")[0],
-        thumbnail: file.thumbnail,
-        loop: loopVideo,
-        files: [contentPath]
-      }
-      result.push(msg);
-
+      msg.seconds = seconds;
+      msg.files.push(contentPath);
     });
+    result.push(msg);
     return result;
   }
 
