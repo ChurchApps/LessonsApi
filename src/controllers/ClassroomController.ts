@@ -128,6 +128,30 @@ export class ClassroomController extends LessonsBaseController {
     });
   }
 
+  // Temporary route to load classrooms as feed categories for ChurchAppsPlayer. It'll be based on user going forward.
+  @httpGet("/public/tree/:churchId")
+  public async getPublicTree(@requestParam("churchId") churchId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
+    return this.actionWrapperAnon(req, res, async () => {
+      const classRooms = await this.repositories.classroom.loadByChurchId(churchId);
+
+      const result = {
+        treeLabels: ["Classroom"],
+        categories: []
+      };
+      classRooms.forEach(c => {
+        result.categories.push({
+          id: c.id,
+          name: c.name,
+          description: "",
+          image: "",
+          apiUrl: "https://api.lessons.church/classrooms/playlistNew/" + c.id
+        });
+      });
+
+      return result;
+    });
+  }
+
   @httpGet("/public/church/:churchId")
   public async getForChurch(@requestParam("churchId") churchId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
     return this.actionWrapperAnon(req, res, async () => {
