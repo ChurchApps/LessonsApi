@@ -112,7 +112,8 @@ export class LibraryHelper {
     const files: any[] = PlaylistHelper.getBestFiles(action, availableFiles);
     if (!files || files.length === 0) return result;
 
-    const message = { name: action.content, thumbnail: files[0].thumbnail, slides: [] }
+    const cp = (files[0].contentPath.indexOf("://") === -1) ? Environment.contentRoot + files[0].contentPath : files[0].contentPath;
+    const message = { name: action.content, thumbnail: files[0].thumbnail || cp, slides: [] }
 
 
     files.forEach(file => {
