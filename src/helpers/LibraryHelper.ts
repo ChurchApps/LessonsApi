@@ -71,7 +71,7 @@ export class LibraryHelper {
         const venueNode = {
           id: venue.id,
           name: venue.name,
-          apiUrl: "/venues/playlist/" + venue.id,
+          apiUrl: "/venues/playlistNew/" + venue.id,
         };
         lessonNode.playlists.push(venueNode);
       }
