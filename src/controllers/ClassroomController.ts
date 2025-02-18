@@ -144,7 +144,13 @@ export class ClassroomController extends LessonsBaseController {
           name: c.name,
           description: "",
           image: "https://lessons.church/images/og-image.png",
-          apiUrl: "https://api.lessons.church/classrooms/playlistNew/" + c.id
+          playlists: [
+            {
+              id: c.id,
+              name: "Watch",
+              apiUrl: "https://api.lessons.church/classrooms/playlistNew/" + c.id
+            }
+          ]
         });
       });
 
