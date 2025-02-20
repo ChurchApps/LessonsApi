@@ -70,6 +70,26 @@ export class ClassroomController extends LessonsBaseController {
     return new Date(utc + (3600000 * -6));
   }
 
+  @httpGet("/instructions/:deviceId")
+  public async getInstructions(@requestParam("deviceId") deviceId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
+    return this.actionWrapperAnon(req, res, async () => {
+      const classrooms = await this.repositories.classroom.loadByChurchId("Hchi650pfrH");
+      const result = {
+        treeLabels: ["Classroom"],
+        playlists: []
+      }
+      classrooms.forEach(c => {
+        result.playlists.push({
+          id: c.id,
+          name: c.name,
+          image: "https://lessons.church/images/og-image.png",
+          apiUrl: "https://api.lessons.church/classrooms/playlistNew/" + c.id
+        });
+      });
+      return result;
+    });
+  }
+
 
   @httpGet("/playlistNew/:classroomId")
   public async getPlaylistNew(@requestParam("classroomId") classroomId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
