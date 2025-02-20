@@ -70,7 +70,7 @@ export class ClassroomController extends LessonsBaseController {
     return new Date(utc + (3600000 * -6));
   }
 
-  @httpGet("/instructions/:deviceId")
+  @httpGet("/player/:deviceId")
   public async getInstructions(@requestParam("deviceId") deviceId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
     return this.actionWrapperAnon(req, res, async () => {
       const classrooms = await this.repositories.classroom.loadByChurchId("Hchi650pfrH");
