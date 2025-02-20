@@ -75,12 +75,10 @@ export class LibraryHelper {
           image: lessonNode.image,
           apiUrl: "/venues/playlistNew/" + venue.id,
         };
-        lessonNode.playlists.push(venueNode);
+        lessonNode.children.push(venueNode);
       }
     });
   }
-
-
 
 
 
