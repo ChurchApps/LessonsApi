@@ -15,7 +15,7 @@ export class LibraryHelper {
 
     const result = {
       treeLabels: ["Program", "Study", "Lesson", "Playlist"],
-      categories: []
+      playlists: []
     };
 
     programs.forEach((program: any) => {
@@ -27,7 +27,7 @@ export class LibraryHelper {
         children: []
       };
       this.appendStudies(studies, lessons, venues, programNode);
-      result.categories.push(programNode);
+      result.playlists.push(programNode);
     });
 
     return result;
@@ -57,7 +57,7 @@ export class LibraryHelper {
           name: lesson.name,
           description: lesson.description,
           image: lesson.image,
-          playlists: []
+          children: []
         };
         this.appendVenues(allVenues, lessonNode);
         studyNode.children.push(lessonNode);
@@ -71,6 +71,8 @@ export class LibraryHelper {
         const venueNode = {
           id: venue.id,
           name: venue.name,
+          description: "",
+          image: lessonNode.image,
           apiUrl: "/venues/playlistNew/" + venue.id,
         };
         lessonNode.playlists.push(venueNode);

@@ -156,21 +156,15 @@ export class ClassroomController extends LessonsBaseController {
 
       const result = {
         treeLabels: ["Classroom"],
-        categories: []
+        playlists: []
       };
       classRooms.forEach(c => {
-        result.categories.push({
+        result.playlists.push({
           id: c.id,
           name: c.name,
           description: "",
           image: "https://lessons.church/images/og-image.png",
-          playlists: [
-            {
-              id: c.id,
-              name: "Watch",
-              apiUrl: "https://api.lessons.church/classrooms/playlistNew/" + c.id
-            }
-          ]
+          apiUrl: "https://api.lessons.church/classrooms/playlistNew/" + c.id
         });
       });
 
