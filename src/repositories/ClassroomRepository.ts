@@ -1,4 +1,4 @@
-import { DB } from "@churchapps/apihelper"
+import { ArrayHelper, DB } from "@churchapps/apihelper"
 import { Classroom } from "../models";
 import { UniqueIdHelper } from "../helpers";
 
@@ -23,9 +23,14 @@ export class ClassroomRepository {
     return classroom;
   }
 
-  public loadForPerson(churchId: string, groupIds:string[]): Promise<Classroom[]> {
+  public loadForPerson(churchId: string, groupIds: string[]): Promise<Classroom[]> {
     const sql = "SELECT * FROM classrooms WHERE churchId=? AND (recentGroupId IN (?) OR upcomingGroupId IN (?)) ORDER BY name";
     return DB.query(sql, [churchId, groupIds, groupIds]);
+  }
+
+  public loadByIds(churchId: string, ids: string[]): Promise<Classroom[]> {
+    const sql = "SELECT * FROM classrooms WHERE churchId=? AND id IN (" + ArrayHelper.fillArray("?", ids.length) + ")";
+    return DB.query(sql, [churchId].concat(ids));
   }
 
   public loadByChurchId(churchId: string): Promise<Classroom[]> {

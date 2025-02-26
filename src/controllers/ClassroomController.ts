@@ -70,10 +70,14 @@ export class ClassroomController extends LessonsBaseController {
     return new Date(utc + (3600000 * -6));
   }
 
-  @httpGet("/player/:deviceId")
-  public async getInstructions(@requestParam("deviceId") deviceId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
+  @httpGet("/player/:churchId")
+  public async getInstructions(@requestParam("churchId") churchId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
     return this.actionWrapperAnon(req, res, async () => {
-      const classrooms = await this.repositories.classroom.loadByChurchId("Hchi650pfrH");
+      const classroomIds = req.query.classrooms ? req.query.classrooms.toString().split(",") : [];
+
+      const classrooms = (classroomIds.length > 0)
+        ? await this.repositories.classroom.loadByIds(churchId, classroomIds)
+        : await this.repositories.classroom.loadByChurchId(churchId);
       const result = {
         treeLabels: ["Classroom"],
         playlists: []
