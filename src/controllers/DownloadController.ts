@@ -9,28 +9,23 @@ import { HubspotHelper } from "../helpers/HubspotHelper";
 @controller("/downloads")
 export class DownloadController extends LessonsBaseController {
 
+
   /*
-  @httpGet("/tmp")
-  public async tmp(req: express.Request<{}, {}, []>, res: express.Response): Promise<any> {
-    return this.actionWrapperAnon(req, res, async () => {
-      return HubspotHelper.lookupCompanByChurchId("0wwjDnnbXAk");
-    });
-  }
-
-  @httpGet("/updateHubspot")
-  public async addHubspot(req: express.Request<{}, {}, []>, res: express.Response): Promise<any> {
-    return this.actionWrapperAnon(req, res, async () => {
-      const data = await this.repositories.download.getDownloadCounts();
-      for (const d of data) {
-        const comp = await HubspotHelper.lookupCompanByChurchId(d.churchId);
-        console.log(d.churchId, comp);
-        if (comp) {
-          await HubspotHelper.setProperties(comp.id, { lessons_downloaded: d.downloadCount });
+    @httpGet("/updateHubspot")
+    public async addHubspot(req: express.Request<{}, {}, []>, res: express.Response): Promise<any> {
+      return this.actionWrapperAnon(req, res, async () => {
+        const data = await this.repositories.download.getDownloadCounts();
+        for (const d of data) {
+          const comp = await HubspotHelper.lookupCompanByChurchId(d.churchId);
+          console.log(d.churchId, comp);
+          if (comp) {
+            const downloadDate = new Date(d.lastDownload).toISOString().split('T')[0];
+            await HubspotHelper.setProperties(comp.id, { lessons_downloaded: d.downloadCount, last_lesson_downloaded: downloadDate });
+          }
         }
-      }
-    });
-  }*/
-
+      });
+    }
+  */
 
   @httpPost("/")
   public async save(req: express.Request<{}, {}, Download[]>, res: express.Response): Promise<interfaces.IHttpActionResult> {
@@ -51,8 +46,10 @@ export class DownloadController extends LessonsBaseController {
 
   private async updateHubspot(churchId: string) {
     if (Environment.hubspotKey) {
-      const count = await this.repositories.download.getDownloadCount(churchId);
-      const properties = { lessons_downloaded: count };
+      const countRow = await this.repositories.download.getDownloadCount(churchId);
+      if (!countRow) return;
+      const downloadDate = new Date(countRow.lastDownload).toISOString().split('T')[0];
+      const properties = { lessons_downloaded: countRow.downloadCount, last_lesson_downloaded: downloadDate };
       const company = await HubspotHelper.lookupCompanByChurchId(churchId);
       if (company) await HubspotHelper.setProperties(churchId, properties);
     }

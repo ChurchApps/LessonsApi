@@ -9,11 +9,11 @@ export class DownloadRepository {
   }
 
   public async getDownloadCounts() {
-    return DB.query("select churchId, count(distinct(lessonId)) as downloadCount from downloads where churchId<>'' group by churchId having count(distinct(lessonId)) > 0", []);
+    return DB.query("select churchId, count(distinct(lessonId)) as downloadCount, max(downloadDate) as lastDownload from downloads where churchId<>'' group by churchId having count(distinct(lessonId)) > 0", []);
   }
 
   public async getDownloadCount(churchId: string) {
-    return DB.queryOne("select count(distinct(lessonId)) from downloads where churchId=?", [churchId]);
+    return DB.queryOne("select count(distinct(lessonId)) as downloadCount, max(downloadDate) as lastDownload from downloads where churchId=?", [churchId]);
   }
 
   public async create(download: Download) {
