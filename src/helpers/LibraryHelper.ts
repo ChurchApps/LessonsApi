@@ -122,13 +122,13 @@ export class LibraryHelper {
       const loopVideo = (file.loopVideo) ? true : false;
       if (!seconds || seconds === 0 || loopVideo) seconds = 3600;
 
-      const slide = {
+      const slide: any = {
         id: file.id,
         seconds,
         type: file.fileType.split("/")[0],
-        loop: loopVideo,
-        files: [contentPath]
+        url: contentPath
       }
+      if (loopVideo) slide.loop = true;
       message.slides.push(slide);
 
     });
