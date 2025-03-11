@@ -13,9 +13,22 @@ export class HubspotHelper {
     return client;
   }
 
+  /*
   static lookupCompany = async (query: string) => {
     const client = this.getClient();
     const req: PublicObjectSearchRequest = { query, limit: 1, after: "", sorts: [], properties: [], filterGroups: [] }
+    const response = await client.crm.companies.searchApi.doSearch(req);
+    return response.results[0];
+  }*/
+
+  static lookupCompanByChurchId = async (churchId: string) => {
+    const client = this.getClient();
+    const req: any = {
+      filterGroups: [{
+        filters: [{ propertyName: "church_id", operator: "EQ", value: churchId }]
+      }],
+      limit: 1
+    }
     const response = await client.crm.companies.searchApi.doSearch(req);
     return response.results[0];
   }
