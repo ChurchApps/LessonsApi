@@ -2,10 +2,27 @@ import { controller, httpGet, httpPost, interfaces, requestParam } from "inversi
 import express from "express";
 import { LessonsBaseController } from "./LessonsBaseController"
 import { Download } from "../models"
+import { Environment } from "../helpers";
+import { HubspotHelper } from "../helpers/HubspotHelper";
 
 
 @controller("/downloads")
 export class DownloadController extends LessonsBaseController {
+
+  @httpGet("/updateHubspot")
+  public async addHubspot(req: express.Request<{}, {}, []>, res: express.Response): Promise<any> {
+    return this.actionWrapperAnon(req, res, async () => {
+      const data = await this.repositories.download.getDownloadCounts();
+      for (const d of data) {
+        const comp = await HubspotHelper.lookupCompany(d.churchId);
+        console.log(d.churchId, comp);
+        if (comp) {
+          await HubspotHelper.setProperties(comp.id, { lessons_downloaded: d.downloadCount });
+        }
+      }
+    });
+  }
+
 
   @httpPost("/")
   public async save(req: express.Request<{}, {}, Download[]>, res: express.Response): Promise<interfaces.IHttpActionResult> {
@@ -19,8 +36,18 @@ export class DownloadController extends LessonsBaseController {
         promises.push(this.repositories.download.save(download));
       });
       const result = await Promise.all(promises);
+      await this.updateHubspot(req.body[0].churchId);
       return result;
     });
+  }
+
+  private async updateHubspot(churchId: string) {
+    if (Environment.hubspotKey) {
+      const count = await this.repositories.download.getDownloadCount(churchId);
+      const properties = { lessons_downloaded: count };
+      const company = await HubspotHelper.lookupCompany(churchId);
+      if (company) await HubspotHelper.setProperties(churchId, properties);
+    }
   }
 
   @httpGet("/:programId/geo")

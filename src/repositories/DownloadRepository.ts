@@ -8,6 +8,14 @@ export class DownloadRepository {
     if (UniqueIdHelper.isMissing(download.id)) return this.create(download); else return this.update(download);
   }
 
+  public async getDownloadCounts() {
+    return DB.query("select churchId, count(distinct(lessonId)) as downloadCount from downloads where churchId<>'' group by churchId having count(distinct(lessonId)) > 0", []);
+  }
+
+  public async getDownloadCount(churchId: string) {
+    return DB.queryOne("select count(distinct(lessonId)) from downloads where churchId=?", [churchId]);
+  }
+
   public async create(download: Download) {
     download.id = UniqueIdHelper.shortId();
     const sql = "INSERT INTO downloads (id, lessonId, fileId, userId, churchId, ipAddress, downloadDate, fileName) VALUES (?, ?, ?, ?, ?, ?, ?, ?);";

@@ -1,6 +1,6 @@
 import fs from "fs";
 import path from "path";
-import {AwsHelper, EnvironmentBase} from "@churchapps/apihelper";
+import { AwsHelper, EnvironmentBase } from "@churchapps/apihelper";
 
 export class Environment extends EnvironmentBase {
 
@@ -8,6 +8,7 @@ export class Environment extends EnvironmentBase {
   static transcodePreset: string;
   static ipGeoKey: string;
   static vimeoToken: string;
+  static hubspotKey: string;
 
   static async init(environment: string) {
     let file = "dev.json";
@@ -24,6 +25,7 @@ export class Environment extends EnvironmentBase {
 
     this.transcodePipeline = data.transcodePipeline;
     this.transcodePreset = data.transcodePreset;
+    this.hubspotKey = process.env.HUBSPOT_KEY || await AwsHelper.readParameter(`/${environment}/hubspotKey`);
     this.ipGeoKey = process.env.IP_GEO_KEY || await AwsHelper.readParameter(`/${environment}/ipGeoKey`);
     this.vimeoToken = process.env.VIMEO_TOKEN || await AwsHelper.readParameter(`/${environment}/vimeoToken`);
   }
