@@ -3,6 +3,7 @@ import express from "express";
 import { LessonsBaseController } from "./LessonsBaseController"
 import { Customization } from "../models"
 import { Permissions } from '../helpers/Permissions'
+import { ArrayHelper } from "@churchapps/apihelper";
 
 @controller("/customizations")
 export class CustomizationController extends LessonsBaseController {
@@ -10,14 +11,33 @@ export class CustomizationController extends LessonsBaseController {
   @httpGet("/venue/:venueId")
   public async getForVenue(@requestParam("venueId") venueId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
     return this.actionWrapper(req, res, async (au) => {
-      return await this.repositories.customization.loadByVenueId(au.churchId, venueId);
+      const customizations =  await this.repositories.customization.loadByVenueId(au.churchId, venueId);
+      if (req.query.classroomId) {
+        // get all the customizations where classroomId is NULL
+        const appliedToAll = ArrayHelper.getAll(customizations, "classroomId", null);
+
+        // get all the customizations where classroomId matches
+        const classroomSpecific = ArrayHelper.getAll(customizations, "classroomId", req.query.classroomId.toString());
+
+        const result = [ ...appliedToAll, ...classroomSpecific ];
+        return result;
+      }
+      return customizations;
     });
   }
 
   @httpGet("/public/venue/:venueId/:churchId")
   public async getPublicForVenue(@requestParam("venueId") venueId: string, @requestParam("churchId") churchId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
     return this.actionWrapper(req, res, async (au) => {
-      return await this.repositories.customization.loadByVenueId(churchId, venueId);
+      const customizations =  await this.repositories.customization.loadByVenueId(churchId, venueId);
+      if (req.query.classroomId) {
+        const appliedToAll = ArrayHelper.getAll(customizations, "classroomId", null);
+        const classroomSpecific = ArrayHelper.getAll(customizations, "classroomId", req.query.classroomId.toString());
+
+        const result = [ ...appliedToAll, ...classroomSpecific ];
+        return result;
+      }
+      return customizations;
     });
   }
 
