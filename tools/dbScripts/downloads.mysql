@@ -7,5 +7,7 @@ CREATE TABLE `downloads` (
   `ipAddress` varchar(45) DEFAULT NULL,
   `downloadDate` datetime DEFAULT NULL,
   `fileName` varchar(255) DEFAULT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  INDEX `idx_downloads_lesson_church` (`lessonId`, `churchId`),
+  INDEX `idx_downloads_date` (`downloadDate`)
 ); 

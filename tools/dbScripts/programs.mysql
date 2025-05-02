@@ -12,5 +12,6 @@ CREATE TABLE `programs` (
   `aboutSection` text,
   `age` varchar(45) DEFAULT NULL,
   `sort` int(11) DEFAULT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  INDEX `idx_programs_provider_live` (`providerId`, `live`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

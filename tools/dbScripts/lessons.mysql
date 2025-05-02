@@ -12,5 +12,7 @@ CREATE TABLE `lessons` (
   `live` bit(1) DEFAULT NULL,
   `description` text,
   `videoEmbedUrl` varchar(255) DEFAULT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  INDEX `idx_lessons_study_live_sort` (`studyId`, `live`, `sort`),
+  INDEX `idx_lessons_live` (`live`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;

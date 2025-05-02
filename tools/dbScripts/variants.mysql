@@ -9,5 +9,6 @@ CREATE TABLE `variants` (
   `downloadDefault` bit(1) DEFAULT NULL,
   `playerDefault` bit(1) DEFAULT NULL,
   `hidden` bit(1) DEFAULT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  INDEX `idx_variants_resource` (`resourceId`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;

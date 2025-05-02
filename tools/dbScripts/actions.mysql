@@ -10,5 +10,6 @@ CREATE TABLE `actions` (
   `assetId` char(11) CHARACTER SET latin1 DEFAULT NULL,
   `externalVideoId` char(11) DEFAULT NULL,
   `addOnId` char(11) DEFAULT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  INDEX `idx_actions_lesson` (`lessonId`)
 );

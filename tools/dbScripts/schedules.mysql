@@ -9,5 +9,7 @@ CREATE TABLE `schedules` (
   `lessonId` char(11) DEFAULT NULL,
   `venueId` char(11) DEFAULT NULL,
   `displayName` varchar(255) DEFAULT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  INDEX `idx_schedules_church_classroom` (`churchId`, `classroomId`),
+  INDEX `idx_schedules_date` (`scheduledDate`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;

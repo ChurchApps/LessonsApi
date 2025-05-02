@@ -6,5 +6,7 @@ CREATE TABLE `bundles` (
   `name` varchar(45) DEFAULT NULL,
   `fileId` char(11) DEFAULT NULL,
   `pendingUpdate` bit(1) DEFAULT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  INDEX `idx_bundles_content` (`contentType`, `contentId`),
+  INDEX `idx_bundles_pending` (`pendingUpdate`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
