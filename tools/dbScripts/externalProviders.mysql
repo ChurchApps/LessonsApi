@@ -1,0 +1,7 @@
+CREATE TABLE `externalProviders` (
+  `id` char(11) NOT NULL,
+  `churchId` char(11) DEFAULT NULL,
+  `name` varchar(45) DEFAULT NULL,
+  `apiUrl` varchar(1024) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+); 

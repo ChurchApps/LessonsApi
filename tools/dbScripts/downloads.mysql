@@ -1,0 +1,11 @@
+CREATE TABLE `downloads` (
+  `id` char(11) NOT NULL,
+  `lessonId` char(11) DEFAULT NULL,
+  `fileId` char(11) DEFAULT NULL,
+  `userId` char(11) DEFAULT NULL,
+  `churchId` char(11) DEFAULT NULL,
+  `ipAddress` varchar(45) DEFAULT NULL,
+  `downloadDate` datetime DEFAULT NULL,
+  `fileName` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+); 
