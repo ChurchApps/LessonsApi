@@ -75,9 +75,9 @@ const zipBundles =
     event,
     context
   ) => {
-    //await checkPool();
-    //await ZipHelper.zipPendingBundles();
-    //await GeoHelper.lookupMissing();
+    await checkPool();
+    await ZipHelper.zipPendingBundles();
+    await GeoHelper.lookupMissing();
   };
 
 module.exports.universal =
