@@ -1,4 +1,5 @@
-import AWS from "aws-sdk";
+// import AWS from "aws-sdk";
+import { ElasticTranscoderClient, CreateJobCommand, ReadJobCommand, CreateJobCommandOutput, ReadJobCommandOutput } from "@aws-sdk/client-elastic-transcoder";
 import { Repositories } from "../repositories/Repositories";
 import { File, Variant, Resource } from "../models";
 import { Environment, FilesHelper } from ".";
@@ -74,11 +75,9 @@ export class TranscodeHelper {
 
 
   private static getEncoder() {
-    const config: AWS.ElasticTranscoder.ClientConfiguration = {
-      apiVersion: "2012-09-25",
+    return new ElasticTranscoderClient({
       region: "us-east-1",
-    }
-    return new AWS.ElasticTranscoder(config)
+    });
   }
 
   static async encodeWebm(sourcePath: string, destPath: string, destFile: string) {
@@ -94,34 +93,21 @@ export class TranscodeHelper {
     }
 
     const thumbPattern = destFile.replace(".webm", "thumb-{count}");
-    const params: AWS.ElasticTranscoder.CreateJobRequest =
-    {
+
+    const params = {
       PipelineId: Environment.transcodePipeline,
       OutputKeyPrefix: destPath,
-      Input: {
-        Key: sourcePath
-      }, Outputs: [{
-        Key: destFile,
-        PresetId: Environment.transcodePreset,
-        ThumbnailPattern: thumbPattern
-      }]
-    }
+      Input: { Key: sourcePath },
+      Outputs: [{ Key: destFile, PresetId: Environment.transcodePreset, ThumbnailPattern: thumbPattern }],
+    };
 
     console.log(params);
     const encoder = this.getEncoder();
     console.log("created encoder")
+    const command = new CreateJobCommand(params);
+    const result: CreateJobCommandOutput = await encoder.send(command);
+    return result.Job;
 
-    const promise: Promise<any> = new Promise((resolve, reject) => {
-      encoder.createJob(params, (err, data) => {
-        if (err) reject(err);
-        else resolve(data);
-      });
-    });;
-
-    console.log("created promise")
-
-    const result = await promise;
-    console.log(JSON.stringify(result));
 
   }
 
