@@ -26,15 +26,15 @@ export class BundleController extends LessonsBaseController {
       });
     }
   */
-
-  @httpGet("/zip")
-  public async zipAll(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
-    return this.actionWrapper(req, res, async (au) => {
-      await ZipHelper.zipPendingBundles();
-      return []
-    });
-  }
-
+  /*
+    @httpGet("/zip")
+    public async zipAll(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
+      return this.actionWrapper(req, res, async (au) => {
+        await ZipHelper.zipPendingBundles();
+        return []
+      });
+    }
+  */
 
   @httpGet("/available")
   public async getAvailable(req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {

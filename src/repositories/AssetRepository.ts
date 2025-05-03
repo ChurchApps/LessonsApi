@@ -2,7 +2,6 @@ import { DB } from "@churchapps/apihelper"
 import { Asset } from "../models";
 import { UniqueIdHelper } from "../helpers";
 import { ArrayHelper } from "@churchapps/apihelper";
-import { ConfigurationServicePlaceholders } from "aws-sdk/lib/config_service_placeholders";
 
 export class AssetRepository {
 

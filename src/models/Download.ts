@@ -1,4 +1,3 @@
-import { DateTime } from "aws-sdk/clients/devicefarm";
 
 export class Download {
   public id?: string;
