@@ -1,6 +1,6 @@
-import { AsyncContainerModule } from "inversify";
+import { ContainerModule } from "inversify";
 
 // This is where all of the binding for constructor injection takes place
-export const bindings = new AsyncContainerModule(async () => {
-  await require("./controllers");
+export const bindings = new ContainerModule(() => {
+  require("./controllers");
 });

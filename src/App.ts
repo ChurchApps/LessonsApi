@@ -11,7 +11,7 @@ import cors from "cors"
 export const init = async () => {
   dotenv.config();
   const container = new Container();
-  await container.loadAsync(bindings);
+  container.load(bindings);
   const app = new InversifyExpressServer(container, null, null, null, CustomAuthProvider);
 
   const configFunction = (expApp: express.Application) => {

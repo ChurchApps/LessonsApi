@@ -1,7 +1,4 @@
-const {
-  createServer,
-  proxy
-} = require("aws-serverless-express");
+const serverlessExpress = require("@vendia/serverless-express");
 const {
   init
 } = require("./dist/App");
@@ -33,31 +30,12 @@ const checkPool =
     }
   };
 
-const universal =
-  function universal(
-    event,
-    context
-  ) {
-    checkPool().then(
-      () => {
-        init().then(
-          (
-            app
-          ) => {
-            const server =
-              createServer(
-                app
-              );
-            return proxy(
-              server,
-              event,
-              context
-            );
-          }
-        );
-      }
-    );
-  };
+const universal = async (event, context) => {
+  await checkPool();
+  const app = await init();
+  const handler = serverlessExpress({ app });
+  return handler(event, context);
+};
 
 const videoPingback =
   async (
