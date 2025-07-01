@@ -1,5 +1,5 @@
 import { DB } from "@churchapps/apihelper"
-import { Customization, Venue } from "../models";
+import { Customization } from "../models";
 import { UniqueIdHelper } from "../helpers";
 
 export class CustomizationRepository {

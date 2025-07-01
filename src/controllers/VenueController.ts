@@ -14,7 +14,7 @@ export class VenueController extends LessonsBaseController {
 
   @httpGet("/timeline")
   public async getPosts(req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
-    return this.actionWrapper(req, res, async (au) => {
+    return this.actionWrapper(req, res, async (_au) => {
       const venueIds = req.query.venueIds ? req.query.venueIds.toString().split(",") : [];
       return await this.repositories.venue.loadTimeline(venueIds);
     });

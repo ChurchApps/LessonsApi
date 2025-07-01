@@ -1,5 +1,6 @@
 // import Hubspot from "@hubspot/api-client";
 import { Environment } from ".";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { PublicObjectSearchRequest } from "@hubspot/api-client/lib/codegen/crm/companies";
 
 export class HubspotHelper {

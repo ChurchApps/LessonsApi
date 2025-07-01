@@ -1,7 +1,7 @@
 import { controller, httpPost, httpGet, interfaces, requestParam, httpDelete } from "inversify-express-utils";
 import express from "express";
 import { LessonsBaseController } from "./LessonsBaseController"
-import { Action, Asset, Bundle, ExternalVideo, File, Lesson, Program, Resource, Role, Section, Study, Variant, Venue } from "../models"
+import { ExternalVideo, Lesson } from "../models"
 import { Permissions } from '../helpers/Permissions'
 import { Environment, FileStorageHelper } from "../helpers"
 import { ArrayHelper } from "@churchapps/apihelper";

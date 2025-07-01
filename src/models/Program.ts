@@ -7,7 +7,7 @@ export class Program {
   public image?: string;
   public shortDescription?: string;
   public description?: string;
-  public videoEmbedUrl: string;
+  public videoEmbedUrl?: string;
   public live?: boolean;
   public aboutSection?: string;
   public age?: string;

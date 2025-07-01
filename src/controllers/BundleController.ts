@@ -4,6 +4,7 @@ import { LessonsBaseController } from "./LessonsBaseController"
 import { Bundle, Resource } from "../models"
 import { Permissions } from '../helpers/Permissions'
 import { FilesHelper } from "../helpers";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { ArrayHelper } from "@churchapps/apihelper";
 import { ZipHelper } from "../helpers/ZipHelper";
 
@@ -29,7 +30,7 @@ export class BundleController extends LessonsBaseController {
 
   @httpGet("/zip")
   public async zipAll(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
-    return this.actionWrapper(req, res, async (au) => {
+    return this.actionWrapper(req, res, async (_au) => {
       await ZipHelper.zipPendingBundles();
       return []
     });

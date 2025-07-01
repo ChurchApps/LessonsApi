@@ -1,6 +1,5 @@
-import { Action, ExternalVideo, File, Lesson, Schedule, Section, Study, Venue } from "../models";
+import { Action, ExternalVideo, File, Lesson, Section, Study, Venue } from "../models";
 import { Repositories } from "../repositories"
-import axios from "axios";
 import { ArrayHelper, Environment } from ".";
 import { PlaylistHelper } from "./PlaylistHelper";
 
@@ -93,7 +92,6 @@ export class LibraryHelper {
 
     sections.forEach(s => {
       const sectionActions: Action[] = ArrayHelper.getAll(actions, "sectionId", s.id);
-      const itemFiles: any[] = [];
       sectionActions.forEach(a => {
         if (a.externalVideoId || a.actionType === "Add-on") {
           const msg = this.getExternalVideoMessage(a, availableVideos, stream, resolution);

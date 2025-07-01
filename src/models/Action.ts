@@ -6,8 +6,8 @@ export class Action {
   public actionType?: string;
   public content?: string;
   public sort?: number;
-  public resourceId: string;
-  public assetId: string;
-  public externalVideoId: string;
+  public resourceId?: string;
+  public assetId?: string;
+  public externalVideoId?: string;
   public addOnId?: string;
 }

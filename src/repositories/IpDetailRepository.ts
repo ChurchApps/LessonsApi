@@ -1,6 +1,6 @@
 import { DB } from "@churchapps/apihelper"
-import { IpDetail, Lesson } from "../models";
-import { UniqueIdHelper, MySqlHelper } from "../helpers";
+import { IpDetail } from "../models";
+import { UniqueIdHelper } from "../helpers";
 
 export class IpDetailRepository {
 

@@ -1,6 +1,6 @@
 import { DB } from "@churchapps/apihelper"
 import { StudyCategory } from "../models";
-import { UniqueIdHelper, MySqlHelper } from "../helpers";
+import { UniqueIdHelper } from "../helpers";
 
 export class StudyCategoryRepository {
 

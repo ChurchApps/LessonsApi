@@ -1,4 +1,3 @@
-import { Schedule } from "../models";
 import { Repositories } from "../repositories"
 import axios from "axios";
 import { ArrayHelper } from ".";

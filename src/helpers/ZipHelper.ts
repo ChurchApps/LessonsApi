@@ -17,7 +17,7 @@ export class ZipHelper {
     try {
       await this.S3().send(new HeadObjectCommand({ Bucket: Environment.s3Bucket, Key: key }));
       return true;
-    } catch (err) {
+    } catch (err: any) {
       if (err.name === 'NotFound') return false;
       throw err;
     }

@@ -43,7 +43,7 @@ export class SectionController extends LessonsBaseController {
       const sourceSection: Section = await this.repositories.section.load(sourceSectionId);
       const destVenue: Venue = await this.repositories.venue.load(au.churchId, destVenueId);
 
-      if (destVenue.churchId !== au.churchId) this.denyAccess(["Access denied"]);
+      if (destVenue.churchId !== au.churchId) return this.denyAccess(["Access denied"]);
       else {
 
         let newSection = { ...sourceSection };
