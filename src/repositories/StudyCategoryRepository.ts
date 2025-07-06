@@ -24,19 +24,19 @@ export class StudyCategoryRepository {
   }
 
   public loadByCategoryName(programId:string, categoryName: string): Promise<StudyCategory[]> {
-    return DB.query("SELECT * FROM studyCategories WHERE programId=? AND categoryName=? ORDER BY sort", [programId, categoryName]);
+    return DB.query("SELECT * FROM studyCategories WHERE programId=? AND categoryName=? ORDER BY sort", [programId, categoryName]) as Promise<StudyCategory[]>
   }
 
   public loadPublicByProgram(programId:string): Promise<StudyCategory[]> {
-    return DB.query("SELECT * FROM studyCategories WHERE programId=? ORDER BY sort", [programId]);
+    return DB.query("SELECT * FROM studyCategories WHERE programId=? ORDER BY sort", [programId]) as Promise<StudyCategory[]>
   }
 
   public loadCategoryNames(programId:string): Promise<StudyCategory[]> {
-    return DB.query("SELECT categoryName FROM studyCategories WHERE programId=? GROUP BY categoryName ORDER BY categoryName", [programId]);
+    return DB.query("SELECT categoryName FROM studyCategories WHERE programId=? GROUP BY categoryName ORDER BY categoryName", [programId]) as Promise<StudyCategory[]>
   }
 
-  public delete(id: string): Promise<StudyCategory> {
-    return DB.query("DELETE FROM studyCategories WHERE id=?", [id]);
+  public delete(churchId: string, id: string): Promise<any> {
+    return DB.query("DELETE FROM studyCategories WHERE id=?", [id]) as Promise<any>;
   }
 
 }

@@ -10,7 +10,7 @@ import axios from "axios";
 export class ExternalProviderController extends LessonsBaseController {
 
   @httpGet("/playlist/:externalProviderId/:programId/:studyId/:lessonId/:venueId")
-  public async getExternalPlaylist(@requestParam("externalProviderId") externalProviderId: string, @requestParam("programId") programId: string, @requestParam("studyId") studyId: string, @requestParam("lessonId") lessonId: string, @requestParam("venueId") venueId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
+  public async getExternalPlaylist(@requestParam("externalProviderId") externalProviderId: string, @requestParam("programId") programId: string, @requestParam("studyId") studyId: string, @requestParam("lessonId") lessonId: string, @requestParam("venueId") venueId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
     return this.actionWrapperAnon(req, res, async () => {
       const data = await ExternalProviderHelper.loadExternalData(externalProviderId, programId, studyId, lessonId, venueId);
       return ExternalProviderHelper.convertToMessages(data);
@@ -18,7 +18,7 @@ export class ExternalProviderController extends LessonsBaseController {
   }
 
   @httpGet("/:id/lessons")
-  public async getPublicLessons(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
+  public async getPublicLessons(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
     return this.actionWrapperAnon(req, res, async () => {
       const ep = await this.repositories.externalProvider.loadPublic(id);
       const data = (await axios.get(ep.apiUrl)).data;
@@ -27,7 +27,7 @@ export class ExternalProviderController extends LessonsBaseController {
   }
 
   @httpGet("/:id/venue/:venueId")
-  public async getPublicExternal(@requestParam("id") id: string, @requestParam("venueId") venueId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
+  public async getPublicExternal(@requestParam("id") id: string, @requestParam("venueId") venueId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
     return this.actionWrapperAnon(req, res, async () => {
       const lessonData = await ExternalProviderHelper.loadExternalDataById(id, venueId);
       return lessonData;
@@ -35,14 +35,14 @@ export class ExternalProviderController extends LessonsBaseController {
   }
 
   @httpGet("/:id")
-  public async get(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
+  public async get(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
     return this.actionWrapper(req, res, async (au) => {
       return await this.repositories.externalProvider.load(au.churchId, id)
     });
   }
 
   @httpGet("/")
-  public async getAll(req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
+  public async getAll(req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
     return this.actionWrapper(req, res, async (au) => {
       return await this.repositories.externalProvider.loadAll(au.churchId);
     });
@@ -50,7 +50,7 @@ export class ExternalProviderController extends LessonsBaseController {
 
 
   @httpPost("/")
-  public async save(req: express.Request<{}, {}, Provider[]>, res: express.Response): Promise<interfaces.IHttpActionResult> {
+  public async save(req: express.Request<{}, {}, Provider[]>, res: express.Response): Promise<any> {
     return this.actionWrapper(req, res, async (au) => {
       if (!au.checkAccess(Permissions.schedules.edit)) return this.json({}, 401);
       else {
@@ -63,7 +63,7 @@ export class ExternalProviderController extends LessonsBaseController {
   }
 
   @httpDelete("/:id")
-  public async delete(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
+  public async delete(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
     return this.actionWrapper(req, res, async (au) => {
       if (!au.checkAccess(Permissions.schedules.edit)) return this.json({}, 401);
       else {

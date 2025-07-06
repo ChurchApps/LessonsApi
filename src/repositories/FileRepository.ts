@@ -25,32 +25,32 @@ export class FileRepository {
   }
 
   public load(churchId: string, id: string): Promise<File> {
-    return DB.queryOne("SELECT * FROM files WHERE id=? AND churchId=?", [id, churchId]);
+    return DB.queryOne("SELECT * FROM files WHERE id=? AND churchId=?", [id, churchId]) as Promise<File>
   }
 
   public loadPublicByIds(ids: string[]): Promise<File[]> {
     const sql = "SELECT * FROM files WHERE id IN (" + ArrayHelper.fillArray("?", ids.length) + ")";
-    return DB.query(sql, ids);
+    return DB.query(sql, ids) as Promise<File[]>
   }
 
   public loadByIds(churchId: string, ids: string[]): Promise<File[]> {
     const sql = "SELECT * FROM files WHERE churchId=? AND id IN (" + ArrayHelper.fillArray("?", ids.length) + ")";
-    return DB.query(sql, [churchId].concat(ids));
+    return DB.query(sql, [churchId].concat(ids)) as Promise<File[]>
   }
 
   public loadForChurch(churchId: string): Promise<File[]> {
-    return DB.query("SELECT * FROM files WHERE churchId=?", [churchId]);
+    return DB.query("SELECT * FROM files WHERE churchId=?", [churchId]) as Promise<File[]>
   }
 
   public loadAll(): Promise<File[]> {
-    return DB.query("SELECT * FROM files", []);
+    return DB.query("SELECT * FROM files", []) as Promise<File[]>
   }
 
-  public delete(churchId: string, id: string): Promise<File> {
-    return DB.query("DELETE FROM files WHERE id=? AND churchId=?", [id, churchId]);
+  public delete(churchId: string, id: string): Promise<any> {
+    return DB.query("DELETE FROM files WHERE id=? AND churchId=?", [id, churchId]) as Promise<any>;
   }
 
-  public cleanUp(): Promise<File> {
+  public cleanUp(): Promise<any> {
     const sql = "DELETE FROM files WHERE id NOT IN ("
       + " SELECT fileId FROM bundles where fileId is not null"
       + " UNION ALL"
@@ -58,7 +58,7 @@ export class FileRepository {
       + " UNION ALL"
       + " SELECT fileId FROM variants where fileId is not null"
       + " )"
-    return DB.query(sql, []);
+    return DB.query(sql, []) as Promise<any>;
   }
 
 

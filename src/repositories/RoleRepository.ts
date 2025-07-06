@@ -24,15 +24,15 @@ export class RoleRepository {
   }
 
   public loadByLessonId(lessonId: string): Promise<Role[]> {
-    return DB.query("SELECT * FROM roles WHERE lessonId=? ORDER BY sort", [lessonId]);
+    return DB.query("SELECT * FROM roles WHERE lessonId=? ORDER BY sort", [lessonId]) as Promise<Role[]>
   }
 
   public load(id: string): Promise<Role> {
-    return DB.queryOne("SELECT * FROM roles WHERE id=?", [id]);
+    return DB.queryOne("SELECT * FROM roles WHERE id=?", [id]) as Promise<Role>
   }
 
-  public delete(churchId: string, id: string): Promise<Role> {
-    return DB.query("DELETE FROM roles WHERE id=? AND churchId=?", [id, churchId]);
+  public delete(churchId: string, id: string): Promise<any> {
+    return DB.query("DELETE FROM roles WHERE id=? AND churchId=?", [id, churchId]) as Promise<any>;
   }
 
 }

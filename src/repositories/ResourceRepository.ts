@@ -24,23 +24,23 @@ export class ResourceRepository {
   }
 
   public loadByContentTypeId(churchId: string, contentType: string, contentId: string): Promise<Resource[]> {
-    return DB.query("SELECT * FROM resources WHERE bundleId in (SELECT id from bundles WHERE churchId=? AND contentType=? AND contentId=?) order by name", [churchId, contentType, contentId]);
+    return DB.query("SELECT * FROM resources WHERE bundleId in (SELECT id from bundles WHERE churchId=? AND contentType=? AND contentId=?) order by name", [churchId, contentType, contentId]) as Promise<Resource[]>
   }
 
   public loadByBundleId(churchId: string, bundleId: string): Promise<Resource[]> {
-    return DB.query("SELECT * FROM resources WHERE churchId=? AND bundleId=? order by name", [churchId, bundleId]);
+    return DB.query("SELECT * FROM resources WHERE churchId=? AND bundleId=? order by name", [churchId, bundleId]) as Promise<Resource[]>
   }
 
   public loadPublicForLesson(lessonId: string): Promise<Resource[]> {
-    return DB.query("SELECT * FROM resources WHERE id in (SELECT resourceId from actions WHERE lessonId=?)", [lessonId]);
+    return DB.query("SELECT * FROM resources WHERE id in (SELECT resourceId from actions WHERE lessonId=?)", [lessonId]) as Promise<Resource[]>
   }
 
   public load(churchId: string, id: string): Promise<Resource> {
-    return DB.queryOne("SELECT * FROM resources WHERE id=? and churchId=?", [id, churchId]);
+    return DB.queryOne("SELECT * FROM resources WHERE id=? and churchId=?", [id, churchId]) as Promise<Resource>
   }
 
   public loadWithoutChurchId(id: string): Promise<Resource> {
-    return DB.queryOne("SELECT * FROM resources WHERE id=?", [id]);
+    return DB.queryOne("SELECT * FROM resources WHERE id=?", [id]) as Promise<Resource>
   }
 
   public loadNeedingWebm(): Promise<any[]> {
@@ -50,11 +50,11 @@ export class ResourceRepository {
       + " inner join resources r on r.id=v.resourceId"
       + " left outer join variants v2 on v2.resourceId=v.resourceId and v2.name='WEBM'"
       + " where f.contentPath like '%.mp4%' and v2.id is null";
-    return DB.query(sql, []);
+    return DB.query(sql, []) as Promise<Resource[]>;
   }
 
-  public delete(churchId: string, id: string): Promise<Resource> {
-    return DB.query("DELETE FROM resources WHERE id=? AND churchId=?", [id, churchId]);
+  public delete(churchId: string, id: string): Promise<any> {
+    return DB.query("DELETE FROM resources WHERE id=? AND churchId=?", [id, churchId]) as Promise<any>;
   }
 
 }

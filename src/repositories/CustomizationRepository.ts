@@ -25,15 +25,15 @@ export class CustomizationRepository {
 
 
   public loadByVenueId(churchId: string, venueId: string): Promise<Customization[]> {
-    return DB.query("SELECT * FROM customizations WHERE churchId=? and venueId=?", [churchId, venueId]);
+    return DB.query("SELECT * FROM customizations WHERE churchId=? and venueId=?", [churchId, venueId]) as Promise<Customization[]>
   }
 
   public load(churchId: string, id: string): Promise<Customization> {
-    return DB.queryOne("SELECT * FROM customizations WHERE id=? and churchId=?", [id, churchId]);
+    return DB.queryOne("SELECT * FROM customizations WHERE id=? and churchId=?", [id, churchId]) as Promise<Customization>
   }
 
-  public delete(churchId: string, id: string): Promise<Customization> {
-    return DB.query("DELETE FROM customizations WHERE id=? AND churchId=?", [id, churchId]);
+  public delete(churchId: string, id: string): Promise<any> {
+    return DB.query("DELETE FROM customizations WHERE id=? AND churchId=?", [id, churchId]) as Promise<any>;
   }
 
 }

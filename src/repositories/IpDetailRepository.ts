@@ -28,7 +28,7 @@ export class IpDetailRepository {
       + " where ipAddress like '%.%.%.%'"
       + " and ipAddress not in (select ipAddress from ipDetails)"
       + " group by ipAddress limit 10";
-    const data: any[] = await DB.query(sql, []);
+    const data: any[] = await DB.query(sql, []) as any[];
     const result: string[] = [];
     data.forEach(d => result.push(d.ipAddress))
     return result;

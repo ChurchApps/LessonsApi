@@ -13,7 +13,7 @@ import { LibraryHelper } from "../helpers/LibraryHelper";
 export class VenueController extends LessonsBaseController {
 
   @httpGet("/timeline")
-  public async getPosts(req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
+  public async getPosts(req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
     return this.actionWrapper(req, res, async (_au) => {
       const venueIds = req.query.venueIds ? req.query.venueIds.toString().split(",") : [];
       return await this.repositories.venue.loadTimeline(venueIds);
@@ -33,7 +33,7 @@ export class VenueController extends LessonsBaseController {
   }
 
   @httpGet("/playlistNew/:venueId")
-  public async getPlaylistNew(@requestParam("venueId") venueId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
+  public async getPlaylistNew(@requestParam("venueId") venueId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
     return this.actionWrapperAnon(req, res, async () => {
       const venue: Venue = await this.repositories.venue.loadPublic(venueId);
       const lesson: Lesson = await this.repositories.lesson.loadPublic(venue.lessonId);
@@ -52,7 +52,7 @@ export class VenueController extends LessonsBaseController {
 
 
   @httpGet("/playlist/:venueId")
-  public async getPlaylist(@requestParam("venueId") venueId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
+  public async getPlaylist(@requestParam("venueId") venueId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
     return this.actionWrapperAnon(req, res, async () => {
       const venue: Venue = await this.repositories.venue.loadPublic(venueId);
       const lesson: Lesson = await this.repositories.lesson.loadPublic(venue.lessonId);
@@ -100,14 +100,14 @@ export class VenueController extends LessonsBaseController {
   }
 
   @httpGet("/:id")
-  public async get(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
+  public async get(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
     return this.actionWrapper(req, res, async (au) => {
       return await this.repositories.venue.load(au.churchId, id);
     });
   }
 
   @httpGet("/public/feed/:id")
-  public async getPublicFeed(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
+  public async getPublicFeed(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
     return this.actionWrapperAnon(req, res, async () => {
       const venue = await this.repositories.venue.loadPublic(id);
       const lesson = await this.repositories.lesson.loadPublic(venue.lessonId);
@@ -124,7 +124,7 @@ export class VenueController extends LessonsBaseController {
   }
 
   @httpGet("/public/:id")
-  public async getPublic(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
+  public async getPublic(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
     return this.actionWrapperAnon(req, res, async () => {
       const venue = await this.repositories.venue.loadPublic(id);
       const sections = await this.repositories.section.loadByLessonId(venue.lessonId);
@@ -137,7 +137,7 @@ export class VenueController extends LessonsBaseController {
 
   /*Unused?*/
   @httpGet("/public/lesson/:lessonId")
-  public async getPublicForLesson(@requestParam("lessonId") lessonId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
+  public async getPublicForLesson(@requestParam("lessonId") lessonId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
     return this.actionWrapperAnon(req, res, async () => {
       const venues = await this.repositories.venue.loadPublicByLessonId(lessonId);
       const sections = await this.repositories.section.loadByLessonId(lessonId);
@@ -150,7 +150,7 @@ export class VenueController extends LessonsBaseController {
   }
 
   @httpGet("/lesson/:lessonId")
-  public async getForLesson(@requestParam("lessonId") lessonId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
+  public async getForLesson(@requestParam("lessonId") lessonId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
     return this.actionWrapper(req, res, async (au) => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
       else return await this.repositories.venue.loadByLessonId(au.churchId, lessonId);
@@ -159,14 +159,14 @@ export class VenueController extends LessonsBaseController {
 
 
   @httpGet("/names/classroom/:classroomId")
-  public async getNameByClassroom(@requestParam("classroomId") classroomId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
+  public async getNameByClassroom(@requestParam("classroomId") classroomId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
     return this.actionWrapper(req, res, async (au) => {
       return await this.repositories.venue.loadNamesForClassroom(au.churchId, classroomId)
     });
   }
 
   @httpGet("/")
-  public async getAll(req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
+  public async getAll(req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
     return this.actionWrapper(req, res, async (au) => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
       else return await this.repositories.venue.loadAll(au.churchId);
@@ -175,7 +175,7 @@ export class VenueController extends LessonsBaseController {
 
 
   @httpPost("/")
-  public async save(req: express.Request<{}, {}, Venue[]>, res: express.Response): Promise<interfaces.IHttpActionResult> {
+  public async save(req: express.Request<{}, {}, Venue[]>, res: express.Response): Promise<any> {
     return this.actionWrapper(req, res, async (au) => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
       else {
@@ -188,7 +188,7 @@ export class VenueController extends LessonsBaseController {
   }
 
   @httpDelete("/:id")
-  public async delete(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
+  public async delete(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
     return this.actionWrapper(req, res, async (au) => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
       else {

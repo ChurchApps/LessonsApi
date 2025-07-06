@@ -13,7 +13,7 @@ export class DownloadRepository {
   }
 
   public async getDownloadCount(churchId: string) {
-    return DB.queryOne("select count(distinct(lessonId)) as downloadCount, max(downloadDate) as lastDownload from downloads where churchId=?", [churchId]);
+    return DB.queryOne("select count(distinct(lessonId)) as downloadCount, max(downloadDate) as lastDownload from downloads where churchId=?", [churchId]) as Promise<any>;
   }
 
   public async create(download: Download) {
@@ -34,11 +34,11 @@ export class DownloadRepository {
   public loadExisting(candidate: Download): Promise<Download> {
     const sql = "SELECT * FROM downloads WHERE lessonId=? AND churchId=? AND ipAddress=? AND fileName=? AND downloadDate>?";
     const date = new Date(candidate.downloadDate.toDateString());
-    return DB.queryOne(sql, [candidate.lessonId, candidate.churchId, candidate.ipAddress, candidate.fileName, date]);
+    return DB.queryOne(sql, [candidate.lessonId, candidate.churchId, candidate.ipAddress, candidate.fileName, date]) as Promise<Download>
   }
 
   public load(id: string): Promise<Download> {
-    return DB.queryOne("SELECT * FROM downloads WHERE id=?", [id]);
+    return DB.queryOne("SELECT * FROM downloads WHERE id=?", [id]) as Promise<Download>
   }
 
   public geo(programId: string, startDate: Date, endDate: Date): Promise<any[]> {
@@ -49,7 +49,7 @@ export class DownloadRepository {
       + " INNER JOIN studies s on s.id=l.studyId"
       + " WHERE s.programId=? AND d.downloadDate between ? AND ?"
       + " GROUP by  ip.lat, ip.lon, ip.city, ip.state, ip.country"
-    return DB.query(sql, [programId, startDate, endDate]);
+    return DB.query(sql, [programId, startDate, endDate]) as Promise<Download[]>;
   }
 
   public countsByStudy(programId: string, startDate: Date, endDate: Date): Promise<any[]> {
@@ -62,7 +62,7 @@ export class DownloadRepository {
       + " GROUP by s.id, s.name"
       + " ORDER by s.name"
 
-    return DB.query(sql, [programId, startDate, endDate]);
+    return DB.query(sql, [programId, startDate, endDate]) as Promise<Download[]>;
   }
 
   public uniqueChurches(programId: string, startDate: Date, endDate: Date): Promise<any[]> {
@@ -74,12 +74,12 @@ export class DownloadRepository {
       + " AND d.churchId IS NOT NULL and d.churchId<>''"
       + " group by d.churchId"
 
-    return DB.query(sql, [programId, startDate, endDate]);
+    return DB.query(sql, [programId, startDate, endDate]) as Promise<Download[]>;
   }
 
 
-  public delete(id: string): Promise<Download> {
-    return DB.query("DELETE FROM downloads WHERE id=?", [id]);
+  public delete(churchId: string, id: string): Promise<any> {
+    return DB.query("DELETE FROM downloads WHERE id=?", [id]) as Promise<any>;
   }
 
 }

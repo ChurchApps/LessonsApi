@@ -9,7 +9,7 @@ import { VimeoHelper } from "../helpers/VimeoHelper";
 export class ExternalVideoController extends LessonsBaseController {
   /*
     @httpGet("/public/lesson/:lessonId")
-    public async getPublicForLesson(@requestParam("lessonId") lessonId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
+    public async getPublicForLesson(@requestParam("lessonId") lessonId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
       return this.actionWrapperAnon(req, res, async () => {
         const externalVideos: ExternalVideo[] = await this.repositories.externalVideo.loadPublicForLesson(lessonId);
         return externalVideos;
@@ -18,7 +18,7 @@ export class ExternalVideoController extends LessonsBaseController {
   */
 
   @httpGet("/test2")
-  public async test2(req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
+  public async test2(req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
     return this.actionWrapperAnon(req, res, async () => {
 
       const videos = await this.repositories.externalVideo.tempLoadNeedingUpdate();
@@ -40,7 +40,7 @@ export class ExternalVideoController extends LessonsBaseController {
 
   /*
    @httpGet("/test")
-   public async test(req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
+   public async test(req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
      return this.actionWrapperAnon(req, res, async () => {
 
        const lessons = await this.repositories.lesson.tempLessonsNeedingVideoFiles();
@@ -74,7 +74,7 @@ export class ExternalVideoController extends LessonsBaseController {
    }*/
 
   @httpGet("/download/:id")
-  public async downloadRedirect(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
+  public async downloadRedirect(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
     return this.actionWrapperAnon(req, res, async () => {
       let result = await this.repositories.externalVideo.loadPublic(id);
       if (result.downloadsExpire < new Date()) result = await VimeoHelper.updateVimeoLinks(result);
@@ -85,7 +85,7 @@ export class ExternalVideoController extends LessonsBaseController {
   }
 
   @httpGet("/public/:id")
-  public async getPublic(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
+  public async getPublic(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
     return this.actionWrapperAnon(req, res, async () => {
       let result = await this.repositories.externalVideo.loadPublic(id);
       console.log(result);
@@ -95,7 +95,7 @@ export class ExternalVideoController extends LessonsBaseController {
   }
 
   @httpGet("/:id")
-  public async get(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
+  public async get(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
     return this.actionWrapper(req, res, async (au) => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
       else {
@@ -106,7 +106,7 @@ export class ExternalVideoController extends LessonsBaseController {
   }
 
   @httpGet("/content/:contentType/:contentId")
-  public async getForContent(@requestParam("contentType") contentType: string, @requestParam("contentId") contentId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
+  public async getForContent(@requestParam("contentType") contentType: string, @requestParam("contentId") contentId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
     return this.actionWrapper(req, res, async (au) => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
       else return await this.repositories.externalVideo.loadByContentTypeId(au.churchId, contentType, contentId);
@@ -114,7 +114,7 @@ export class ExternalVideoController extends LessonsBaseController {
   }
 
   @httpPost("/")
-  public async save(req: express.Request<{}, {}, ExternalVideo[]>, res: express.Response): Promise<interfaces.IHttpActionResult> {
+  public async save(req: express.Request<{}, {}, ExternalVideo[]>, res: express.Response): Promise<any> {
     return this.actionWrapper(req, res, async (au) => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
       else {
@@ -148,7 +148,7 @@ export class ExternalVideoController extends LessonsBaseController {
   }
 
   @httpDelete("/:id")
-  public async delete(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
+  public async delete(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
     return this.actionWrapper(req, res, async (au) => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
       else {

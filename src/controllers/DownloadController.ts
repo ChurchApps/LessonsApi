@@ -28,7 +28,7 @@ export class DownloadController extends LessonsBaseController {
   */
 
   @httpPost("/")
-  public async save(req: express.Request<{}, {}, Download[]>, res: express.Response): Promise<interfaces.IHttpActionResult> {
+  public async save(req: express.Request<{}, {}, Download[]>, res: express.Response): Promise<any> {
     return this.actionWrapper(req, res, async () => {
       const promises: Promise<Download>[] = [];
       req.body.forEach(download => {

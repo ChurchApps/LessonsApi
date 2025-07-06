@@ -43,35 +43,35 @@ export class VenueRepository {
       + " where s.churchId=? AND s.classroomId=?"
       + " group by v.name"
       + " order by v.name;"
-    return DB.query(sql, [churchId, lessonId]);
+    return DB.query(sql, [churchId, lessonId]) as Promise<string[]>;
   }
 
   public loadByLessonId(churchId: string, lessonId: string): Promise<Venue[]> {
-    return DB.query("SELECT * FROM venues WHERE churchId=? AND lessonId=? ORDER BY sort", [churchId, lessonId]);
+    return DB.query("SELECT * FROM venues WHERE churchId=? AND lessonId=? ORDER BY sort", [churchId, lessonId]) as Promise<Venue[]>
   }
 
   public loadPublicByLessonId(lessonId: string): Promise<Venue[]> {
-    return DB.query("SELECT * FROM venues WHERE lessonId=? ORDER BY sort", [lessonId]);
+    return DB.query("SELECT * FROM venues WHERE lessonId=? ORDER BY sort", [lessonId]) as Promise<Venue[]>
   }
 
   public loadPublic(id: string): Promise<Venue> {
-    return DB.queryOne("SELECT * FROM venues WHERE id=?", [id]);
+    return DB.queryOne("SELECT * FROM venues WHERE id=?", [id]) as Promise<Venue>
   }
 
   public loadPublicAll(): Promise<Venue[]> {
-    return DB.query("SELECT * FROM venues order by name", []);
+    return DB.query("SELECT * FROM venues order by name", []) as Promise<Venue[]>
   }
 
   public load(churchId: string, id: string): Promise<Venue> {
-    return DB.queryOne("SELECT * FROM venues WHERE id=? AND churchId=?", [id, churchId]);
+    return DB.queryOne("SELECT * FROM venues WHERE id=? AND churchId=?", [id, churchId]) as Promise<Venue>
   }
 
   public loadAll(churchId: string): Promise<Venue[]> {
-    return DB.query("SELECT * FROM venues WHERE churchId=? ORDER BY sort", [churchId]);
+    return DB.query("SELECT * FROM venues WHERE churchId=? ORDER BY sort", [churchId]) as Promise<Venue[]>
   }
 
-  public delete(churchId: string, id: string): Promise<Venue> {
-    return DB.query("DELETE FROM venues WHERE id=? AND churchId=?", [id, churchId]);
+  public delete(churchId: string, id: string): Promise<any> {
+    return DB.query("DELETE FROM venues WHERE id=? AND churchId=?", [id, churchId]) as Promise<any>;
   }
 
 }

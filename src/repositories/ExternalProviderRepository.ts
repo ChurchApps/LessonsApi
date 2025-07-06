@@ -24,20 +24,20 @@ export class ExternalProviderRepository {
   }
 
   public loadPublic(id: string): Promise<ExternalProvider> {
-    return DB.queryOne("SELECT * FROM externalProviders WHERE id=?", [id]);
+    return DB.queryOne("SELECT * FROM externalProviders WHERE id=?", [id]) as Promise<ExternalProvider>
   }
 
   public load(churchId: string, id: string): Promise<ExternalProvider> {
-    return DB.queryOne("SELECT * FROM externalProviders WHERE id=? AND churchId=?", [id, churchId]);
+    return DB.queryOne("SELECT * FROM externalProviders WHERE id=? AND churchId=?", [id, churchId]) as Promise<ExternalProvider>
   }
 
   public loadAll(churchId: string): Promise<ExternalProvider[]> {
     console.log("SELECT * FROM externalProviders WHERE churchId=?", [churchId])
-    return DB.query("SELECT * FROM externalProviders WHERE churchId=?", [churchId]);
+    return DB.query("SELECT * FROM externalProviders WHERE churchId=?", [churchId]) as Promise<ExternalProvider[]>
   }
 
-  public delete(churchId: string, id: string): Promise<ExternalProvider> {
-    return DB.query("DELETE FROM externalProviders WHERE id=? AND churchId=?", [id, churchId]);
+  public delete(churchId: string, id: string): Promise<any> {
+    return DB.query("DELETE FROM externalProviders WHERE id=? AND churchId=?", [id, churchId]) as Promise<any>;
   }
 
 }

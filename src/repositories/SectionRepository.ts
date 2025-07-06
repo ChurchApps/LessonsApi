@@ -24,7 +24,7 @@ export class SectionRepository {
   }
 
   public loadByVenueId(churchId: string, venueId: string): Promise<Section[]> {
-    return DB.query("SELECT * FROM sections WHERE churchId=? AND venueId=? ORDER BY sort", [churchId, venueId]);
+    return DB.query("SELECT * FROM sections WHERE churchId=? AND venueId=? ORDER BY sort", [churchId, venueId]) as Promise<Section[]>
   }
 
   public loadForPlaylist(churchId: string, venueId: string, classRoomChurchId: string): Promise<Section[]> {
@@ -32,23 +32,23 @@ export class SectionRepository {
       + " left join customizations sectionSort on sectionSort.churchId=? AND sectionSort.venueId=s.venueId AND sectionSort.action='sort' AND sectionSort.contentId=s.id"
       + " WHERE s.churchId=? AND s.venueId=?"
       + " ORDER BY IFNULL(cast(sectionSort.actionContent as unsigned), s.sort)"
-    return DB.query(sql, [classRoomChurchId, churchId, venueId]);
+    return DB.query(sql, [classRoomChurchId, churchId, venueId]) as Promise<Section[]>
   }
 
   public loadByVenueIdPublic(venueId: string): Promise<Section[]> {
-    return DB.query("SELECT * FROM sections WHERE venueId=? ORDER BY sort", [venueId]);
+    return DB.query("SELECT * FROM sections WHERE venueId=? ORDER BY sort", [venueId]) as Promise<Section[]>
   }
 
   public loadByLessonId(lessonId: string): Promise<Section[]> {
-    return DB.query("SELECT * FROM sections WHERE lessonId=? ORDER BY sort", [lessonId]);
+    return DB.query("SELECT * FROM sections WHERE lessonId=? ORDER BY sort", [lessonId]) as Promise<Section[]>
   }
 
   public load(id: string): Promise<Section> {
-    return DB.queryOne("SELECT * FROM sections WHERE id=?", [id]);
+    return DB.queryOne("SELECT * FROM sections WHERE id=?", [id]) as Promise<Section>
   }
 
-  public delete(churchId: string, id: string): Promise<Section> {
-    return DB.query("DELETE FROM sections WHERE id=? AND churchId=?", [id, churchId]);
+  public delete(churchId: string, id: string): Promise<any> {
+    return DB.query("DELETE FROM sections WHERE id=? AND churchId=?", [id, churchId]) as Promise<any>;
   }
 
 }

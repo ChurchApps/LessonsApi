@@ -24,23 +24,23 @@ export class AddOnRepository {
   }
 
   public loadPublic(): Promise<AddOn[]> {
-    return DB.query("SELECT * FROM addOns order by category, name", []);
+    return DB.query("SELECT * FROM addOns order by category, name", []) as Promise<AddOn[]>
   }
 
   public loadAll(churchId: string): Promise<AddOn[]> {
-    return DB.query("SELECT * FROM addOns WHERE churchId=? order by category, name", [churchId]);
+    return DB.query("SELECT * FROM addOns WHERE churchId=? order by category, name", [churchId]) as Promise<AddOn[]>
   }
 
   public loadPublicForLesson(lessonId: string): Promise<AddOn[]> {
-    return DB.query("SELECT * FROM addOns WHERE id in (SELECT addOnId from actions WHERE lessonId=?)", [lessonId]);
+    return DB.query("SELECT * FROM addOns WHERE id in (SELECT addOnId from actions WHERE lessonId=?)", [lessonId]) as Promise<AddOn[]>
   }
 
   public load(id: string): Promise<AddOn> {
-    return DB.queryOne("SELECT * FROM addOns WHERE id=?", [id]);
+    return DB.queryOne("SELECT * FROM addOns WHERE id=?", [id]) as Promise<AddOn>
   }
 
-  public delete(churchId: string, id: string): Promise<AddOn> {
-    return DB.query("DELETE FROM addOns WHERE id=? AND churchId=?", [id, churchId]);
+  public delete(churchId: string, id: string): Promise<any> {
+    return DB.query("DELETE FROM addOns WHERE id=? AND churchId=?", [id, churchId]) as Promise<any>;
   }
 
 }

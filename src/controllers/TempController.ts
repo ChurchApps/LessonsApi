@@ -12,7 +12,7 @@ export class TempController extends LessonsBaseController {
 
 
   @httpGet("/venue/:venueId")
-  public async getPublicForVenue(@requestParam("venueId") venueId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
+  public async getPublicForVenue(@requestParam("venueId") venueId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
     return this.actionWrapperAnon(req, res, async () => {
 
       const venue = await this.repositories.venue.loadPublic(venueId);

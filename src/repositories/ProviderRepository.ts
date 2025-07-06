@@ -28,27 +28,27 @@ export class ProviderRepository {
       + "(select count(*) from providers) as providers, "
       + "(select count(*) from studies where live=1) as studies, "
       + "(select count(*) from lessons where live=1) as lessons"
-    return DB.queryOne(sql, []);
+    return DB.queryOne(sql, []) as Promise<Provider>
   }
 
   public loadPublic(id: string): Promise<Provider> {
-    return DB.queryOne("SELECT * FROM providers WHERE id=?", [id]);
+    return DB.queryOne("SELECT * FROM providers WHERE id=?", [id]) as Promise<Provider>
   }
 
   public load(churchId: string, id: string): Promise<Provider> {
-    return DB.queryOne("SELECT * FROM providers WHERE id=? AND churchId=?", [id, churchId]);
+    return DB.queryOne("SELECT * FROM providers WHERE id=? AND churchId=?", [id, churchId]) as Promise<Provider>
   }
 
   public loadAll(churchId: string): Promise<Provider[]> {
-    return DB.query("SELECT * FROM providers WHERE churchId=?", [churchId]);
+    return DB.query("SELECT * FROM providers WHERE churchId=?", [churchId]) as Promise<Provider[]>
   }
 
   public loadPublicAll(): Promise<Provider[]> {
-    return DB.query("SELECT * FROM providers", []);
+    return DB.query("SELECT * FROM providers", []) as Promise<Provider[]>
   }
 
-  public delete(churchId: string, id: string): Promise<Provider> {
-    return DB.query("DELETE FROM providers WHERE id=? AND churchId=?", [id, churchId]);
+  public delete(churchId: string, id: string): Promise<any> {
+    return DB.query("DELETE FROM providers WHERE id=? AND churchId=?", [id, churchId]) as Promise<any>;
   }
 
 }

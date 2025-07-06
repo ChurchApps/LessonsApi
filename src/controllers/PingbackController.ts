@@ -6,7 +6,7 @@ import { LessonsBaseController } from "./LessonsBaseController"
 export class PingbackController extends LessonsBaseController {
 
   @httpPost("/")
-  public async handleVideoTranscoded(req: express.Request<{}, {}, any>, res: express.Response): Promise<interfaces.IHttpActionResult> {
+  public async handleVideoTranscoded(req: express.Request<{}, {}, any>, res: express.Response): Promise<any> {
     req.headers['content-type'] = req.headers['content-type'] || 'application/json';
 
     console.log("made it to pingback");

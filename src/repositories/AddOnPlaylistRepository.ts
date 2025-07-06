@@ -24,11 +24,11 @@ export class AddOnPlaylistRepository {
   }
 
   public load(id: string): Promise<AddOnPlaylist> {
-    return DB.queryOne("SELECT * FROM addOnPlaylists WHERE id=?", [id]);
+    return DB.queryOne("SELECT * FROM addOnPlaylists WHERE id=?", [id]) as Promise<AddOnPlaylist>
   }
 
-  public delete(churchId: string, id: string): Promise<AddOnPlaylist> {
-    return DB.query("DELETE FROM addOnPlaylists WHERE id=? AND churchId=?", [id, churchId]);
+  public delete(churchId: string, id: string): Promise<any> {
+    return DB.query("DELETE FROM addOnPlaylists WHERE id=? AND churchId=?", [id, churchId]) as Promise<any>;
   }
 
 }

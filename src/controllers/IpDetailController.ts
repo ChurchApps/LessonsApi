@@ -7,7 +7,7 @@ import { GeoHelper } from "../helpers"
 export class IpDetailController extends LessonsBaseController {
 
   @httpPost("/lookup")
-  public async save(req: express.Request<{}, {}, []>, res: express.Response): Promise<interfaces.IHttpActionResult> {
+  public async save(req: express.Request<{}, {}, []>, res: express.Response): Promise<any> {
     return this.actionWrapperAnon(req, res, async () => {
       await GeoHelper.lookupMissing();
     });

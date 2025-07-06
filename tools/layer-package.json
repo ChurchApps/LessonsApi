@@ -1,0 +1,23 @@
+{
+  "name": "lessons-api-layer",
+  "version": "1.0.0",
+  "description": "Lambda layer dependencies for LessonsApi",
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.842.0",
+    "@churchapps/apihelper": "^0.1.1",
+    "@hubspot/api-client": "^13.0.0",
+    "@vendia/serverless-express": "^4.12.6",
+    "archiver": "^7.0.1",
+    "axios": "^1.10.0",
+    "body-parser": "^2.2.0",
+    "cors": "^2.8.5",
+    "dayjs": "^1.11.13",
+    "dotenv": "^17.0.1",
+    "express": "^4.21.2",
+    "fs-extra": "^11.3.0",
+    "inversify": "^6.2.2",
+    "inversify-express-utils": "^6.5.0",
+    "mysql2": "^3.14.1",
+    "reflect-metadata": "^0.2.2"
+  }
+}

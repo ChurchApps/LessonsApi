@@ -34,19 +34,19 @@ export class ActionRepository {
       + " left join customizations sc on sc.churchId=? AND sc.venueId=s.venueId AND sc.action='sort' AND sc.contentId=s.id"
       + " where s.venueId=? and c.id is null"
       + " order by IFNULL(cast(sc.actionContent as unsigned), s.sort), IFNULL(cast(rc.actionContent as unsigned), r.sort), IFNULL(cast(ac.actionContent as unsigned), a.sort)"
-    return DB.query(sql, [churchId, churchId, churchId, churchId, venueId]);
+    return DB.query(sql, [churchId, churchId, churchId, churchId, venueId]) as Promise<Action[]>
   }
 
   public loadByLessonId(lessonId: string): Promise<Action[]> {
-    return DB.query("SELECT * FROM actions WHERE lessonId=? ORDER BY sort", [lessonId]);
+    return DB.query("SELECT * FROM actions WHERE lessonId=? ORDER BY sort", [lessonId]) as Promise<Action[]>
   }
 
   public load(id: string): Promise<Action> {
-    return DB.queryOne("SELECT * FROM actions WHERE id=?", [id]);
+    return DB.queryOne("SELECT * FROM actions WHERE id=?", [id]) as Promise<Action>
   }
 
-  public delete(churchId: string, id: string): Promise<Action> {
-    return DB.query("DELETE FROM actions WHERE id=? AND churchId=?", [id, churchId]);
+  public delete(churchId: string, id: string): Promise<any> {
+    return DB.query("DELETE FROM actions WHERE id=? AND churchId=?", [id, churchId]) as Promise<any>;
   }
 
 }

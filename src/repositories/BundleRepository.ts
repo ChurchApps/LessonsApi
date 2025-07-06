@@ -24,11 +24,11 @@ export class BundleRepository {
   }
 
   public loadByContentTypeId(churchId: string, contentType: string, contentId: string): Promise<Bundle[]> {
-    return DB.query("SELECT * FROM bundles WHERE churchId=? AND contentType=? AND contentId=? order by name", [churchId, contentType, contentId]);
+    return DB.query("SELECT * FROM bundles WHERE churchId=? AND contentType=? AND contentId=? order by name", [churchId, contentType, contentId]) as Promise<Bundle[]>
   }
 
   public loadPendingUpdate(limit: number): Promise<Bundle[]> {
-    return DB.query("SELECT * FROM bundles WHERE pendingUpdate=1 limit " + limit.toString(), []);
+    return DB.query("SELECT * FROM bundles WHERE pendingUpdate=1 limit " + limit.toString(), []) as Promise<Bundle[]>
   }
 
   public loadAvailable(churchId: string, programId: string, studyId: string): Promise<Bundle[]> {
@@ -40,21 +40,21 @@ export class BundleRepository {
     } else sql += "programId=?"
     console.log(sql);
     console.log(JSON.stringify(params))
-    return DB.query(sql, params);
+    return DB.query(sql, params) as Promise<Bundle[]>;
   }
 
   public loadPublicForLesson(lessonId: string): Promise<Bundle[]> {
-    return DB.query("SELECT * FROM bundles WHERE id in (SELECT bundleId FROM resources WHERE id in (SELECT resourceId from actions WHERE lessonId=?))", [lessonId]);
+    return DB.query("SELECT * FROM bundles WHERE id in (SELECT bundleId FROM resources WHERE id in (SELECT resourceId from actions WHERE lessonId=?))", [lessonId]) as Promise<Bundle[]>
   }
 
   public load(churchId: string, id: string): Promise<Bundle> {
-    return DB.queryOne("SELECT * FROM bundles WHERE id=? and churchId=?", [id, churchId]);
+    return DB.queryOne("SELECT * FROM bundles WHERE id=? and churchId=?", [id, churchId]) as Promise<Bundle>
   }
 
 
 
-  public delete(churchId: string, id: string): Promise<Bundle> {
-    return DB.query("DELETE FROM bundles WHERE id=? AND churchId=?", [id, churchId]);
+  public delete(churchId: string, id: string): Promise<any> {
+    return DB.query("DELETE FROM bundles WHERE id=? AND churchId=?", [id, churchId]) as Promise<any>;
   }
 
 }

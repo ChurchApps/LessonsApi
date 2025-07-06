@@ -14,7 +14,7 @@ export class LessonController extends LessonsBaseController {
 
 
   @httpGet("/public/tree")
-  public async getPublicForProgram(req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
+  public async getPublicForProgram(req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
     return this.actionWrapperAnon(req, res, async () => {
 
       const providerId = req.query.providerId as string;
@@ -48,14 +48,14 @@ export class LessonController extends LessonsBaseController {
   }
 
   @httpGet("/public/study/:studyId")
-  public async getPublicForStudy(@requestParam("studyId") studyId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
+  public async getPublicForStudy(@requestParam("studyId") studyId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
     return this.actionWrapperAnon(req, res, async () => {
       return await this.repositories.lesson.loadPublicByStudyId(studyId);
     });
   }
 
   @httpGet("/public/studies")
-  public async getPublicForStudies(req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
+  public async getPublicForStudies(req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
     return this.actionWrapperAnon(req, res, async () => {
       if (!req.query.ids) return []
       const ids = req.query.ids.toString().split(',')
@@ -64,7 +64,7 @@ export class LessonController extends LessonsBaseController {
   }
 
   @httpGet("/study/:studyId")
-  public async getForStudy(@requestParam("studyId") studyId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
+  public async getForStudy(@requestParam("studyId") studyId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
     return this.actionWrapper(req, res, async (au) => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
       else return await this.repositories.lesson.loadByStudyId(au.churchId, studyId);
@@ -72,7 +72,7 @@ export class LessonController extends LessonsBaseController {
   }
 
   @httpGet("/public/slugAlt/:programSlug/:studySlug/:slug")
-  public async getPublicBySlugAlt(@requestParam("programSlug") programSlug: string, @requestParam("studySlug") studySlug: string, @requestParam("slug") slug: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
+  public async getPublicBySlugAlt(@requestParam("programSlug") programSlug: string, @requestParam("studySlug") studySlug: string, @requestParam("slug") slug: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
     return this.actionWrapperAnon(req, res, async () => {
       const program = await this.repositories.program.loadPublicBySlug(programSlug);
       const study = await this.repositories.study.loadPublicBySlug(program.id, studySlug);
@@ -96,7 +96,7 @@ export class LessonController extends LessonsBaseController {
   }
 
   @httpGet("/public/slug/:programSlug/:studySlug/:slug")
-  public async getPublicBySlug(@requestParam("programSlug") programSlug: string, @requestParam("studySlug") studySlug: string, @requestParam("slug") slug: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
+  public async getPublicBySlug(@requestParam("programSlug") programSlug: string, @requestParam("studySlug") studySlug: string, @requestParam("slug") slug: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
     return this.actionWrapperAnon(req, res, async () => {
       const program = await this.repositories.program.loadPublicBySlug(programSlug);
       const study = await this.repositories.study.loadPublicBySlug(program.id, studySlug);
@@ -109,7 +109,7 @@ export class LessonController extends LessonsBaseController {
 
 
   @httpGet("/public/ids")
-  public async getPublicByIds(req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
+  public async getPublicByIds(req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
     return this.actionWrapperAnon(req, res, async () => {
       const ids = req.query.ids.toString().split(",");
       return await this.repositories.lesson.loadPublicByIds(ids);
@@ -117,7 +117,7 @@ export class LessonController extends LessonsBaseController {
   }
 
   @httpGet("/public/:id")
-  public async getPublic(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
+  public async getPublic(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
     return this.actionWrapperAnon(req, res, async () => {
       const lesson = await this.repositories.lesson.loadPublic(id);
       const study = await this.repositories.study.loadPublic(lesson.studyId);
@@ -128,14 +128,14 @@ export class LessonController extends LessonsBaseController {
   }
 
   @httpGet("/:id")
-  public async get(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
+  public async get(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
     return this.actionWrapper(req, res, async (au) => {
       return await this.repositories.lesson.load(au.churchId, id);
     });
   }
 
   @httpGet("/")
-  public async getAll(req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
+  public async getAll(req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
     return this.actionWrapper(req, res, async (au) => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
       else return await this.repositories.lesson.loadAll(au.churchId);
@@ -144,7 +144,7 @@ export class LessonController extends LessonsBaseController {
 
 
   @httpPost("/")
-  public async save(req: express.Request<{}, {}, Lesson[]>, res: express.Response): Promise<interfaces.IHttpActionResult> {
+  public async save(req: express.Request<{}, {}, Lesson[]>, res: express.Response): Promise<any> {
     return this.actionWrapper(req, res, async (au) => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
       else {
@@ -168,7 +168,7 @@ export class LessonController extends LessonsBaseController {
   }
 
   @httpDelete("/:id")
-  public async delete(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
+  public async delete(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
     return this.actionWrapper(req, res, async (au) => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
       else {

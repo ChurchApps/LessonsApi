@@ -25,21 +25,21 @@ export class VariantRepository {
   }
 
   public loadByResourceId(churchId: string, resourceId: string): Promise<Variant[]> {
-    return DB.query("SELECT * FROM variants WHERE churchId=? AND resourceId=? ORDER BY name", [churchId, resourceId]);
+    return DB.query("SELECT * FROM variants WHERE churchId=? AND resourceId=? ORDER BY name", [churchId, resourceId]) as Promise<Variant[]>
   }
 
   public loadByResourceIds(churchId: string, resourceIds: string[]): Promise<Variant[]> {
     const sql = "SELECT * FROM variants WHERE churchId=? AND resourceId IN (" + ArrayHelper.fillArray("?", resourceIds.length) + ") ORDER BY name";
-    return DB.query(sql, [churchId].concat(resourceIds));
+    return DB.query(sql, [churchId].concat(resourceIds)) as Promise<Variant[]>
   }
 
   public loadByContentTypeId(churchId: string, contentType: string, contentId: string): Promise<Variant[]> {
     const subQuery = "SELECT r.id from resources r INNER JOIN bundles b on b.id=r.bundleId WHERE b.churchId=? AND b.contentType=? AND b.contentId=?";
-    return DB.query("SELECT * FROM variants WHERE churchId=? AND resourceId in (" + subQuery + ") order by name", [churchId, churchId, contentType, contentId]);
+    return DB.query("SELECT * FROM variants WHERE churchId=? AND resourceId in (" + subQuery + ") order by name", [churchId, churchId, contentType, contentId]) as Promise<Variant[]>
   }
 
   public load(churchId: string, id: string): Promise<Variant> {
-    return DB.queryOne("SELECT * FROM variants WHERE id=? AND churchId=?", [id, churchId]);
+    return DB.queryOne("SELECT * FROM variants WHERE id=? AND churchId=?", [id, churchId]) as Promise<Variant>
   }
 
   public loadPlaylist(resourceIds: string[]): Promise<any> {
@@ -47,11 +47,11 @@ export class VariantRepository {
       + " inner join variants v on v.resourceId=r.id"
       + " inner join files f on f.id=v.fileId"
       + " where r.id in (" + ArrayHelper.fillArray("?", resourceIds.length).join(", ") + ");"
-    return DB.query(sql, resourceIds);
+    return DB.query(sql, resourceIds) as Promise<Variant[]>;
   }
 
-  public delete(churchId: string, id: string): Promise<Variant> {
-    return DB.query("DELETE FROM variants WHERE id=? AND churchId=?", [id, churchId]);
+  public delete(churchId: string, id: string): Promise<any> {
+    return DB.query("DELETE FROM variants WHERE id=? AND churchId=?", [id, churchId]) as Promise<any>;
   }
 
 

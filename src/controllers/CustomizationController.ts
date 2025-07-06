@@ -9,7 +9,7 @@ import { ArrayHelper } from "@churchapps/apihelper";
 export class CustomizationController extends LessonsBaseController {
 
   @httpGet("/venue/:venueId")
-  public async getForVenue(@requestParam("venueId") venueId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
+  public async getForVenue(@requestParam("venueId") venueId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
     return this.actionWrapper(req, res, async (au) => {
       const customizations =  await this.repositories.customization.loadByVenueId(au.churchId, venueId);
       if (req.query.classroomId) {
@@ -27,7 +27,7 @@ export class CustomizationController extends LessonsBaseController {
   }
 
   @httpGet("/public/venue/:venueId/:churchId")
-  public async getPublicForVenue(@requestParam("venueId") venueId: string, @requestParam("churchId") churchId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
+  public async getPublicForVenue(@requestParam("venueId") venueId: string, @requestParam("churchId") churchId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
     return this.actionWrapper(req, res, async (_au) => {
       const customizations =  await this.repositories.customization.loadByVenueId(churchId, venueId);
       if (req.query.classroomId) {
@@ -42,14 +42,14 @@ export class CustomizationController extends LessonsBaseController {
   }
 
   @httpGet("/:id")
-  public async get(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
+  public async get(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
     return this.actionWrapper(req, res, async (au) => {
       return await this.repositories.customization.load(au.churchId, id)
     });
   }
 
   @httpPost("/")
-  public async save(req: express.Request<{}, {}, Customization[]>, res: express.Response): Promise<interfaces.IHttpActionResult> {
+  public async save(req: express.Request<{}, {}, Customization[]>, res: express.Response): Promise<any> {
     return this.actionWrapper(req, res, async (au) => {
       if (!au.checkAccess(Permissions.schedules.edit)) return this.json({}, 401);
       else {
@@ -62,7 +62,7 @@ export class CustomizationController extends LessonsBaseController {
   }
 
   @httpDelete("/:id")
-  public async delete(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<interfaces.IHttpActionResult> {
+  public async delete(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
     return this.actionWrapper(req, res, async (au) => {
       if (!au.checkAccess(Permissions.schedules.edit)) return this.json({}, 401);
       else {
