@@ -14,48 +14,70 @@ export const init = async () => {
   const app = new InversifyExpressServer(container, null, null, null, CustomAuthProvider);
 
   const configFunction = (expApp: express.Application) => {
-    expApp.use(cors());
-    
-    // Custom body parsing middleware to handle serverless-express Buffer bodies
+    // Configure CORS first
+    expApp.use(
+      cors({
+        origin: true,
+        credentials: true,
+        methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+        allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "Accept", "Origin"]
+      })
+    );
+
+    // Handle preflight requests early
+    expApp.options("*", (req, res) => {
+      res.header("Access-Control-Allow-Origin", "*");
+      res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, PATCH, OPTIONS");
+      res.header("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With, Accept, Origin");
+      res.sendStatus(200);
+    });
+
+    // Handle body parsing from @codegenie/serverless-express
     expApp.use((req, res, next) => {
-      if (req.body instanceof Buffer) {
-        const bodyString = req.body.toString();
-        if (req.headers['content-type']?.includes('application/json')) {
-          try {
-            req.body = JSON.parse(bodyString);
-          } catch (e) {
-            req.body = bodyString;
-          }
-        } else {
-          req.body = bodyString;
-        }
-      } else if (req.body && typeof req.body === 'object' && req.body.type === 'Buffer' && Array.isArray(req.body.data)) {
-        // Handle Buffer-like objects
-        const buffer = Buffer.from(req.body.data);
-        const bodyString = buffer.toString();
-        if (req.headers['content-type']?.includes('application/json')) {
-          try {
-            req.body = JSON.parse(bodyString);
-          } catch (e) {
-            req.body = bodyString;
-          }
-        } else {
-          req.body = bodyString;
-        }
-      } else if (typeof req.body === 'string' && req.headers['content-type']?.includes('application/json')) {
-        // Handle string bodies that should be JSON
+      const contentType = req.headers["content-type"] || "";
+
+      // Handle Buffer instances (most common case with serverless-express)
+      if (Buffer.isBuffer(req.body)) {
         try {
-          req.body = JSON.parse(req.body);
-        } catch (e) {
-          // Keep as string if parsing fails
+          const bodyString = req.body.toString("utf8");
+          if (contentType.includes("application/json")) {
+            req.body = JSON.parse(bodyString);
+          } else {
+            req.body = bodyString;
+          }
+        } catch {
+          req.body = {};
         }
       }
+      // Handle Buffer-like objects
+      else if (req.body && req.body.type === "Buffer" && Array.isArray(req.body.data)) {
+        try {
+          const bodyString = Buffer.from(req.body.data).toString("utf8");
+          if (contentType.includes("application/json")) {
+            req.body = JSON.parse(bodyString);
+          } else {
+            req.body = bodyString;
+          }
+        } catch {
+          req.body = {};
+        }
+      }
+      // Handle string JSON bodies
+      else if (typeof req.body === "string" && req.body.length > 0) {
+        try {
+          if (contentType.includes("application/json")) {
+            req.body = JSON.parse(req.body);
+          }
+        } catch {
+          // Silently ignore JSON parse errors
+        }
+      }
+
       next();
     });
-    
-    // Standard express body parsing as fallback
-    expApp.use(express.urlencoded({ extended: true }));
-    expApp.use(express.json({ limit: "50mb" }));
+
+    // Note: No standard body-parser middleware needed
+    // Custom buffer handling above replaces the need for body-parser
   };
 
   const server = app.setConfig(configFunction).build();

@@ -28,11 +28,10 @@
   "dependencies": {
     "@aws-sdk/client-s3": "^3.842.0",
     "@churchapps/apihelper": "^0.1.1",
+    "@codegenie/serverless-express": "^4.16.0",
     "@hubspot/api-client": "^13.0.0",
-    "@vendia/serverless-express": "^4.12.6",
     "archiver": "^7.0.1",
     "axios": "^1.10.0",
-    "body-parser": "^2.2.0",
     "cors": "^2.8.5",
     "dayjs": "^1.11.13",
     "dotenv": "^17.0.1",
