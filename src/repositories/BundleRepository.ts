@@ -38,8 +38,6 @@ export class BundleRepository {
       sql += "(programId=? OR studyId=?)";
       params.push(studyId);
     } else sql += "programId=?"
-    console.log(sql);
-    console.log(JSON.stringify(params))
     return DB.query(sql, params) as Promise<Bundle[]>;
   }
 

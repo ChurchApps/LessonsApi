@@ -101,9 +101,7 @@ export class TranscodeHelper {
       Outputs: [{ Key: destFile, PresetId: Environment.transcodePreset, ThumbnailPattern: thumbPattern }],
     };
 
-    console.log(params);
     const encoder = this.getEncoder();
-    console.log("created encoder")
     const command = new CreateJobCommand(params);
     const result: CreateJobCommandOutput = await encoder.send(command);
     return result.Job;

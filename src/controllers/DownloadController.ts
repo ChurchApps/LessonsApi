@@ -17,7 +17,6 @@ export class DownloadController extends LessonsBaseController {
         const data = await this.repositories.download.getDownloadCounts();
         for (const d of data) {
           const comp = await HubspotHelper.lookupCompanByChurchId(d.churchId);
-          console.log(d.churchId, comp);
           if (comp) {
             const downloadDate = new Date(d.lastDownload).toISOString().split('T')[0];
             await HubspotHelper.setProperties(comp.id, { lessons_downloaded: d.downloadCount, last_lesson_downloaded: downloadDate });

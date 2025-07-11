@@ -88,7 +88,6 @@ export class ExternalVideoController extends LessonsBaseController {
   public async getPublic(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
     return this.actionWrapperAnon(req, res, async () => {
       let result = await this.repositories.externalVideo.loadPublic(id);
-      console.log(result);
       if (result.downloadsExpire < new Date()) result = await VimeoHelper.updateVimeoLinks(result);
       return result;
     });

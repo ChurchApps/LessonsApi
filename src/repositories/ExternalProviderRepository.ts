@@ -32,7 +32,6 @@ export class ExternalProviderRepository {
   }
 
   public loadAll(churchId: string): Promise<ExternalProvider[]> {
-    console.log("SELECT * FROM externalProviders WHERE churchId=?", [churchId])
     return DB.query("SELECT * FROM externalProviders WHERE churchId=?", [churchId]) as Promise<ExternalProvider[]>
   }
 
