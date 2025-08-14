@@ -198,6 +198,62 @@ export class VenueController extends LessonsBaseController {
     });
   }
 
+  @httpGet("/public/planItems/:id")
+  public async getPublicPlanItems(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
+    return this.actionWrapperAnon(req, res, async () => {
+      const venue = await this.repositories.venue.loadPublic(id);
+      const sections = await this.repositories.section.loadByLessonId(venue.lessonId);
+      const roles = await this.repositories.role.loadByLessonId(venue.lessonId);
+      const actions = await this.repositories.action.loadByLessonId(venue.lessonId);
+
+      // Convert sections to PlanItem format
+      const planItems: any[] = [];
+      sections.forEach(section => {
+        const sectionPlanItem = {
+          id: section.id,
+          churchId: venue.churchId,
+          planId: venue.id,
+          parentId: null,
+          sort: section.sort,
+          itemType: "header",
+          relatedId: section.id,
+          label: section.name,
+          description: section.name,
+          seconds: null,
+          children: []
+        };
+
+        // Add actions directly as children of sections
+        const sectionRoles = roles.filter(r => r.sectionId === section.id);
+        sectionRoles.forEach(role => {
+          const roleActions = actions.filter(a => a.roleId === role.id);
+          roleActions.forEach(action => {
+            const actionPlanItem = {
+              id: action.id,
+              churchId: venue.churchId,
+              planId: venue.id,
+              parentId: section.id,
+              sort: action.sort,
+              itemType: "item",
+              relatedId: null,
+              label: action.actionType,
+              description: action.content || "",
+              seconds: 0,
+              link: action.actionType === "Play" ? `https://lessons.church/preview/${action.id}?lessonId=${venue.lessonId}` : null,
+              children: []
+            };
+            sectionPlanItem.children.push(actionPlanItem);
+          });
+        });
+
+        planItems.push(sectionPlanItem);
+      });
+
+      return planItems;
+    });
+  }
+
+
   public async appendSections(venue: Venue, allSections: Section[], allRoles: Role[], allActions: Action[]) {
     venue.sections = ArrayHelper.getAll(allSections, "venueId", venue.id);
 
