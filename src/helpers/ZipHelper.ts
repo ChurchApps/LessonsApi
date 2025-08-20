@@ -30,11 +30,13 @@ export class ZipHelper {
       if (await this.checkFileExists(f.key)) verifiedFiles.push(f);
     }
 
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
       try {
+        // Fetch all streams first
         for (const f of verifiedFiles) {
           const params = { Bucket: Environment.s3Bucket, Key: f.key };
-          f.stream = this.S3().send(new GetObjectCommand(params)).then(response => response.Body);
+          const response = await this.S3().send(new GetObjectCommand(params));
+          f.stream = response.Body;
         }
 
         const streamPassThrough = new Stream.PassThrough()
