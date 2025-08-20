@@ -1,4 +1,5 @@
-import { S3Client, HeadObjectCommand, GetObjectCommand, PutObjectCommand, ObjectCannedACL } from "@aws-sdk/client-s3";
+import { S3Client, HeadObjectCommand, GetObjectCommand, ObjectCannedACL } from "@aws-sdk/client-s3";
+import { Upload } from "@aws-sdk/lib-storage";
 import { Repositories } from "../repositories/Repositories";
 import { File, Variant, Bundle } from "../models";
 import { Environment, FilesHelper } from ".";
@@ -41,16 +42,21 @@ export class ZipHelper {
         }
 
         const streamPassThrough = new Stream.PassThrough()
-        const uploadParams = {
-          Bucket: Environment.s3Bucket,
-          ACL: ObjectCannedACL.public_read,
-          Body: streamPassThrough,
-          ContentType: "application/zip",
-          Key: zipKey
-        };
+        
+        // Use Upload class for streaming without ContentLength issues
+        const upload = new Upload({
+          client: this.S3(),
+          params: {
+            Bucket: Environment.s3Bucket,
+            Key: zipKey,
+            Body: streamPassThrough,
+            ContentType: "application/zip",
+            ACL: ObjectCannedACL.public_read
+          }
+        });
 
         console.log(`Starting upload for: ${zipKey}`);
-        this.S3().send(new PutObjectCommand(uploadParams))
+        upload.done()
           .then(() => {
             console.log(`Upload completed for: ${zipKey}`);
             resolve(null);
