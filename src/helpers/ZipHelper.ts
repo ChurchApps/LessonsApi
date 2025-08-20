@@ -35,6 +35,7 @@ export class ZipHelper {
         // Fetch all streams first
         for (const f of verifiedFiles) {
           const params = { Bucket: Environment.s3Bucket, Key: f.key };
+          console.log(`Fetching file: ${f.key}`);
           const response = await this.S3().send(new GetObjectCommand(params));
           f.stream = response.Body;
         }
@@ -48,21 +49,35 @@ export class ZipHelper {
           Key: zipKey
         };
 
+        console.log(`Starting upload for: ${zipKey}`);
         this.S3().send(new PutObjectCommand(uploadParams))
-          .then(() => resolve(null))
-          .catch(error => reject(error));
+          .then(() => {
+            console.log(`Upload completed for: ${zipKey}`);
+            resolve(null);
+          })
+          .catch(error => {
+            console.error(`Upload failed for ${zipKey}:`, error);
+            reject(error);
+          });
 
         console.log(zipKey);
 
         const archive = Archiver("zip", { zlib: { level: 0 } });
         archive.on("error", error => {
+          console.error(`Archive error for ${zipKey}:`, error);
           reject(error);
         })
 
         archive.pipe(streamPassThrough);
-        verifiedFiles.forEach(f => { archive.append(f.stream, { name: f.name }) });
+        console.log(`Adding ${verifiedFiles.length} files to archive`);
+        verifiedFiles.forEach(f => { 
+          console.log(`Adding file to archive: ${f.name}`);
+          archive.append(f.stream, { name: f.name });
+        });
+        console.log(`Finalizing archive for: ${zipKey}`);
         archive.finalize();
       } catch (ex) {
+        console.error(`zipFiles error for ${zipKey}:`, ex);
         reject(ex);
       }
     });
@@ -114,9 +129,10 @@ export class ZipHelper {
       // End note
       await ZipHelper.zipFiles(zipName, zipFiles)
       console.log("done zipping");
-    } catch {
+    } catch (error) {
       success = false;
-      console.log("failed to zip");
+      console.log("failed to zip:", error);
+      console.error("ZipBundle error details:", error);
     }
     if (success) {
       let file: File = null;
