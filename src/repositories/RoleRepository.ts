@@ -1,11 +1,11 @@
-import { DB } from "@churchapps/apihelper"
+import { DB } from "@churchapps/apihelper";
 import { Role } from "../models";
 import { UniqueIdHelper } from "../helpers";
 
 export class RoleRepository {
-
   public save(role: Role) {
-    if (UniqueIdHelper.isMissing(role.id)) return this.create(role); else return this.update(role);
+    if (UniqueIdHelper.isMissing(role.id)) return this.create(role);
+    else return this.update(role);
   }
 
   public async create(role: Role) {
@@ -24,15 +24,14 @@ export class RoleRepository {
   }
 
   public loadByLessonId(lessonId: string): Promise<Role[]> {
-    return DB.query("SELECT * FROM roles WHERE lessonId=? ORDER BY sort", [lessonId]) as Promise<Role[]>
+    return DB.query("SELECT * FROM roles WHERE lessonId=? ORDER BY sort", [lessonId]) as Promise<Role[]>;
   }
 
   public load(id: string): Promise<Role> {
-    return DB.queryOne("SELECT * FROM roles WHERE id=?", [id]) as Promise<Role>
+    return DB.queryOne("SELECT * FROM roles WHERE id=?", [id]) as Promise<Role>;
   }
 
   public delete(churchId: string, id: string): Promise<any> {
     return DB.query("DELETE FROM roles WHERE id=? AND churchId=?", [id, churchId]) as Promise<any>;
   }
-
 }

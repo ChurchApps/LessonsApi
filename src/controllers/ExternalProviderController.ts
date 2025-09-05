@@ -1,14 +1,13 @@
 import { controller, httpPost, httpGet, interfaces, requestParam, httpDelete } from "inversify-express-utils";
 import express from "express";
-import { LessonsBaseController } from "./LessonsBaseController"
-import { Provider } from "../models"
-import { Permissions } from '../helpers/Permissions'
+import { LessonsBaseController } from "./LessonsBaseController";
+import { Provider } from "../models";
+import { Permissions } from "../helpers/Permissions";
 import { ExternalProviderHelper } from "../helpers/ExternalProviderHelper";
 import axios from "axios";
 
 @controller("/externalProviders")
 export class ExternalProviderController extends LessonsBaseController {
-
   @httpGet("/playlist/:externalProviderId/:programId/:studyId/:lessonId/:venueId")
   public async getExternalPlaylist(@requestParam("externalProviderId") externalProviderId: string, @requestParam("programId") programId: string, @requestParam("studyId") studyId: string, @requestParam("lessonId") lessonId: string, @requestParam("venueId") venueId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
     return this.actionWrapperAnon(req, res, async () => {
@@ -36,26 +35,28 @@ export class ExternalProviderController extends LessonsBaseController {
 
   @httpGet("/:id")
   public async get(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
-    return this.actionWrapper(req, res, async (au) => {
-      return await this.repositories.externalProvider.load(au.churchId, id)
+    return this.actionWrapper(req, res, async au => {
+      return await this.repositories.externalProvider.load(au.churchId, id);
     });
   }
 
   @httpGet("/")
   public async getAll(req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
-    return this.actionWrapper(req, res, async (au) => {
+    return this.actionWrapper(req, res, async au => {
       return await this.repositories.externalProvider.loadAll(au.churchId);
     });
   }
 
-
   @httpPost("/")
   public async save(req: express.Request<{}, {}, Provider[]>, res: express.Response): Promise<any> {
-    return this.actionWrapper(req, res, async (au) => {
+    return this.actionWrapper(req, res, async au => {
       if (!au.checkAccess(Permissions.schedules.edit)) return this.json({}, 401);
       else {
         const promises: Promise<Provider>[] = [];
-        req.body.forEach(externalProvider => { externalProvider.churchId = au.churchId; promises.push(this.repositories.externalProvider.save(externalProvider)); });
+        req.body.forEach(externalProvider => {
+          externalProvider.churchId = au.churchId;
+          promises.push(this.repositories.externalProvider.save(externalProvider));
+        });
         const result = await Promise.all(promises);
         return result;
       }
@@ -64,7 +65,7 @@ export class ExternalProviderController extends LessonsBaseController {
 
   @httpDelete("/:id")
   public async delete(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
-    return this.actionWrapper(req, res, async (au) => {
+    return this.actionWrapper(req, res, async au => {
       if (!au.checkAccess(Permissions.schedules.edit)) return this.json({}, 401);
       else {
         await this.repositories.externalProvider.delete(au.churchId, id);
@@ -72,5 +73,4 @@ export class ExternalProviderController extends LessonsBaseController {
       }
     });
   }
-
 }

@@ -1,11 +1,11 @@
-import { DB } from "@churchapps/apihelper"
+import { DB } from "@churchapps/apihelper";
 import { Download } from "../models";
 import { UniqueIdHelper } from "../helpers";
 
 export class DownloadRepository {
-
   public save(download: Download) {
-    if (UniqueIdHelper.isMissing(download.id)) return this.create(download); else return this.update(download);
+    if (UniqueIdHelper.isMissing(download.id)) return this.create(download);
+    else return this.update(download);
   }
 
   public async getDownloadCounts() {
@@ -34,52 +34,32 @@ export class DownloadRepository {
   public loadExisting(candidate: Download): Promise<Download> {
     const sql = "SELECT * FROM downloads WHERE lessonId=? AND churchId=? AND ipAddress=? AND fileName=? AND downloadDate>?";
     const date = new Date(candidate.downloadDate.toDateString());
-    return DB.queryOne(sql, [candidate.lessonId, candidate.churchId, candidate.ipAddress, candidate.fileName, date]) as Promise<Download>
+    return DB.queryOne(sql, [candidate.lessonId, candidate.churchId, candidate.ipAddress, candidate.fileName, date]) as Promise<Download>;
   }
 
   public load(id: string): Promise<Download> {
-    return DB.queryOne("SELECT * FROM downloads WHERE id=?", [id]) as Promise<Download>
+    return DB.queryOne("SELECT * FROM downloads WHERE id=?", [id]) as Promise<Download>;
   }
 
   public geo(programId: string, startDate: Date, endDate: Date): Promise<any[]> {
-    const sql = "SELECT ip.lat, ip.lon, ip.city, ip.state, ip.country, count(*) as totalDownloads"
-      + " FROM downloads d"
-      + " INNER JOIN ipDetails ip on ip.ipAddress=d.ipAddress"
-      + " INNER JOIN lessons l ON l.id=d.lessonId"
-      + " INNER JOIN studies s on s.id=l.studyId"
-      + " WHERE s.programId=? AND d.downloadDate between ? AND ?"
-      + " GROUP by  ip.lat, ip.lon, ip.city, ip.state, ip.country"
+    const sql = "SELECT ip.lat, ip.lon, ip.city, ip.state, ip.country, count(*) as totalDownloads" + " FROM downloads d" + " INNER JOIN ipDetails ip on ip.ipAddress=d.ipAddress" + " INNER JOIN lessons l ON l.id=d.lessonId" + " INNER JOIN studies s on s.id=l.studyId" + " WHERE s.programId=? AND d.downloadDate between ? AND ?" + " GROUP by  ip.lat, ip.lon, ip.city, ip.state, ip.country";
     return DB.query(sql, [programId, startDate, endDate]) as Promise<Download[]>;
   }
 
   public countsByStudy(programId: string, startDate: Date, endDate: Date): Promise<any[]> {
     // const sql = "SELECT s.id, s.name as studyName, count(distinct(IF(d.churchId IS NULL or d.churchId='', ipAddress, d.churchId))) as downloadCount"
-    const sql = "SELECT s.id, s.name as studyName, count(distinct(ipAddress)) as downloadCount"
-      + " FROM downloads d"
-      + " INNER JOIN lessons l ON l.id=d.lessonId"
-      + " INNER JOIN studies s on s.id=l.studyId"
-      + " WHERE s.programId=? AND d.downloadDate between ? AND ?"
-      + " GROUP by s.id, s.name"
-      + " ORDER by s.name"
+    const sql = "SELECT s.id, s.name as studyName, count(distinct(ipAddress)) as downloadCount" + " FROM downloads d" + " INNER JOIN lessons l ON l.id=d.lessonId" + " INNER JOIN studies s on s.id=l.studyId" + " WHERE s.programId=? AND d.downloadDate between ? AND ?" + " GROUP by s.id, s.name" + " ORDER by s.name";
 
     return DB.query(sql, [programId, startDate, endDate]) as Promise<Download[]>;
   }
 
   public uniqueChurches(programId: string, startDate: Date, endDate: Date): Promise<any[]> {
-    const sql = "SELECT d.churchId"
-      + " FROM downloads d"
-      + " INNER JOIN lessons l ON l.id=d.lessonId"
-      + " INNER JOIN studies s on s.id=l.studyId"
-      + " WHERE s.programId=? AND d.downloadDate between ? AND ?"
-      + " AND d.churchId IS NOT NULL and d.churchId<>''"
-      + " group by d.churchId"
+    const sql = "SELECT d.churchId" + " FROM downloads d" + " INNER JOIN lessons l ON l.id=d.lessonId" + " INNER JOIN studies s on s.id=l.studyId" + " WHERE s.programId=? AND d.downloadDate between ? AND ?" + " AND d.churchId IS NOT NULL and d.churchId<>''" + " group by d.churchId";
 
     return DB.query(sql, [programId, startDate, endDate]) as Promise<Download[]>;
   }
 
-
   public delete(churchId: string, id: string): Promise<any> {
     return DB.query("DELETE FROM downloads WHERE id=?", [id]) as Promise<any>;
   }
-
 }

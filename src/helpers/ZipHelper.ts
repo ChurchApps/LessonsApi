@@ -4,45 +4,49 @@ import { Repositories } from "../repositories/Repositories";
 import { File, Variant, Bundle } from "../models";
 import { Environment, FilesHelper } from ".";
 import { Stream } from "stream";
-import Archiver from "archiver"
+import Archiver from "archiver";
 import { ArrayHelper, FileStorageHelper } from "@churchapps/apihelper";
 
-
 export class ZipHelper {
-
   private static S3() {
     return new S3Client({ apiVersion: "2006-03-01" });
   }
 
   static async checkFileExists(key: string) {
     try {
-      await this.S3().send(new HeadObjectCommand({ Bucket: Environment.s3Bucket, Key: key }));
+      const command = new HeadObjectCommand({ Bucket: Environment.s3Bucket, Key: key });
+      await Promise.race([this.S3().send(command), new Promise((_, reject) => setTimeout(() => reject(new Error("S3 HeadObject timeout")), 10000))]);
       return true;
     } catch (err: any) {
-      if (err.name === 'NotFound') return false;
+      if (err.name === "NotFound") return false;
+      console.error(`Failed to check file existence for ${key}:`, err.message);
       throw err;
     }
   }
 
-  static async zipFiles(zipKey: string, files: { name: string, key: string, stream?: any }[]) {
-
-    const verifiedFiles: { name: string, key: string, stream?: any }[] = [];
+  static async zipFiles(zipKey: string, files: { name: string; key: string; stream?: any }[]) {
+    const verifiedFiles: { name: string; key: string; stream?: any }[] = [];
     for (const f of files) {
       if (await this.checkFileExists(f.key)) verifiedFiles.push(f);
     }
 
     return new Promise(async (resolve, reject) => {
       try {
-        // Fetch all streams first
+        // Fetch all streams first with timeout
         for (const f of verifiedFiles) {
           const params = { Bucket: Environment.s3Bucket, Key: f.key };
           console.log(`Fetching file: ${f.key}`);
-          const response = await this.S3().send(new GetObjectCommand(params));
-          f.stream = response.Body;
+          try {
+            const response = await Promise.race([this.S3().send(new GetObjectCommand(params)), new Promise((_, reject) => setTimeout(() => reject(new Error("S3 GetObject timeout")), 30000))]);
+            f.stream = (response as any).Body;
+          } catch (error) {
+            console.error(`Failed to fetch file ${f.key} for zip ${zipKey}:`, error);
+            throw error;
+          }
         }
 
-        const streamPassThrough = new Stream.PassThrough()
-        
+        const streamPassThrough = new Stream.PassThrough();
+
         // Use Upload class for streaming without ContentLength issues
         const upload = new Upload({
           client: this.S3(),
@@ -51,17 +55,24 @@ export class ZipHelper {
             Key: zipKey,
             Body: streamPassThrough,
             ContentType: "application/zip",
-            ACL: ObjectCannedACL.public_read
-          }
+            ACL: ObjectCannedACL.public_read,
+          },
         });
 
         console.log(`Starting upload for: ${zipKey}`);
-        upload.done()
+        const uploadTimeout = setTimeout(() => {
+          reject(new Error(`Upload timeout for ${zipKey} after 5 minutes`));
+        }, 300000); // 5 minutes
+
+        upload
+          .done()
           .then(() => {
+            clearTimeout(uploadTimeout);
             console.log(`Upload completed for: ${zipKey}`);
             resolve(null);
           })
           .catch(error => {
+            clearTimeout(uploadTimeout);
             console.error(`Upload failed for ${zipKey}:`, error);
             reject(error);
           });
@@ -72,11 +83,11 @@ export class ZipHelper {
         archive.on("error", error => {
           console.error(`Archive error for ${zipKey}:`, error);
           reject(error);
-        })
+        });
 
         archive.pipe(streamPassThrough);
         console.log(`Adding ${verifiedFiles.length} files to archive`);
-        verifiedFiles.forEach(f => { 
+        verifiedFiles.forEach(f => {
           console.log(`Adding file to archive: ${f.name}`);
           archive.append(f.stream, { name: f.name });
         });
@@ -101,46 +112,95 @@ export class ZipHelper {
   }
 
   static async zipPendingBundles() {
+    const startTime = Date.now();
+    console.log("Starting zipPendingBundles process");
+
     const bundles = await Repositories.getCurrent().bundle.loadPendingUpdate(5);
+    console.log(`Found ${bundles.length} bundles pending zip update`);
+
+    let processed = 0;
+    let successful = 0;
+    let failed = 0;
+
     for (const bundle of bundles) {
+      const bundleStartTime = Date.now();
+      console.log(`Processing bundle ${bundle.id} (${bundle.name}) for church ${bundle.churchId}`);
+
       try {
         await ZipHelper.zipBundle(bundle);
-      } catch {
+        successful++;
+        console.log(`Successfully processed bundle ${bundle.id} in ${Date.now() - bundleStartTime}ms`);
+      } catch (error) {
+        failed++;
+        console.error(`Failed to process bundle ${bundle.id} (${bundle.name}):`, {
+          bundleId: bundle.id,
+          churchId: bundle.churchId,
+          error: (error as any).message,
+          stack: (error as any).stack,
+          processingTime: Date.now() - bundleStartTime,
+        });
+
+        // Reset pending flag so it can be retried later
         bundle.pendingUpdate = false;
         await Repositories.getCurrent().bundle.save(bundle);
       }
+      processed++;
+    }
+
+    const totalTime = Date.now() - startTime;
+    console.log(`Completed zipPendingBundles process: ${processed} processed, ${successful} successful, ${failed} failed in ${totalTime}ms`);
+
+    // Log metrics for monitoring
+    if (failed > 0) {
+      console.warn(`Bundle zipping failures detected`, {
+        totalProcessed: processed,
+        successful,
+        failed,
+        failureRate: ((failed / processed) * 100).toFixed(1) + "%",
+      });
     }
   }
 
   static async zipBundle(bundle: Bundle) {
-    const resources = await Repositories.getCurrent().resource.loadByBundleId(bundle.churchId, bundle.id);
-    const variants = await Repositories.getCurrent().variant.loadByResourceIds(bundle.churchId, ArrayHelper.getIds(resources, "id"));
-    const files = await Repositories.getCurrent().file.loadByIds(bundle.churchId, ArrayHelper.getIds(variants, "fileId"));
+    console.log(`Starting zip process for bundle ${bundle.id} (${bundle.name})`);
 
-    const zipFiles: { name: string, key: string }[] = [];
-    files.forEach(f => {
-      const variant: Variant = ArrayHelper.getOne(variants, "fileId", f.id)
-      if (variant && !variant.hidden) {
-        let filePath = f.contentPath.split("?")[0];
-        filePath = filePath.replace("/content/", "").replace(Environment.contentRoot + "/", "")
-        zipFiles.push({ name: f.fileName, key: filePath });
-      }
-    });
-    const zipName = "files/bundles/" + bundle.id + "/" + bundle.name + ".zip";
-    let success = true;
     try {
-      // Note: We save this first to ensure this doesn't get stuck in a loop and run up bandwidth costs if anythign fails or times out.
-      bundle.pendingUpdate = false;
-      await Repositories.getCurrent().bundle.save(bundle);
-      // End note
-      await ZipHelper.zipFiles(zipName, zipFiles)
-      console.log("done zipping");
-    } catch (error) {
-      success = false;
-      console.log("failed to zip:", error);
-      console.error("ZipBundle error details:", error);
-    }
-    if (success) {
+      const resources = await Repositories.getCurrent().resource.loadByBundleId(bundle.churchId, bundle.id);
+      console.log(`Found ${resources.length} resources for bundle ${bundle.id}`);
+
+      const variants = await Repositories.getCurrent().variant.loadByResourceIds(bundle.churchId, ArrayHelper.getIds(resources, "id"));
+      console.log(`Found ${variants.length} variants for bundle ${bundle.id}`);
+
+      const files = await Repositories.getCurrent().file.loadByIds(bundle.churchId, ArrayHelper.getIds(variants, "fileId"));
+      console.log(`Found ${files.length} files for bundle ${bundle.id}`);
+
+      const zipFiles: { name: string; key: string }[] = [];
+      files.forEach(f => {
+        const variant: Variant = ArrayHelper.getOne(variants, "fileId", f.id);
+        if (variant && !variant.hidden) {
+          let filePath = f.contentPath.split("?")[0];
+          filePath = filePath.replace("/content/", "").replace(Environment.contentRoot + "/", "");
+          zipFiles.push({ name: f.fileName, key: filePath });
+        }
+      });
+
+      console.log(`Prepared ${zipFiles.length} files for zipping in bundle ${bundle.id}`);
+
+      if (zipFiles.length === 0) {
+        console.warn(`Bundle ${bundle.id} has no files to zip, marking as completed`);
+        bundle.pendingUpdate = false;
+        await Repositories.getCurrent().bundle.save(bundle);
+        return;
+      }
+
+      const zipName = "files/bundles/" + bundle.id + "/" + bundle.name + ".zip";
+      console.log(`Creating zip file: ${zipName}`);
+
+      // Create the zip file
+      await ZipHelper.zipFiles(zipName, zipFiles);
+      console.log(`Successfully created zip file for bundle ${bundle.id}`);
+
+      // Update file record and mark as complete
       let file: File = null;
       if (bundle.fileId) {
         file = await Repositories.getCurrent().file.load(bundle.churchId, bundle.fileId);
@@ -159,20 +219,30 @@ export class ZipHelper {
           contentPath: Environment.contentRoot + "/" + zipName + "?dt=" + now.getTime().toString(),
           churchId: bundle.churchId,
           fileName: bundle.name + ".zip",
-          fileType: "application/zip"
-        }
+          fileType: "application/zip",
+        };
       } else {
         file.dateModified = now;
-        file.contentPath = Environment.contentRoot + "/" + zipName + "?dt=" + now.getTime().toString()
+        file.contentPath = Environment.contentRoot + "/" + zipName + "?dt=" + now.getTime().toString();
       }
       file = await Repositories.getCurrent().file.save(file);
       bundle.fileId = file.id;
+
+      // Only mark as not pending after all operations succeed
       bundle.pendingUpdate = false;
       await Repositories.getCurrent().bundle.save(bundle);
       await FilesHelper.updateSize(file);
+
+      console.log(`Completed zip process for bundle ${bundle.id}`);
+    } catch (error) {
+      console.error(`Critical error in zipBundle for bundle ${bundle.id}:`, {
+        bundleId: bundle.id,
+        bundleName: bundle.name,
+        churchId: bundle.churchId,
+        error: (error as any).message,
+        stack: (error as any).stack,
+      });
+      throw error; // Re-throw to be handled by zipPendingBundles
     }
   }
-
 }
-
-

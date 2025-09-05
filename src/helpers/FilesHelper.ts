@@ -1,7 +1,7 @@
-import { Repositories } from "../repositories"
-import { FileStorageHelper } from "@churchapps/apihelper"
+import { Repositories } from "../repositories";
+import { FileStorageHelper } from "@churchapps/apihelper";
 import { File } from "../models";
-import Axios from "axios"
+import Axios from "axios";
 
 export class FilesHelper {
   static async deleteFile(churchId: string, id: string, resourceId: string) {
@@ -31,5 +31,4 @@ export class FilesHelper {
     const oldKey = "bundles/" + bundle.contentType + "/" + bundle.contentId + "/" + bundle.id;
     await FileStorageHelper.removeFolder(oldKey);
   }
-
 }

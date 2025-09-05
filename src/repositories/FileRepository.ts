@@ -1,12 +1,12 @@
-import { DB } from "@churchapps/apihelper"
+import { DB } from "@churchapps/apihelper";
 import { File } from "../models";
 import { UniqueIdHelper } from "../helpers";
 import { ArrayHelper } from "@churchapps/apihelper";
 
 export class FileRepository {
-
   public save(file: File) {
-    if (UniqueIdHelper.isMissing(file.id)) return this.create(file); else return this.update(file);
+    if (UniqueIdHelper.isMissing(file.id)) return this.create(file);
+    else return this.update(file);
   }
 
   public async create(file: File) {
@@ -25,25 +25,25 @@ export class FileRepository {
   }
 
   public load(churchId: string, id: string): Promise<File> {
-    return DB.queryOne("SELECT * FROM files WHERE id=? AND churchId=?", [id, churchId]) as Promise<File>
+    return DB.queryOne("SELECT * FROM files WHERE id=? AND churchId=?", [id, churchId]) as Promise<File>;
   }
 
   public loadPublicByIds(ids: string[]): Promise<File[]> {
     const sql = "SELECT * FROM files WHERE id IN (" + ArrayHelper.fillArray("?", ids.length) + ")";
-    return DB.query(sql, ids) as Promise<File[]>
+    return DB.query(sql, ids) as Promise<File[]>;
   }
 
   public loadByIds(churchId: string, ids: string[]): Promise<File[]> {
     const sql = "SELECT * FROM files WHERE churchId=? AND id IN (" + ArrayHelper.fillArray("?", ids.length) + ")";
-    return DB.query(sql, [churchId].concat(ids)) as Promise<File[]>
+    return DB.query(sql, [churchId].concat(ids)) as Promise<File[]>;
   }
 
   public loadForChurch(churchId: string): Promise<File[]> {
-    return DB.query("SELECT * FROM files WHERE churchId=?", [churchId]) as Promise<File[]>
+    return DB.query("SELECT * FROM files WHERE churchId=?", [churchId]) as Promise<File[]>;
   }
 
   public loadAll(): Promise<File[]> {
-    return DB.query("SELECT * FROM files", []) as Promise<File[]>
+    return DB.query("SELECT * FROM files", []) as Promise<File[]>;
   }
 
   public delete(churchId: string, id: string): Promise<any> {
@@ -51,15 +51,7 @@ export class FileRepository {
   }
 
   public cleanUp(): Promise<any> {
-    const sql = "DELETE FROM files WHERE id NOT IN ("
-      + " SELECT fileId FROM bundles where fileId is not null"
-      + " UNION ALL"
-      + " SELECT fileId FROM assets where fileId is not null"
-      + " UNION ALL"
-      + " SELECT fileId FROM variants where fileId is not null"
-      + " )"
+    const sql = "DELETE FROM files WHERE id NOT IN (" + " SELECT fileId FROM bundles where fileId is not null" + " UNION ALL" + " SELECT fileId FROM assets where fileId is not null" + " UNION ALL" + " SELECT fileId FROM variants where fileId is not null" + " )";
     return DB.query(sql, []) as Promise<any>;
   }
-
-
 }

@@ -3,7 +3,6 @@ import path from "path";
 import { AwsHelper, EnvironmentBase } from "@churchapps/apihelper";
 
 export class Environment extends EnvironmentBase {
-
   static transcodePipeline: string;
   static transcodePreset: string;
   static ipGeoKey: string;
@@ -15,7 +14,6 @@ export class Environment extends EnvironmentBase {
     if (environment === "staging") file = "staging.json";
     if (environment === "prod") file = "prod.json";
 
-
     const relativePath = "../../config/" + file;
     const physicalPath = path.resolve(__dirname, relativePath);
 
@@ -25,9 +23,8 @@ export class Environment extends EnvironmentBase {
 
     this.transcodePipeline = data.transcodePipeline;
     this.transcodePreset = data.transcodePreset;
-    this.hubspotKey = process.env.HUBSPOT_KEY || await AwsHelper.readParameter(`/${environment}/hubspotKey`);
-    this.ipGeoKey = process.env.IP_GEO_KEY || await AwsHelper.readParameter(`/${environment}/ipGeoKey`);
-    this.vimeoToken = process.env.VIMEO_TOKEN || await AwsHelper.readParameter(`/${environment}/vimeoToken`);
+    this.hubspotKey = process.env.HUBSPOT_KEY || (await AwsHelper.readParameter(`/${environment}/hubspotKey`));
+    this.ipGeoKey = process.env.IP_GEO_KEY || (await AwsHelper.readParameter(`/${environment}/ipGeoKey`));
+    this.vimeoToken = process.env.VIMEO_TOKEN || (await AwsHelper.readParameter(`/${environment}/vimeoToken`));
   }
-
 }

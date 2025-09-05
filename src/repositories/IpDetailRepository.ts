@@ -1,11 +1,11 @@
-import { DB } from "@churchapps/apihelper"
+import { DB } from "@churchapps/apihelper";
 import { IpDetail } from "../models";
 import { UniqueIdHelper } from "../helpers";
 
 export class IpDetailRepository {
-
   public save(detail: IpDetail) {
-    if (UniqueIdHelper.isMissing(detail.id)) return this.create(detail); else return this.update(detail);
+    if (UniqueIdHelper.isMissing(detail.id)) return this.create(detail);
+    else return this.update(detail);
   }
 
   public async create(detail: IpDetail) {
@@ -24,15 +24,10 @@ export class IpDetailRepository {
   }
 
   public async loadPendingLookup() {
-    const sql = "select ipAddress from downloads"
-      + " where ipAddress like '%.%.%.%'"
-      + " and ipAddress not in (select ipAddress from ipDetails)"
-      + " group by ipAddress limit 10";
-    const data: any[] = await DB.query(sql, []) as any[];
+    const sql = "select ipAddress from downloads" + " where ipAddress like '%.%.%.%'" + " and ipAddress not in (select ipAddress from ipDetails)" + " group by ipAddress limit 10";
+    const data: any[] = (await DB.query(sql, [])) as any[];
     const result: string[] = [];
-    data.forEach(d => result.push(d.ipAddress))
+    data.forEach(d => result.push(d.ipAddress));
     return result;
   }
-
-
 }

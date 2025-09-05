@@ -1,11 +1,11 @@
-import { DB } from "@churchapps/apihelper"
+import { DB } from "@churchapps/apihelper";
 import { Bundle } from "../models";
 import { UniqueIdHelper } from "../helpers";
 
 export class BundleRepository {
-
   public save(bundle: Bundle) {
-    if (UniqueIdHelper.isMissing(bundle.id)) return this.create(bundle); else return this.update(bundle);
+    if (UniqueIdHelper.isMissing(bundle.id)) return this.create(bundle);
+    else return this.update(bundle);
   }
 
   public async create(bundle: Bundle) {
@@ -24,35 +24,36 @@ export class BundleRepository {
   }
 
   public loadByContentTypeId(churchId: string, contentType: string, contentId: string): Promise<Bundle[]> {
-    return DB.query("SELECT * FROM bundles WHERE churchId=? AND contentType=? AND contentId=? order by name", [churchId, contentType, contentId]) as Promise<Bundle[]>
+    return DB.query("SELECT * FROM bundles WHERE churchId=? AND contentType=? AND contentId=? order by name", [churchId, contentType, contentId]) as Promise<Bundle[]>;
   }
 
   public loadPendingUpdate(limit: number): Promise<Bundle[]> {
-    return DB.query("SELECT * FROM bundles WHERE pendingUpdate=1 limit " + limit.toString(), []) as Promise<Bundle[]>
+    return DB.query("SELECT * FROM bundles WHERE pendingUpdate=1 limit " + limit.toString(), []) as Promise<Bundle[]>;
+  }
+
+  public loadAll(churchId: string): Promise<Bundle[]> {
+    return DB.query("SELECT * FROM bundles WHERE churchId=? order by name", [churchId]) as Promise<Bundle[]>;
   }
 
   public loadAvailable(churchId: string, programId: string, studyId: string): Promise<Bundle[]> {
-    const params = [churchId, programId]
-    let sql = "SELECT * FROM labelledBundles WHERE churchId=? AND "
+    const params = [churchId, programId];
+    let sql = "SELECT * FROM labelledBundles WHERE churchId=? AND ";
     if (studyId) {
       sql += "(programId=? OR studyId=?)";
       params.push(studyId);
-    } else sql += "programId=?"
+    } else sql += "programId=?";
     return DB.query(sql, params) as Promise<Bundle[]>;
   }
 
   public loadPublicForLesson(lessonId: string): Promise<Bundle[]> {
-    return DB.query("SELECT * FROM bundles WHERE id in (SELECT bundleId FROM resources WHERE id in (SELECT resourceId from actions WHERE lessonId=?))", [lessonId]) as Promise<Bundle[]>
+    return DB.query("SELECT * FROM bundles WHERE id in (SELECT bundleId FROM resources WHERE id in (SELECT resourceId from actions WHERE lessonId=?))", [lessonId]) as Promise<Bundle[]>;
   }
 
   public load(churchId: string, id: string): Promise<Bundle> {
-    return DB.queryOne("SELECT * FROM bundles WHERE id=? and churchId=?", [id, churchId]) as Promise<Bundle>
+    return DB.queryOne("SELECT * FROM bundles WHERE id=? and churchId=?", [id, churchId]) as Promise<Bundle>;
   }
-
-
 
   public delete(churchId: string, id: string): Promise<any> {
     return DB.query("DELETE FROM bundles WHERE id=? AND churchId=?", [id, churchId]) as Promise<any>;
   }
-
 }

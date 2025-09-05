@@ -1,11 +1,11 @@
-import { DB } from "@churchapps/apihelper"
+import { DB } from "@churchapps/apihelper";
 import { Schedule } from "../models";
 import { UniqueIdHelper } from "../helpers";
 
 export class ScheduleRepository {
-
   public save(schedule: Schedule) {
-    if (UniqueIdHelper.isMissing(schedule.id)) return this.create(schedule); else return this.update(schedule);
+    if (UniqueIdHelper.isMissing(schedule.id)) return this.create(schedule);
+    else return this.update(schedule);
   }
 
   public async create(schedule: Schedule) {
@@ -24,23 +24,22 @@ export class ScheduleRepository {
   }
 
   public loadByChurchIdClassroomId(churchId: string, classroomId: string): Promise<Schedule[]> {
-    return DB.query("SELECT * FROM schedules WHERE churchId=? AND classroomId=? ORDER BY scheduledDate", [churchId, classroomId]) as Promise<Schedule[]>
+    return DB.query("SELECT * FROM schedules WHERE churchId=? AND classroomId=? ORDER BY scheduledDate", [churchId, classroomId]) as Promise<Schedule[]>;
   }
 
   public loadByClassroomId(classroomId: string): Promise<Schedule[]> {
-    return DB.query("SELECT * FROM schedules WHERE classroomId=? ORDER BY scheduledDate", [classroomId]) as Promise<Schedule[]>
+    return DB.query("SELECT * FROM schedules WHERE classroomId=? ORDER BY scheduledDate", [classroomId]) as Promise<Schedule[]>;
   }
 
-  public loadCurrent(classroomId: string, date:Date): Promise<Schedule> {
+  public loadCurrent(classroomId: string, date: Date): Promise<Schedule> {
     return DB.queryOne("SELECT * FROM schedules WHERE classroomId=? AND scheduledDate > (? - INTERVAL 1 DAY) ORDER BY scheduledDate LIMIT 1", [classroomId, date]);
   }
 
   public load(id: string): Promise<Schedule> {
-    return DB.queryOne("SELECT * FROM schedules WHERE id=?", [id]) as Promise<Schedule>
+    return DB.queryOne("SELECT * FROM schedules WHERE id=?", [id]) as Promise<Schedule>;
   }
 
   public delete(churchId: string, id: string): Promise<any> {
     return DB.query("DELETE FROM schedules WHERE id=? AND churchId=?", [id, churchId]) as Promise<any>;
   }
-
 }

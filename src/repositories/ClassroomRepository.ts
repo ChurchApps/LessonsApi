@@ -1,11 +1,11 @@
-import { ArrayHelper, DB } from "@churchapps/apihelper"
+import { ArrayHelper, DB } from "@churchapps/apihelper";
 import { Classroom } from "../models";
 import { UniqueIdHelper } from "../helpers";
 
 export class ClassroomRepository {
-
   public save(classroom: Classroom) {
-    if (UniqueIdHelper.isMissing(classroom.id)) return this.create(classroom); else return this.update(classroom);
+    if (UniqueIdHelper.isMissing(classroom.id)) return this.create(classroom);
+    else return this.update(classroom);
   }
 
   public async create(classroom: Classroom) {
@@ -25,24 +25,23 @@ export class ClassroomRepository {
 
   public loadForPerson(churchId: string, groupIds: string[]): Promise<Classroom[]> {
     const sql = "SELECT * FROM classrooms WHERE churchId=? AND (recentGroupId IN (?) OR upcomingGroupId IN (?)) ORDER BY name";
-    return DB.query(sql, [churchId, groupIds, groupIds]) as Promise<Classroom[]>
+    return DB.query(sql, [churchId, groupIds, groupIds]) as Promise<Classroom[]>;
   }
 
   public loadByIds(churchId: string, ids: string[]): Promise<Classroom[]> {
     const sql = "SELECT * FROM classrooms WHERE churchId=? AND id IN (" + ArrayHelper.fillArray("?", ids.length) + ")";
-    return DB.query(sql, [churchId].concat(ids)) as Promise<Classroom[]>
+    return DB.query(sql, [churchId].concat(ids)) as Promise<Classroom[]>;
   }
 
   public loadByChurchId(churchId: string): Promise<Classroom[]> {
-    return DB.query("SELECT * FROM classrooms WHERE churchId=? ORDER BY name", [churchId]) as Promise<Classroom[]>
+    return DB.query("SELECT * FROM classrooms WHERE churchId=? ORDER BY name", [churchId]) as Promise<Classroom[]>;
   }
 
   public load(id: string): Promise<Classroom> {
-    return DB.queryOne("SELECT * FROM classrooms WHERE id=?", [id]) as Promise<Classroom>
+    return DB.queryOne("SELECT * FROM classrooms WHERE id=?", [id]) as Promise<Classroom>;
   }
 
   public delete(churchId: string, id: string): Promise<any> {
     return DB.query("DELETE FROM classrooms WHERE id=? AND churchId=?", [id, churchId]) as Promise<any>;
   }
-
 }

@@ -1,14 +1,13 @@
 import { controller, httpPost, httpGet, interfaces, requestParam, httpDelete } from "inversify-express-utils";
 import express from "express";
-import { LessonsBaseController } from "./LessonsBaseController"
-import { Resource } from "../models"
-import { Permissions } from '../helpers/Permissions'
+import { LessonsBaseController } from "./LessonsBaseController";
+import { Resource } from "../models";
+import { Permissions } from "../helpers/Permissions";
 import { Environment, FilesHelper, ZipHelper } from "../helpers";
 import { ArrayHelper, FileStorageHelper } from "@churchapps/apihelper";
 
 @controller("/resources")
 export class ResourceController extends LessonsBaseController {
-
   /*
   @httpGet("/public/lesson/:lessonId")
   public async getPublicForLesson(@requestParam("lessonId") lessonId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
@@ -30,15 +29,15 @@ export class ResourceController extends LessonsBaseController {
 
   @httpGet("/:id")
   public async get(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
-    return this.actionWrapper(req, res, async (au) => {
+    return this.actionWrapper(req, res, async au => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
-      else return await this.repositories.resource.load(au.churchId, id)
+      else return await this.repositories.resource.load(au.churchId, id);
     });
   }
 
   @httpGet("/content/:contentType/:contentId")
   public async getForContent(@requestParam("contentType") contentType: string, @requestParam("contentId") contentId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
-    return this.actionWrapper(req, res, async (au) => {
+    return this.actionWrapper(req, res, async au => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
       else return await this.repositories.resource.loadByContentTypeId(au.churchId, contentType, contentId);
     });
@@ -46,18 +45,20 @@ export class ResourceController extends LessonsBaseController {
 
   @httpPost("/")
   public async save(req: express.Request<{}, {}, Resource[]>, res: express.Response): Promise<any> {
-    return this.actionWrapper(req, res, async (au) => {
+    return this.actionWrapper(req, res, async au => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
       else {
         const promises: Promise<Resource>[] = [];
         for (const resource of req.body) {
           resource.churchId = au.churchId;
           if (resource.id) await this.checkMoveFiles(resource);
-          promises.push(this.repositories.resource.save(resource).then(async r => {
-            await ZipHelper.setBundlePending(r.churchId, r.bundleId);
-            if (r.bundleId !== resource.bundleId) await ZipHelper.setBundlePending(resource.churchId, resource.bundleId); // update the old bundle too
-            return r;
-          }));
+          promises.push(
+            this.repositories.resource.save(resource).then(async r => {
+              await ZipHelper.setBundlePending(r.churchId, r.bundleId);
+              if (r.bundleId !== resource.bundleId) await ZipHelper.setBundlePending(resource.churchId, resource.bundleId); // update the old bundle too
+              return r;
+            })
+          );
         }
         const result = await Promise.all(promises);
         return result;
@@ -67,22 +68,26 @@ export class ResourceController extends LessonsBaseController {
 
   @httpDelete("/:id")
   public async delete(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
-    return this.actionWrapper(req, res, async (au) => {
+    return this.actionWrapper(req, res, async au => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
       else {
         const promises: Promise<any>[] = [];
-        promises.push(this.repositories.asset.loadByResourceId(au.churchId, id).then(assets =>
-          assets.forEach(async a => {
-            await FilesHelper.deleteFile(au.churchId, a.fileId, a.resourceId);
-            await this.repositories.asset.delete(au.churchId, a.id);
-          })
-        ));
-        promises.push(this.repositories.variant.loadByResourceId(au.churchId, id).then(variants =>
-          variants.forEach(async v => {
-            await FilesHelper.deleteFile(au.churchId, v.fileId, v.resourceId);
-            await this.repositories.variant.delete(au.churchId, v.id);
-          })
-        ));
+        promises.push(
+          this.repositories.asset.loadByResourceId(au.churchId, id).then(assets =>
+            assets.forEach(async a => {
+              await FilesHelper.deleteFile(au.churchId, a.fileId, a.resourceId);
+              await this.repositories.asset.delete(au.churchId, a.id);
+            })
+          )
+        );
+        promises.push(
+          this.repositories.variant.loadByResourceId(au.churchId, id).then(variants =>
+            variants.forEach(async v => {
+              await FilesHelper.deleteFile(au.churchId, v.fileId, v.resourceId);
+              await this.repositories.variant.delete(au.churchId, v.id);
+            })
+          )
+        );
 
         await Promise.all(promises);
         await FilesHelper.deleteResourceFolder(au.churchId, id);
@@ -118,7 +123,7 @@ export class ResourceController extends LessonsBaseController {
 
   private async moveFiles(churchId: string, resourceId: string, oldContentType: string, oldContentId: string, newContentType: string, newContentId: string) {
     const assets = await this.repositories.asset.loadByResourceId(churchId, resourceId);
-    const variants = await this.repositories.variant.loadByResourceId(churchId, resourceId)
+    const variants = await this.repositories.variant.loadByResourceId(churchId, resourceId);
     let fileIds = ArrayHelper.getIds(assets, "fileId");
     fileIds = fileIds.concat(ArrayHelper.getIds(variants, "fileId"));
     if (fileIds.length > 0) {
@@ -133,6 +138,4 @@ export class ResourceController extends LessonsBaseController {
       }
     }
   }
-
-
 }

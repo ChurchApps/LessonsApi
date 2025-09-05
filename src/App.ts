@@ -5,7 +5,7 @@ import { InversifyExpressServer } from "inversify-express-utils";
 import { bindings } from "./inversify.config";
 import express from "express";
 import { CustomAuthProvider } from "@churchapps/apihelper";
-import cors from "cors"
+import cors from "cors";
 
 export const init = async () => {
   dotenv.config();
@@ -20,7 +20,7 @@ export const init = async () => {
         origin: true,
         credentials: true,
         methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-        allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "Accept", "Origin"]
+        allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "Accept", "Origin"],
       })
     );
 
@@ -82,4 +82,4 @@ export const init = async () => {
 
   const server = app.setConfig(configFunction).build();
   return server;
-}
+};

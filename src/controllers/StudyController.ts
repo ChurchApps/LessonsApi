@@ -1,13 +1,12 @@
 import { controller, httpPost, httpGet, interfaces, requestParam, httpDelete } from "inversify-express-utils";
 import express from "express";
-import { LessonsBaseController } from "./LessonsBaseController"
-import { Study } from "../models"
-import { Permissions } from '../helpers/Permissions'
-import { Environment, FileStorageHelper } from "../helpers"
+import { LessonsBaseController } from "./LessonsBaseController";
+import { Study } from "../models";
+import { Permissions } from "../helpers/Permissions";
+import { Environment, FileStorageHelper } from "../helpers";
 
 @controller("/studies")
 export class StudyController extends LessonsBaseController {
-
   @httpGet("/public/program/:programId")
   public async getPublicForProgram(@requestParam("programId") programId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
     return this.actionWrapperAnon(req, res, async () => {
@@ -18,18 +17,17 @@ export class StudyController extends LessonsBaseController {
   @httpGet("/public/programs")
   public async getPublicByPrograms(req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
     return this.actionWrapperAnon(req, res, async () => {
-      if (!req.query.ids) return []
-      const ids = req.query.ids.toString().split(',')
-      return this.repositories.study.loadPublicByProgramIds(ids)
-    })
+      if (!req.query.ids) return [];
+      const ids = req.query.ids.toString().split(",");
+      return this.repositories.study.loadPublicByProgramIds(ids);
+    });
   }
 
   @httpGet("/public/slug/:programId/:slug")
   public async getPublicBySlug(@requestParam("programId") programId: string, @requestParam("slug") slug: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
     return this.actionWrapperAnon(req, res, async () => {
-      return await this.repositories.study.loadPublicBySlug(programId, slug)
+      return await this.repositories.study.loadPublicBySlug(programId, slug);
     });
-
   }
   @httpGet("/public/ids")
   public async getPublicByIds(req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
@@ -42,7 +40,7 @@ export class StudyController extends LessonsBaseController {
   @httpGet("/public/:id")
   public async getPublic(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
     return this.actionWrapperAnon(req, res, async () => {
-      return await this.repositories.study.loadPublic(id)
+      return await this.repositories.study.loadPublic(id);
     });
   }
 
@@ -55,16 +53,14 @@ export class StudyController extends LessonsBaseController {
 
   @httpGet("/:id")
   public async get(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
-    return this.actionWrapper(req, res, async (au) => {
-      return await this.repositories.study.load(au.churchId, id)
+    return this.actionWrapper(req, res, async au => {
+      return await this.repositories.study.load(au.churchId, id);
     });
   }
 
-
-
   @httpGet("/program/:programId")
   public async getForProgram(@requestParam("programId") programId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
-    return this.actionWrapper(req, res, async (au) => {
+    return this.actionWrapper(req, res, async au => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
       else return await this.repositories.study.loadByProgramId(au.churchId, programId);
     });
@@ -72,7 +68,7 @@ export class StudyController extends LessonsBaseController {
 
   @httpGet("/")
   public async getForAll(req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
-    return this.actionWrapper(req, res, async (au) => {
+    return this.actionWrapper(req, res, async au => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
       else return await this.repositories.study.loadAll(au.churchId);
     });
@@ -80,7 +76,7 @@ export class StudyController extends LessonsBaseController {
 
   @httpPost("/")
   public async save(req: express.Request<{}, {}, Study[]>, res: express.Response): Promise<any> {
-    return this.actionWrapper(req, res, async (au) => {
+    return this.actionWrapper(req, res, async au => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
       else {
         const promises: Promise<Study>[] = [];
@@ -89,11 +85,11 @@ export class StudyController extends LessonsBaseController {
           const s = study;
           const saveFunction = async () => {
             if (s.image && s.image.startsWith("data:image/")) {
-              if (!s.id) await this.repositories.study.save(s);  // save first to generate an id
+              if (!s.id) await this.repositories.study.save(s); // save first to generate an id
               await this.saveImage(s);
             }
             return await this.repositories.study.save(s);
-          }
+          };
           promises.push(saveFunction());
         });
         const result = await Promise.all(promises);
@@ -103,18 +99,17 @@ export class StudyController extends LessonsBaseController {
   }
 
   private async saveImage(study: Study) {
-    const base64 = study.image.split(',')[1];
+    const base64 = study.image.split(",")[1];
     const key = "/studies/" + study.id + ".png";
-    return FileStorageHelper.store(key, "image/png", Buffer.from(base64, 'base64')).then(async () => {
+    return FileStorageHelper.store(key, "image/png", Buffer.from(base64, "base64")).then(async () => {
       const photoUpdated = new Date();
       study.image = Environment.contentRoot + key + "?dt=" + photoUpdated.getTime().toString();
     });
   }
 
-
   @httpDelete("/:id")
   public async delete(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
-    return this.actionWrapper(req, res, async (au) => {
+    return this.actionWrapper(req, res, async au => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
       else {
         const resources = await this.repositories.resource.loadByContentTypeId(au.churchId, "study", id);
@@ -124,5 +119,4 @@ export class StudyController extends LessonsBaseController {
       }
     });
   }
-
 }

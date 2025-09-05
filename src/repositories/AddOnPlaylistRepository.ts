@@ -1,11 +1,11 @@
-import { DB } from "@churchapps/apihelper"
+import { DB } from "@churchapps/apihelper";
 import { AddOnPlaylist } from "../models";
 import { UniqueIdHelper } from "../helpers";
 
 export class AddOnPlaylistRepository {
-
   public save(addOnPlaylist: AddOnPlaylist) {
-    if (UniqueIdHelper.isMissing(addOnPlaylist.id)) return this.create(addOnPlaylist); else return this.update(addOnPlaylist);
+    if (UniqueIdHelper.isMissing(addOnPlaylist.id)) return this.create(addOnPlaylist);
+    else return this.update(addOnPlaylist);
   }
 
   public async create(addOnPlaylist: AddOnPlaylist) {
@@ -24,11 +24,10 @@ export class AddOnPlaylistRepository {
   }
 
   public load(id: string): Promise<AddOnPlaylist> {
-    return DB.queryOne("SELECT * FROM addOnPlaylists WHERE id=?", [id]) as Promise<AddOnPlaylist>
+    return DB.queryOne("SELECT * FROM addOnPlaylists WHERE id=?", [id]) as Promise<AddOnPlaylist>;
   }
 
   public delete(churchId: string, id: string): Promise<any> {
     return DB.query("DELETE FROM addOnPlaylists WHERE id=? AND churchId=?", [id, churchId]) as Promise<any>;
   }
-
 }

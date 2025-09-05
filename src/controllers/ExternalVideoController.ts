@@ -1,8 +1,8 @@
 import { controller, httpPost, httpGet, interfaces, requestParam, httpDelete } from "inversify-express-utils";
 import express from "express";
-import { LessonsBaseController } from "./LessonsBaseController"
-import { ExternalVideo } from "../models"
-import { Permissions } from '../helpers/Permissions'
+import { LessonsBaseController } from "./LessonsBaseController";
+import { ExternalVideo } from "../models";
+import { Permissions } from "../helpers/Permissions";
 import { VimeoHelper } from "../helpers/VimeoHelper";
 
 @controller("/externalVideos")
@@ -20,7 +20,6 @@ export class ExternalVideoController extends LessonsBaseController {
   @httpGet("/test2")
   public async test2(req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
     return this.actionWrapperAnon(req, res, async () => {
-
       const videos = await this.repositories.externalVideo.tempLoadNeedingUpdate();
 
       for (const ev of videos) {
@@ -28,15 +27,12 @@ export class ExternalVideoController extends LessonsBaseController {
           await VimeoHelper.updateVimeoLinks(ev);
         } catch (e) {
           console.log(e);
-
         }
       }
 
-      return { status: "success" }
+      return { status: "success" };
     });
   }
-
-
 
   /*
    @httpGet("/test")
@@ -95,7 +91,7 @@ export class ExternalVideoController extends LessonsBaseController {
 
   @httpGet("/:id")
   public async get(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
-    return this.actionWrapper(req, res, async (au) => {
+    return this.actionWrapper(req, res, async au => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
       else {
         const result = await this.repositories.externalVideo.load(au.churchId, id);
@@ -106,7 +102,7 @@ export class ExternalVideoController extends LessonsBaseController {
 
   @httpGet("/content/:contentType/:contentId")
   public async getForContent(@requestParam("contentType") contentType: string, @requestParam("contentId") contentId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
-    return this.actionWrapper(req, res, async (au) => {
+    return this.actionWrapper(req, res, async au => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
       else return await this.repositories.externalVideo.loadByContentTypeId(au.churchId, contentType, contentId);
     });
@@ -114,7 +110,7 @@ export class ExternalVideoController extends LessonsBaseController {
 
   @httpPost("/")
   public async save(req: express.Request<{}, {}, ExternalVideo[]>, res: express.Response): Promise<any> {
-    return this.actionWrapper(req, res, async (au) => {
+    return this.actionWrapper(req, res, async au => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
       else {
         const promises: Promise<ExternalVideo>[] = [];
@@ -138,7 +134,6 @@ export class ExternalVideoController extends LessonsBaseController {
           } else {
             promises.push(this.repositories.externalVideo.save(externalVideo));
           }
-
         });
         const result = await Promise.all(promises);
         return result;
@@ -148,7 +143,7 @@ export class ExternalVideoController extends LessonsBaseController {
 
   @httpDelete("/:id")
   public async delete(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
-    return this.actionWrapper(req, res, async (au) => {
+    return this.actionWrapper(req, res, async au => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
       else {
         await this.repositories.externalVideo.delete(au.churchId, id);
@@ -156,5 +151,4 @@ export class ExternalVideoController extends LessonsBaseController {
       }
     });
   }
-
 }

@@ -1,8 +1,8 @@
 import { controller, httpPost, httpGet, interfaces, requestParam, httpDelete } from "inversify-express-utils";
 import express from "express";
-import { LessonsBaseController } from "./LessonsBaseController"
-import { Venue, Section, Action, Role, ExternalVideo, Lesson, Download } from "../models"
-import { Permissions } from '../helpers/Permissions'
+import { LessonsBaseController } from "./LessonsBaseController";
+import { Venue, Section, Action, Role, ExternalVideo, Lesson, Download } from "../models";
+import { Permissions } from "../helpers/Permissions";
 import { ArrayHelper } from "@churchapps/apihelper";
 import { Environment } from "../helpers";
 import { PlaylistHelper } from "../helpers/PlaylistHelper";
@@ -11,10 +11,9 @@ import { LibraryHelper } from "../helpers/LibraryHelper";
 
 @controller("/venues")
 export class VenueController extends LessonsBaseController {
-
   @httpGet("/timeline")
   public async getPosts(req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
-    return this.actionWrapper(req, res, async (_au) => {
+    return this.actionWrapper(req, res, async _au => {
       const venueIds = req.query.venueIds ? req.query.venueIds.toString().split(",") : [];
       return await this.repositories.venue.loadTimeline(venueIds);
     });
@@ -26,9 +25,9 @@ export class VenueController extends LessonsBaseController {
       churchId,
       ipAddress,
       downloadDate: new Date(),
-      fileName: "Playlist: " + venueName
-    }
-    const existing = await this.repositories.download.loadExisting(download)
+      fileName: "Playlist: " + venueName,
+    };
+    const existing = await this.repositories.download.loadExisting(download);
     if (!existing) await this.repositories.download.save(download);
   }
 
@@ -38,18 +37,17 @@ export class VenueController extends LessonsBaseController {
       const venue: Venue = await this.repositories.venue.loadPublic(venueId);
       const lesson: Lesson = await this.repositories.lesson.loadPublic(venue.lessonId);
       const sections = await this.repositories.section.loadForPlaylist(venue.churchId, venue.id, venue.churchId);
-      const actions = await this.repositories.action.loadPlaylistActions(venue.id, venue.churchId)
+      const actions = await this.repositories.action.loadPlaylistActions(venue.id, venue.churchId);
       const availableFiles = await PlaylistHelper.loadPlaylistFiles(actions);
       const availableVideos = await PlaylistHelper.loadPlaylistVideos(actions);
       let resolution: "720" | "1080" = "720";
       if (req.query.resolution && req.query.resolution === "1080") resolution = "1080";
 
-      const ipAddress = (req.headers['x-forwarded-for'] || req.socket.remoteAddress).toString().split(",")[0]
+      const ipAddress = (req.headers["x-forwarded-for"] || req.socket.remoteAddress).toString().split(",")[0];
       await this.logDownload(venue.lessonId, venue.name, venue.churchId, ipAddress);
       return await LibraryHelper.getPlaylist(venue, lesson, sections, actions, availableFiles, availableVideos, req.query.mode === "web", resolution);
     });
   }
-
 
   @httpGet("/playlist/:venueId")
   public async getPlaylist(@requestParam("venueId") venueId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
@@ -57,13 +55,13 @@ export class VenueController extends LessonsBaseController {
       const venue: Venue = await this.repositories.venue.loadPublic(venueId);
       const lesson: Lesson = await this.repositories.lesson.loadPublic(venue.lessonId);
       const sections = await this.repositories.section.loadForPlaylist(venue.churchId, venue.id, venue.churchId);
-      const actions = await this.repositories.action.loadPlaylistActions(venue.id, venue.churchId)
+      const actions = await this.repositories.action.loadPlaylistActions(venue.id, venue.churchId);
       const availableFiles = await PlaylistHelper.loadPlaylistFiles(actions);
       const availableVideos = await PlaylistHelper.loadPlaylistVideos(actions);
       let resolution: "720" | "1080" = "720";
       if (req.query.resolution && req.query.resolution === "1080") resolution = "1080";
 
-      const ipAddress = (req.headers['x-forwarded-for'] || req.socket.remoteAddress).toString().split(",")[0]
+      const ipAddress = (req.headers["x-forwarded-for"] || req.socket.remoteAddress).toString().split(",")[0];
       await this.logDownload(venue.lessonId, venue.name, venue.churchId, ipAddress);
 
       const messages: any[] = [];
@@ -76,32 +74,49 @@ export class VenueController extends LessonsBaseController {
             let video: ExternalVideo = ArrayHelper.getOne(availableVideos, "id", a.externalVideoId);
             if (!video && a.actionType === "Add-on") video = ArrayHelper.getOne(availableVideos, "contentId", a.addOnId);
             if (video) {
-              if (req.query.mode === "web") itemFiles.push({ name: video.name, url: video.videoProvider.toLowerCase() + ":" + video.videoId, seconds: video.seconds, loopVideo: video.loopVideo })
-              else itemFiles.push({ name: video.name, url: resolution === "1080" ? video.play1080 : video.play720, seconds: video.seconds, loopVideo: video.loopVideo })
+              if (req.query.mode === "web")
+                itemFiles.push({
+                  name: video.name,
+                  url: video.videoProvider.toLowerCase() + ":" + video.videoId,
+                  seconds: video.seconds,
+                  loopVideo: video.loopVideo,
+                });
+              else
+                itemFiles.push({
+                  name: video.name,
+                  url: resolution === "1080" ? video.play1080 : video.play720,
+                  seconds: video.seconds,
+                  loopVideo: video.loopVideo,
+                });
             }
           } else {
             const files: any[] = PlaylistHelper.getBestFiles(a, availableFiles);
             files.forEach(file => {
-              const contentPath = (file.contentPath.indexOf("://") === -1) ? Environment.contentRoot + file.contentPath : file.contentPath;
+              const contentPath = file.contentPath.indexOf("://") === -1 ? Environment.contentRoot + file.contentPath : file.contentPath;
               let seconds = parseInt(file.seconds, 0);
-              const loopVideo = (file.loopVideo) ? true : false;
+              const loopVideo = file.loopVideo ? true : false;
               if (!seconds || seconds === 0 || loopVideo) seconds = 3600;
-              itemFiles.push({ name: file.resourceName, url: contentPath, seconds, loopVideo })
+              itemFiles.push({ name: file.resourceName, url: contentPath, seconds, loopVideo });
             });
           }
         });
         messages.push({ name: s.name, files: itemFiles });
-
-
       });
 
-      return { messages, lessonName: lesson.name, lessonTitle: lesson.title, lessonImage: lesson.image, lessonDescription: lesson.description, venueName: venue.name };
+      return {
+        messages,
+        lessonName: lesson.name,
+        lessonTitle: lesson.title,
+        lessonImage: lesson.image,
+        lessonDescription: lesson.description,
+        venueName: venue.name,
+      };
     });
   }
 
   @httpGet("/:id")
   public async get(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
-    return this.actionWrapper(req, res, async (au) => {
+    return this.actionWrapper(req, res, async au => {
       return await this.repositories.venue.load(au.churchId, id);
     });
   }
@@ -145,42 +160,42 @@ export class VenueController extends LessonsBaseController {
       const actions = await this.repositories.action.loadByLessonId(lessonId);
       venues.forEach(v => this.appendSections(v, sections, roles, actions));
       return venues;
-
     });
   }
 
   @httpGet("/lesson/:lessonId")
   public async getForLesson(@requestParam("lessonId") lessonId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
-    return this.actionWrapper(req, res, async (au) => {
+    return this.actionWrapper(req, res, async au => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
       else return await this.repositories.venue.loadByLessonId(au.churchId, lessonId);
     });
   }
 
-
   @httpGet("/names/classroom/:classroomId")
   public async getNameByClassroom(@requestParam("classroomId") classroomId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
-    return this.actionWrapper(req, res, async (au) => {
-      return await this.repositories.venue.loadNamesForClassroom(au.churchId, classroomId)
+    return this.actionWrapper(req, res, async au => {
+      return await this.repositories.venue.loadNamesForClassroom(au.churchId, classroomId);
     });
   }
 
   @httpGet("/")
   public async getAll(req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
-    return this.actionWrapper(req, res, async (au) => {
+    return this.actionWrapper(req, res, async au => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
       else return await this.repositories.venue.loadAll(au.churchId);
     });
   }
 
-
   @httpPost("/")
   public async save(req: express.Request<{}, {}, Venue[]>, res: express.Response): Promise<any> {
-    return this.actionWrapper(req, res, async (au) => {
+    return this.actionWrapper(req, res, async au => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
       else {
         const promises: Promise<Venue>[] = [];
-        req.body.forEach(venue => { venue.churchId = au.churchId; promises.push(this.repositories.venue.save(venue)); });
+        req.body.forEach(venue => {
+          venue.churchId = au.churchId;
+          promises.push(this.repositories.venue.save(venue));
+        });
         const result = await Promise.all(promises);
         return result;
       }
@@ -189,7 +204,7 @@ export class VenueController extends LessonsBaseController {
 
   @httpDelete("/:id")
   public async delete(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
-    return this.actionWrapper(req, res, async (au) => {
+    return this.actionWrapper(req, res, async au => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
       else {
         await this.repositories.venue.delete(au.churchId, id);
@@ -220,7 +235,7 @@ export class VenueController extends LessonsBaseController {
           label: section.name,
           description: section.name,
           seconds: null,
-          children: []
+          children: [],
         };
 
         // Add actions directly as children of sections
@@ -240,7 +255,7 @@ export class VenueController extends LessonsBaseController {
               description: action.content || "",
               seconds: 0,
               link: action.actionType === "Play" ? `https://lessons.church/preview/${action.id}?lessonId=${venue.lessonId}` : null,
-              children: []
+              children: [],
             };
             sectionPlanItem.children.push(actionPlanItem);
           });
@@ -253,7 +268,6 @@ export class VenueController extends LessonsBaseController {
     });
   }
 
-
   public async appendSections(venue: Venue, allSections: Section[], allRoles: Role[], allActions: Action[]) {
     venue.sections = ArrayHelper.getAll(allSections, "venueId", venue.id);
 
@@ -264,6 +278,4 @@ export class VenueController extends LessonsBaseController {
       });
     });
   }
-
-
 }

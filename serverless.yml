@@ -20,6 +20,8 @@ provider:
     role: arn:aws:iam::428019619026:role/ChurchAppsRole
   environment:
     APP_ENV: ${self:custom.env}
+  logs:
+    restApi: true
 
 functions:
   api:
@@ -34,6 +36,96 @@ functions:
   zipBundles:
     handler: lambda.zipBundles
     vpc: ${self:custom.vpcSettings.current}
+    events:
+      - schedule: rate(5 minutes)
 
 plugins:
   - serverless-plugin-utils
+
+resources:
+  Resources:
+    # CloudWatch Log Group for zip bundles function
+    ZipBundlesLogGroup:
+      Type: AWS::Logs::LogGroup
+      Properties:
+        LogGroupName: /aws/lambda/lessons-api-${self:custom.env}-zipBundles
+        RetentionInDays: 5
+
+    # CloudWatch Alarm for Lambda errors
+    ZipBundlesErrorAlarm:
+      Type: AWS::CloudWatch::Alarm
+      Properties:
+        AlarmName: lessons-api-${self:custom.env}-zipBundles-errors
+        AlarmDescription: Alert when zipBundles function has errors
+        MetricName: Errors
+        Namespace: AWS/Lambda
+        Statistic: Sum
+        Period: 300
+        EvaluationPeriods: 1
+        Threshold: 1
+        ComparisonOperator: GreaterThanOrEqualToThreshold
+        Dimensions:
+          - Name: FunctionName
+            Value: lessons-api-${self:custom.env}-zipBundles
+        TreatMissingData: notBreaching
+
+    # CloudWatch Alarm for Lambda duration
+    ZipBundlesDurationAlarm:
+      Type: AWS::CloudWatch::Alarm
+      Properties:
+        AlarmName: lessons-api-${self:custom.env}-zipBundles-duration
+        AlarmDescription: Alert when zipBundles function runs too long
+        MetricName: Duration
+        Namespace: AWS/Lambda
+        Statistic: Average
+        Period: 300
+        EvaluationPeriods: 2
+        Threshold: 50000
+        ComparisonOperator: GreaterThanThreshold
+        Dimensions:
+          - Name: FunctionName
+            Value: lessons-api-${self:custom.env}-zipBundles
+        TreatMissingData: notBreaching
+
+    # CloudWatch Dashboard for monitoring
+    ZipBundlesDashboard:
+      Type: AWS::CloudWatch::Dashboard
+      Properties:
+        DashboardName: lessons-api-${self:custom.env}-bundle-monitoring
+        DashboardBody:
+          !Sub |
+          {
+            "widgets": [
+              {
+                "type": "metric",
+                "x": 0,
+                "y": 0,
+                "width": 12,
+                "height": 6,
+                "properties": {
+                  "metrics": [
+                    [ "AWS/Lambda", "Duration", "FunctionName", "lessons-api-${self:custom.env}-zipBundles" ],
+                    [ ".", "Errors", ".", "." ],
+                    [ ".", "Invocations", ".", "." ]
+                  ],
+                  "period": 300,
+                  "stat": "Sum",
+                  "region": "us-east-2",
+                  "title": "Bundle Zip Lambda Metrics"
+                }
+              },
+              {
+                "type": "log",
+                "x": 0,
+                "y": 6,
+                "width": 24,
+                "height": 6,
+                "properties": {
+                  "query": "SOURCE '/aws/lambda/lessons-api-${self:custom.env}-zipBundles'\n| fields @timestamp, @message\n| filter @message like /queue depth|processed|failed|error/\n| sort @timestamp desc\n| limit 100",
+                  "region": "us-east-2",
+                  "title": "Bundle Processing Logs",
+                  "view": "table"
+                }
+              }
+            ]
+          }

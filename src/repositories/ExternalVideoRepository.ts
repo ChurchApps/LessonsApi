@@ -1,11 +1,11 @@
-import { DB } from "@churchapps/apihelper"
+import { DB } from "@churchapps/apihelper";
 import { ExternalVideo } from "../models";
 import { UniqueIdHelper } from "../helpers";
 
 export class ExternalVideoRepository {
-
   public save(externalVideo: ExternalVideo) {
-    if (UniqueIdHelper.isMissing(externalVideo.id)) return this.create(externalVideo); else return this.update(externalVideo);
+    if (UniqueIdHelper.isMissing(externalVideo.id)) return this.create(externalVideo);
+    else return this.update(externalVideo);
   }
 
   public async create(externalVideo: ExternalVideo) {
@@ -24,43 +24,40 @@ export class ExternalVideoRepository {
   }
 
   public loadByContentTypeId(churchId: string, contentType: string, contentId: string): Promise<ExternalVideo[]> {
-    return DB.query("SELECT * FROM externalVideos WHERE churchId=? AND contentType=? AND contentId=? order by name", [churchId, contentType, contentId]) as Promise<ExternalVideo[]>
+    return DB.query("SELECT * FROM externalVideos WHERE churchId=? AND contentType=? AND contentId=? order by name", [churchId, contentType, contentId]) as Promise<ExternalVideo[]>;
   }
 
   public loadByContentTypeIds(contentType: string, contentIds: string[]): Promise<ExternalVideo[]> {
-    return DB.query("SELECT * FROM externalVideos WHERE contentType=? AND contentId IN (?) order by name", [contentType, contentIds]) as Promise<ExternalVideo[]>
+    return DB.query("SELECT * FROM externalVideos WHERE contentType=? AND contentId IN (?) order by name", [contentType, contentIds]) as Promise<ExternalVideo[]>;
   }
 
   public loadPendingUpdate(limit: number): Promise<ExternalVideo[]> {
-    return DB.query("SELECT * FROM externalVideos WHERE pendingUpdate=1 limit " + limit.toString(), []) as Promise<ExternalVideo[]>
+    return DB.query("SELECT * FROM externalVideos WHERE pendingUpdate=1 limit " + limit.toString(), []) as Promise<ExternalVideo[]>;
   }
 
   public loadPublicForLesson(lessonId: string): Promise<ExternalVideo[]> {
-    const sql = "SELECT * FROM externalVideos WHERE id in (SELECT externalVideoId from actions WHERE lessonId=?)"
-      + " UNION"
-      + " SELECT * FROM externalVideos WHERE contentId in (SELECT addOnId from actions WHERE lessonId=?)"
+    const sql = "SELECT * FROM externalVideos WHERE id in (SELECT externalVideoId from actions WHERE lessonId=?)" + " UNION" + " SELECT * FROM externalVideos WHERE contentId in (SELECT addOnId from actions WHERE lessonId=?)";
 
-    return DB.query(sql, [lessonId, lessonId]) as Promise<ExternalVideo[]>
+    return DB.query(sql, [lessonId, lessonId]) as Promise<ExternalVideo[]>;
   }
 
   public loadByIds(ids: string[]): Promise<ExternalVideo[]> {
-    return DB.query("SELECT * FROM externalVideos WHERE id in (?)", [ids]) as Promise<ExternalVideo[]>
+    return DB.query("SELECT * FROM externalVideos WHERE id in (?)", [ids]) as Promise<ExternalVideo[]>;
   }
 
   public load(churchId: string, id: string): Promise<ExternalVideo> {
-    return DB.queryOne("SELECT * FROM externalVideos WHERE id=? and churchId=?", [id, churchId]) as Promise<ExternalVideo>
+    return DB.queryOne("SELECT * FROM externalVideos WHERE id=? and churchId=?", [id, churchId]) as Promise<ExternalVideo>;
   }
 
   public loadPublic(id: string): Promise<ExternalVideo> {
-    return DB.queryOne("SELECT * FROM externalVideos WHERE id=?", [id]) as Promise<ExternalVideo>
+    return DB.queryOne("SELECT * FROM externalVideos WHERE id=?", [id]) as Promise<ExternalVideo>;
   }
 
   public tempLoadNeedingUpdate(): Promise<ExternalVideo[]> {
-    return DB.query("select * from externalVideos where downloadsExpire is null", []) as Promise<ExternalVideo[]>
+    return DB.query("select * from externalVideos where downloadsExpire is null", []) as Promise<ExternalVideo[]>;
   }
 
   public delete(churchId: string, id: string): Promise<any> {
     return DB.query("DELETE FROM externalVideos WHERE id=? AND churchId=?", [id, churchId]) as Promise<any>;
   }
-
 }

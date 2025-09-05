@@ -8,6 +8,7 @@ export class Bundle {
   public name?: string;
   public fileId?: string;
   public pendingUpdate?: boolean;
+  public dateModified?: Date;
 
   public file?: File;
 }

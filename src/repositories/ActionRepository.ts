@@ -1,11 +1,11 @@
-import { DB } from "@churchapps/apihelper"
+import { DB } from "@churchapps/apihelper";
 import { Action } from "../models";
 import { UniqueIdHelper } from "../helpers";
 
 export class ActionRepository {
-
   public save(action: Action) {
-    if (UniqueIdHelper.isMissing(action.id)) return this.create(action); else return this.update(action);
+    if (UniqueIdHelper.isMissing(action.id)) return this.create(action);
+    else return this.update(action);
   }
 
   public async create(action: Action) {
@@ -24,29 +24,19 @@ export class ActionRepository {
   }
 
   public loadPlaylistActions(venueId: string, churchId: string): Promise<Action[]> {
-    const sql = "select a.*, s.id as sectionId "
-      + " from sections s"
-      + " inner join roles r on r.sectionId=s.id"
-      + " inner join actions a on a.roleId=r.id and a.actionType in ('Play', 'Add-on')"
-      + " left join customizations c on c.churchId=? AND c.venueId=s.venueId AND c.action='remove' AND c.contentId IN (s.id, r.id, a.id)"
-      + " left join customizations ac on ac.churchId=? AND ac.venueId=s.venueId AND ac.action='sort' AND ac.contentId=a.id"
-      + " left join customizations rc on rc.churchId=? AND rc.venueId=s.venueId AND rc.action='sort' AND rc.contentId=r.id"
-      + " left join customizations sc on sc.churchId=? AND sc.venueId=s.venueId AND sc.action='sort' AND sc.contentId=s.id"
-      + " where s.venueId=? and c.id is null"
-      + " order by IFNULL(cast(sc.actionContent as unsigned), s.sort), IFNULL(cast(rc.actionContent as unsigned), r.sort), IFNULL(cast(ac.actionContent as unsigned), a.sort)"
-    return DB.query(sql, [churchId, churchId, churchId, churchId, venueId]) as Promise<Action[]>
+    const sql = "select a.*, s.id as sectionId " + " from sections s" + " inner join roles r on r.sectionId=s.id" + " inner join actions a on a.roleId=r.id and a.actionType in ('Play', 'Add-on')" + " left join customizations c on c.churchId=? AND c.venueId=s.venueId AND c.action='remove' AND c.contentId IN (s.id, r.id, a.id)" + " left join customizations ac on ac.churchId=? AND ac.venueId=s.venueId AND ac.action='sort' AND ac.contentId=a.id" + " left join customizations rc on rc.churchId=? AND rc.venueId=s.venueId AND rc.action='sort' AND rc.contentId=r.id" + " left join customizations sc on sc.churchId=? AND sc.venueId=s.venueId AND sc.action='sort' AND sc.contentId=s.id" + " where s.venueId=? and c.id is null" + " order by IFNULL(cast(sc.actionContent as unsigned), s.sort), IFNULL(cast(rc.actionContent as unsigned), r.sort), IFNULL(cast(ac.actionContent as unsigned), a.sort)";
+    return DB.query(sql, [churchId, churchId, churchId, churchId, venueId]) as Promise<Action[]>;
   }
 
   public loadByLessonId(lessonId: string): Promise<Action[]> {
-    return DB.query("SELECT * FROM actions WHERE lessonId=? ORDER BY sort", [lessonId]) as Promise<Action[]>
+    return DB.query("SELECT * FROM actions WHERE lessonId=? ORDER BY sort", [lessonId]) as Promise<Action[]>;
   }
 
   public load(id: string): Promise<Action> {
-    return DB.queryOne("SELECT * FROM actions WHERE id=?", [id]) as Promise<Action>
+    return DB.queryOne("SELECT * FROM actions WHERE id=?", [id]) as Promise<Action>;
   }
 
   public delete(churchId: string, id: string): Promise<any> {
     return DB.query("DELETE FROM actions WHERE id=? AND churchId=?", [id, churchId]) as Promise<any>;
   }
-
 }

@@ -11,7 +11,6 @@ export class File {
   public contentType?: string;
   public contentId?: string;
 
-  public resourceId?: string;     // doesn't get saved, but determines the file path.
+  public resourceId?: string; // doesn't get saved, but determines the file path.
   public fileContents?: string;
-
 }

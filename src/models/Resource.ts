@@ -1,5 +1,5 @@
-import { Variant } from "./Variant"
-import { Asset } from "./Asset"
+import { Variant } from "./Variant";
+import { Asset } from "./Asset";
 
 export class Resource {
   public id?: string;

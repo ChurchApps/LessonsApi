@@ -7,12 +7,11 @@ export class HubspotHelper {
   static contactId: string = "";
   static companyId: string = "";
 
-
   private static getClient = () => {
-    const hubspot = require('@hubspot/api-client')
-    const client = new hubspot.Client({ accessToken: Environment.hubspotKey })
+    const hubspot = require("@hubspot/api-client");
+    const client = new hubspot.Client({ accessToken: Environment.hubspotKey });
     return client;
-  }
+  };
 
   /*
   static lookupCompany = async (query: string) => {
@@ -25,14 +24,16 @@ export class HubspotHelper {
   static lookupCompanByChurchId = async (churchId: string) => {
     const client = this.getClient();
     const req: any = {
-      filterGroups: [{
-        filters: [{ propertyName: "church_id", operator: "EQ", value: churchId }]
-      }],
-      limit: 1
-    }
+      filterGroups: [
+        {
+          filters: [{ propertyName: "church_id", operator: "EQ", value: churchId }],
+        },
+      ],
+      limit: 1,
+    };
     const response = await client.crm.companies.searchApi.doSearch(req);
     return response.results[0];
-  }
+  };
 
   static setProperties = async (companyId: string, properties: any) => {
     const client = this.getClient();
@@ -43,9 +44,5 @@ export class HubspotHelper {
       console.log(error);
       return { error };
     }
-  }
-
-
-
-
+  };
 }

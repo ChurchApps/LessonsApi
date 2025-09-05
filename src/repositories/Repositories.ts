@@ -1,9 +1,4 @@
-import {
-  FileRepository, LessonRepository, ProviderRepository, SectionRepository, StudyRepository, StudyCategoryRepository, ProgramRepository, VenueRepository, RoleRepository,
-  ActionRepository, ResourceRepository, VariantRepository, AssetRepository, ClassroomRepository, ScheduleRepository, BundleRepository, CustomizationRepository, DownloadRepository,
-  IpDetailRepository, ExternalVideoRepository, ExternalProviderRepository, AddOnRepository, AddOnPlaylistRepository, AddOnPlaylistItemRepository
-} from ".";
-
+import { FileRepository, LessonRepository, ProviderRepository, SectionRepository, StudyRepository, StudyCategoryRepository, ProgramRepository, VenueRepository, RoleRepository, ActionRepository, ResourceRepository, VariantRepository, AssetRepository, ClassroomRepository, ScheduleRepository, BundleRepository, CustomizationRepository, DownloadRepository, IpDetailRepository, ExternalVideoRepository, ExternalProviderRepository, AddOnRepository, AddOnPlaylistRepository, AddOnPlaylistItemRepository } from ".";
 
 export class Repositories {
   public addOn: AddOnRepository;
@@ -35,7 +30,7 @@ export class Repositories {
   public static getCurrent = () => {
     if (Repositories._current === null) Repositories._current = new Repositories();
     return Repositories._current;
-  }
+  };
 
   constructor() {
     this.addOn = new AddOnRepository();

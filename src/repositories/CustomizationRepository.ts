@@ -1,11 +1,11 @@
-import { DB } from "@churchapps/apihelper"
+import { DB } from "@churchapps/apihelper";
 import { Customization } from "../models";
 import { UniqueIdHelper } from "../helpers";
 
 export class CustomizationRepository {
-
   public save(customization: Customization) {
-    if (UniqueIdHelper.isMissing(customization.id)) return this.create(customization); else return this.update(customization);
+    if (UniqueIdHelper.isMissing(customization.id)) return this.create(customization);
+    else return this.update(customization);
   }
 
   public async create(customization: Customization) {
@@ -23,17 +23,15 @@ export class CustomizationRepository {
     return customization;
   }
 
-
   public loadByVenueId(churchId: string, venueId: string): Promise<Customization[]> {
-    return DB.query("SELECT * FROM customizations WHERE churchId=? and venueId=?", [churchId, venueId]) as Promise<Customization[]>
+    return DB.query("SELECT * FROM customizations WHERE churchId=? and venueId=?", [churchId, venueId]) as Promise<Customization[]>;
   }
 
   public load(churchId: string, id: string): Promise<Customization> {
-    return DB.queryOne("SELECT * FROM customizations WHERE id=? and churchId=?", [id, churchId]) as Promise<Customization>
+    return DB.queryOne("SELECT * FROM customizations WHERE id=? and churchId=?", [id, churchId]) as Promise<Customization>;
   }
 
   public delete(churchId: string, id: string): Promise<any> {
     return DB.query("DELETE FROM customizations WHERE id=? AND churchId=?", [id, churchId]) as Promise<any>;
   }
-
 }

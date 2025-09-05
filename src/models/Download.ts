@@ -1,4 +1,3 @@
-
 export class Download {
   public id?: string;
   public lessonId?: string;

@@ -1,11 +1,11 @@
-import { DB } from "@churchapps/apihelper"
+import { DB } from "@churchapps/apihelper";
 import { Study } from "../models";
 import { UniqueIdHelper, MySqlHelper } from "../helpers";
 
 export class StudyRepository {
-
   public save(study: Study) {
-    if (UniqueIdHelper.isMissing(study.id)) return this.create(study); else return this.update(study);
+    if (UniqueIdHelper.isMissing(study.id)) return this.create(study);
+    else return this.update(study);
   }
 
   public async create(study: Study) {
@@ -24,47 +24,43 @@ export class StudyRepository {
   }
 
   public loadByProgramId(churchId: string, programId: string): Promise<Study[]> {
-    return DB.query("SELECT * FROM studies WHERE churchId=? AND programId=? ORDER BY sort", [churchId, programId]) as Promise<Study[]>
+    return DB.query("SELECT * FROM studies WHERE churchId=? AND programId=? ORDER BY sort", [churchId, programId]) as Promise<Study[]>;
   }
 
   public loadPublicByProgramId(programId: string): Promise<Study[]> {
-    const sql = "SELECT *"
-    + " , (SELECT COUNT(*) FROM lessons WHERE studyId=s.id) AS lessonCount"
-    + " FROM studies s"
-    + " WHERE programId=? AND live=1 ORDER BY sort"
-    return DB.query(sql, [programId]) as Promise<Study[]>
+    const sql = "SELECT *" + " , (SELECT COUNT(*) FROM lessons WHERE studyId=s.id) AS lessonCount" + " FROM studies s" + " WHERE programId=? AND live=1 ORDER BY sort";
+    return DB.query(sql, [programId]) as Promise<Study[]>;
   }
 
   public loadPublicByProgramIds(programIds: string[]): Promise<Study[]> {
-    return DB.query("SELECT * FROM studies WHERE programId IN (" + MySqlHelper.toQuotedAndCommaSeparatedString(programIds) + ") AND live=1 ORDER BY sort", []) as Promise<Study[]>
+    return DB.query("SELECT * FROM studies WHERE programId IN (" + MySqlHelper.toQuotedAndCommaSeparatedString(programIds) + ") AND live=1 ORDER BY sort", []) as Promise<Study[]>;
   }
 
   public load(churchId: string, id: string): Promise<Study> {
-    return DB.queryOne("SELECT * FROM studies WHERE id=? AND churchId=?", [id, churchId]) as Promise<Study>
+    return DB.queryOne("SELECT * FROM studies WHERE id=? AND churchId=?", [id, churchId]) as Promise<Study>;
   }
 
   public loadPublicBySlug(programId: string, slug: string): Promise<Study> {
-    return DB.queryOne("SELECT * FROM studies WHERE programId=? AND slug=? AND live=1 ORDER BY sort", [programId, slug]) as Promise<Study>
+    return DB.queryOne("SELECT * FROM studies WHERE programId=? AND slug=? AND live=1 ORDER BY sort", [programId, slug]) as Promise<Study>;
   }
 
   public loadPublicByIds(ids: string[]): Promise<Study[]> {
-    return DB.query("SELECT * FROM studies WHERE id IN (?) and live=1", [ids]) as Promise<Study[]>
+    return DB.query("SELECT * FROM studies WHERE id IN (?) and live=1", [ids]) as Promise<Study[]>;
   }
 
   public loadPublicAll(): Promise<Study[]> {
-    return DB.query("SELECT * FROM studies WHERE live=1", []) as Promise<Study[]>
+    return DB.query("SELECT * FROM studies WHERE live=1", []) as Promise<Study[]>;
   }
 
   public loadPublic(id: string): Promise<Study> {
-    return DB.queryOne("SELECT * FROM studies WHERE id=? AND live=1 ORDER BY sort", [id]) as Promise<Study>
+    return DB.queryOne("SELECT * FROM studies WHERE id=? AND live=1 ORDER BY sort", [id]) as Promise<Study>;
   }
 
   public loadAll(churchId: string): Promise<Study[]> {
-    return DB.query("SELECT * FROM studies WHERE churchId=? ORDER BY sort", [churchId]) as Promise<Study[]>
+    return DB.query("SELECT * FROM studies WHERE churchId=? ORDER BY sort", [churchId]) as Promise<Study[]>;
   }
 
   public delete(churchId: string, id: string): Promise<any> {
     return DB.query("DELETE FROM studies WHERE id=? AND churchId=?", [id, churchId]) as Promise<any>;
   }
-
 }

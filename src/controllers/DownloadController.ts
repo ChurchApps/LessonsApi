@@ -1,15 +1,12 @@
 import { controller, httpGet, httpPost, interfaces, requestParam } from "inversify-express-utils";
 import express from "express";
-import { LessonsBaseController } from "./LessonsBaseController"
-import { Download } from "../models"
+import { LessonsBaseController } from "./LessonsBaseController";
+import { Download } from "../models";
 import { Environment } from "../helpers";
 import { HubspotHelper } from "../helpers/HubspotHelper";
 
-
 @controller("/downloads")
 export class DownloadController extends LessonsBaseController {
-
-
   /*
     @httpGet("/updateHubspot")
     public async addHubspot(req: express.Request<{}, {}, []>, res: express.Response): Promise<any> {
@@ -32,7 +29,7 @@ export class DownloadController extends LessonsBaseController {
       const promises: Promise<Download>[] = [];
       req.body.forEach(download => {
         if (!download.id) {
-          download.ipAddress = (req.headers['x-forwarded-for'] || req.socket.remoteAddress).toString().split(",")[0];
+          download.ipAddress = (req.headers["x-forwarded-for"] || req.socket.remoteAddress).toString().split(",")[0];
           download.downloadDate = new Date();
         }
         promises.push(this.repositories.download.save(download));
@@ -47,7 +44,7 @@ export class DownloadController extends LessonsBaseController {
     if (Environment.hubspotKey) {
       const countRow = await this.repositories.download.getDownloadCount(churchId);
       if (!countRow) return;
-      const downloadDate = new Date(countRow.lastDownload).toISOString().split('T')[0];
+      const downloadDate = new Date(countRow.lastDownload).toISOString().split("T")[0];
       const properties = { lessons_downloaded: countRow.downloadCount, last_lesson_downloaded: downloadDate };
       const company = await HubspotHelper.lookupCompanByChurchId(churchId);
       if (company) await HubspotHelper.setProperties(churchId, properties);
@@ -56,7 +53,7 @@ export class DownloadController extends LessonsBaseController {
 
   @httpGet("/:programId/geo")
   public async geoData(@requestParam("programId") programId: string, req: express.Request, res: express.Response): Promise<any> {
-    return this.actionWrapper(req, res, async (au) => {
+    return this.actionWrapper(req, res, async au => {
       const program = await this.repositories.program.load(au.churchId, programId);
       if (!program) return this.denyAccess(["Access denied"]);
       else {
@@ -69,10 +66,9 @@ export class DownloadController extends LessonsBaseController {
     });
   }
 
-
   @httpGet("/:programId/studies")
   public async programStudies(@requestParam("programId") programId: string, req: express.Request, res: express.Response): Promise<any> {
-    return this.actionWrapper(req, res, async (au) => {
+    return this.actionWrapper(req, res, async au => {
       const program = await this.repositories.program.load(au.churchId, programId);
       if (!program) return this.denyAccess(["Access denied"]);
       else {
@@ -87,7 +83,7 @@ export class DownloadController extends LessonsBaseController {
 
   @httpGet("/:programId/churches")
   public async programChurches(@requestParam("programId") programId: string, req: express.Request, res: express.Response): Promise<any> {
-    return this.actionWrapper(req, res, async (au) => {
+    return this.actionWrapper(req, res, async au => {
       const program = await this.repositories.program.load(au.churchId, programId);
       if (!program) return this.denyAccess(["Access denied"]);
       else {
@@ -99,6 +95,4 @@ export class DownloadController extends LessonsBaseController {
       }
     });
   }
-
-
 }

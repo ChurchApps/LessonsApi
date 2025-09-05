@@ -1,20 +1,22 @@
 import { controller, httpPost, httpGet, interfaces, requestParam, httpDelete } from "inversify-express-utils";
 import express from "express";
-import { LessonsBaseController } from "./LessonsBaseController"
-import { StudyCategory } from "../models"
-import { Permissions } from '../helpers/Permissions'
+import { LessonsBaseController } from "./LessonsBaseController";
+import { StudyCategory } from "../models";
+import { Permissions } from "../helpers/Permissions";
 
 @controller("/studyCategories")
 export class StudyCategoryController extends LessonsBaseController {
-
   @httpGet("/categoryNames/:programId")
   public async getCategoryNames(@requestParam("programId") programId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
-    return this.actionWrapper(req, res, async (au) => {
+    return this.actionWrapper(req, res, async au => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
       else {
         const data = await this.repositories.studyCategory.loadCategoryNames(programId);
-        const result:string[] = [];
-        if (data) data.forEach(d => { result.push(d.categoryName); });
+        const result: string[] = [];
+        if (data)
+          data.forEach(d => {
+            result.push(d.categoryName);
+          });
         return result;
       }
     });
@@ -29,7 +31,7 @@ export class StudyCategoryController extends LessonsBaseController {
 
   @httpGet("/:programId")
   public async getByCategoryName(@requestParam("programId") programId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
-    return this.actionWrapper(req, res, async (au) => {
+    return this.actionWrapper(req, res, async au => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
       else {
         const categoryName = req.query.categoryName as string;
@@ -40,7 +42,7 @@ export class StudyCategoryController extends LessonsBaseController {
 
   @httpPost("/")
   public async save(req: express.Request<{}, {}, StudyCategory[]>, res: express.Response): Promise<any> {
-    return this.actionWrapper(req, res, async (au) => {
+    return this.actionWrapper(req, res, async au => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
       else {
         const promises: Promise<StudyCategory>[] = [];
@@ -71,12 +73,11 @@ export class StudyCategoryController extends LessonsBaseController {
 
   @httpDelete("/:id")
   public async delete(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
-    return this.actionWrapper(req, res, async (au) => {
+    return this.actionWrapper(req, res, async au => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
       else {
         return await this.repositories.studyCategory.delete(au.churchId, id);
       }
     });
   }
-
 }

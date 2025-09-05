@@ -1,10 +1,9 @@
-import Axios from "axios"
+import Axios from "axios";
 import { Environment } from "./Environment";
 import { ExternalVideo } from "../models";
 import { Repositories } from "../repositories";
 
 export class VimeoHelper {
-
   public static async updateVimeoLinks(ev: ExternalVideo) {
     if (!Environment.vimeoToken) return ev;
     const vimeo = await VimeoHelper.getVideoDetails(ev.videoId);
@@ -21,7 +20,7 @@ export class VimeoHelper {
   }
 
   private static getAxiosConfig() {
-    return { headers: { Authorization: "Bearer " + Environment.vimeoToken } }
+    return { headers: { Authorization: "Bearer " + Environment.vimeoToken } };
   }
 
   public static async getVideoDetails(videoId: string) {
@@ -35,13 +34,13 @@ export class VimeoHelper {
       play1080p: this.getFileDetails(resp, "1080p"),
       play4k: this.getFileDetails(resp, "4k"),
       thumbnail: this.getPictureDetails(resp, 640),
-      downloadsExpire: this.getDownloadExpiration(resp)
-    }
+      downloadsExpire: this.getDownloadExpiration(resp),
+    };
     return result;
   }
 
   private static getPictureDetails(resp: any, width: number) {
-    let result = ""
+    let result = "";
     resp.data.pictures.sizes?.forEach((s: any) => {
       if (s.width === width) result = s.link_with_play_button;
     });
@@ -49,7 +48,7 @@ export class VimeoHelper {
   }
 
   private static getFileDetails(resp: any, rendition: string) {
-    let result = ""
+    let result = "";
     resp.data.files?.forEach((f: any) => {
       if (f.rendition === rendition) result = f.link;
     });
@@ -57,7 +56,7 @@ export class VimeoHelper {
   }
 
   private static getDownloadDetails(resp: any, rendition: string) {
-    let result = ""
+    let result = "";
     resp.data.download?.forEach((f: any) => {
       if (f.rendition === rendition) result = f.link;
     });
@@ -71,5 +70,4 @@ export class VimeoHelper {
     });
     return result;
   }
-
 }

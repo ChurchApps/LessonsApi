@@ -1,11 +1,11 @@
-import { DB } from "@churchapps/apihelper"
+import { DB } from "@churchapps/apihelper";
 import { Program } from "../models";
 import { UniqueIdHelper } from "../helpers";
 
 export class ProgramRepository {
-
   public save(program: Program) {
-    if (UniqueIdHelper.isMissing(program.id)) return this.create(program); else return this.update(program);
+    if (UniqueIdHelper.isMissing(program.id)) return this.create(program);
+    else return this.update(program);
   }
 
   public async create(program: Program) {
@@ -24,27 +24,27 @@ export class ProgramRepository {
   }
 
   public loadByProviderId(churchId: string, providerId: string): Promise<Program[]> {
-    return DB.query("SELECT * FROM programs WHERE churchId=? AND providerId=?", [churchId, providerId]) as Promise<Program[]>
+    return DB.query("SELECT * FROM programs WHERE churchId=? AND providerId=?", [churchId, providerId]) as Promise<Program[]>;
   }
 
   public loadPublicByProviderId(providerId: string): Promise<Program[]> {
-    return DB.query("SELECT * FROM programs WHERE providerId=?", [providerId]) as Promise<Program[]>
+    return DB.query("SELECT * FROM programs WHERE providerId=?", [providerId]) as Promise<Program[]>;
   }
 
   public load(churchId: string, id: string): Promise<Program> {
-    return DB.queryOne("SELECT * FROM programs WHERE id=? and churchId=?", [id, churchId]) as Promise<Program>
+    return DB.queryOne("SELECT * FROM programs WHERE id=? and churchId=?", [id, churchId]) as Promise<Program>;
   }
 
   public loadPublicBySlug(slug: string): Promise<Program> {
-    return DB.queryOne("SELECT * FROM programs WHERE slug=? and live=1", [slug]) as Promise<Program>
+    return DB.queryOne("SELECT * FROM programs WHERE slug=? and live=1", [slug]) as Promise<Program>;
   }
 
   public loadPublic(id: string): Promise<Program> {
-    return DB.queryOne("SELECT * FROM programs WHERE id=? and live=1", [id]) as Promise<Program>
+    return DB.queryOne("SELECT * FROM programs WHERE id=? and live=1", [id]) as Promise<Program>;
   }
 
   public loadPublicAll(): Promise<Program[]> {
-    return DB.query("SELECT p.* FROM programs p inner join providers pr on pr.id=p.providerId WHERE p.live=1 and pr.live=1 ORDER BY p.sort", []) as Promise<Program[]>
+    return DB.query("SELECT p.* FROM programs p inner join providers pr on pr.id=p.providerId WHERE p.live=1 and pr.live=1 ORDER BY p.sort", []) as Promise<Program[]>;
   }
 
   public loadAll(churchId: string): Promise<Program[]> {
@@ -54,5 +54,4 @@ export class ProgramRepository {
   public delete(churchId: string, id: string): Promise<any> {
     return DB.query("DELETE FROM programs WHERE id=? AND churchId=?", [id, churchId]) as Promise<any>;
   }
-
 }

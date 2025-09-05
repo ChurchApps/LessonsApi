@@ -1,11 +1,11 @@
-import { DB } from "@churchapps/apihelper"
+import { DB } from "@churchapps/apihelper";
 import { AddOn } from "../models";
 import { UniqueIdHelper } from "../helpers";
 
 export class AddOnRepository {
-
   public save(addOn: AddOn) {
-    if (UniqueIdHelper.isMissing(addOn.id)) return this.create(addOn); else return this.update(addOn);
+    if (UniqueIdHelper.isMissing(addOn.id)) return this.create(addOn);
+    else return this.update(addOn);
   }
 
   public async create(addOn: AddOn) {
@@ -24,23 +24,22 @@ export class AddOnRepository {
   }
 
   public loadPublic(): Promise<AddOn[]> {
-    return DB.query("SELECT * FROM addOns order by category, name", []) as Promise<AddOn[]>
+    return DB.query("SELECT * FROM addOns order by category, name", []) as Promise<AddOn[]>;
   }
 
   public loadAll(churchId: string): Promise<AddOn[]> {
-    return DB.query("SELECT * FROM addOns WHERE churchId=? order by category, name", [churchId]) as Promise<AddOn[]>
+    return DB.query("SELECT * FROM addOns WHERE churchId=? order by category, name", [churchId]) as Promise<AddOn[]>;
   }
 
   public loadPublicForLesson(lessonId: string): Promise<AddOn[]> {
-    return DB.query("SELECT * FROM addOns WHERE id in (SELECT addOnId from actions WHERE lessonId=?)", [lessonId]) as Promise<AddOn[]>
+    return DB.query("SELECT * FROM addOns WHERE id in (SELECT addOnId from actions WHERE lessonId=?)", [lessonId]) as Promise<AddOn[]>;
   }
 
   public load(id: string): Promise<AddOn> {
-    return DB.queryOne("SELECT * FROM addOns WHERE id=?", [id]) as Promise<AddOn>
+    return DB.queryOne("SELECT * FROM addOns WHERE id=?", [id]) as Promise<AddOn>;
   }
 
   public delete(churchId: string, id: string): Promise<any> {
     return DB.query("DELETE FROM addOns WHERE id=? AND churchId=?", [id, churchId]) as Promise<any>;
   }
-
 }
