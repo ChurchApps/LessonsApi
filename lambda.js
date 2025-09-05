@@ -50,7 +50,7 @@ const universal = async (event, context) => {
   }
 };
 
-const videoPingback = async (event, context) => {
+const videoPingback = async (event, _context) => {
   await checkPool();
   await TranscodeHelper.handlePingback(event);
 };
