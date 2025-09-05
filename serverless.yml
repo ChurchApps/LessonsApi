@@ -8,11 +8,6 @@ custom:
         - sg-052314a1eec2f2567
       subnetIds:
         - subnet-01a6b61d749d10c46
-    staging:
-      securityGroupIds:
-        - sg-052314a1eec2f2567
-      subnetIds:
-        - subnet-01a6b61d749d10c46
     current: ${self:custom.vpcSettings.${self:custom.env}}
 
 provider:
@@ -55,7 +50,7 @@ resources:
       Properties:
         RoleName: serverlessApiGatewayCloudWatchRole
         AssumeRolePolicyDocument:
-          Version: '2012-10-17'
+          Version: "2012-10-17"
           Statement:
             - Effect: Allow
               Principal:
@@ -113,8 +108,7 @@ resources:
       Type: AWS::CloudWatch::Dashboard
       Properties:
         DashboardName: lessons-api-${self:custom.env}-bundle-monitoring
-        DashboardBody:
-          !Sub |
+        DashboardBody: !Sub |
           {
             "widgets": [
               {
