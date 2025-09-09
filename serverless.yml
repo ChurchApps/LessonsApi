@@ -36,6 +36,7 @@ functions:
   zipBundles:
     handler: lambda.zipBundles
     vpc: ${self:custom.vpcSettings.current}
+    timeout: 300
     events:
       - schedule: rate(5 minutes)
 
