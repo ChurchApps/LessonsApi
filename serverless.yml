@@ -26,9 +26,14 @@ provider:
 functions:
   api:
     handler: lambda.universal
+    timeout: 30
     events:
-      - http: ANY {proxy+}
-      - http: ANY /
+      - http:
+          path: /{proxy+}
+          method: ANY
+      - http:
+          path: /
+          method: ANY
     vpc: ${self:custom.vpcSettings.current}
   videoPingback:
     handler: lambda.videoPingback
