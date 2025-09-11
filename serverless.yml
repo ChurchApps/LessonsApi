@@ -20,8 +20,6 @@ provider:
     role: arn:aws:iam::428019619026:role/ChurchAppsRole
   environment:
     APP_ENV: ${self:custom.env}
-  logs:
-    restApi: true
 
 functions:
   api:
