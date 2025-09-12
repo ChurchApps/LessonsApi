@@ -165,19 +165,34 @@ export class ZipHelper {
     console.log(`Starting zip process for bundle ${bundle.id} (${bundle.name})`);
 
     try {
-      const resources = await Repositories.getCurrent().resource.loadByBundleId(bundle.churchId, bundle.id);
+      // Load resources and guard against nulls
+      let resources = await Repositories.getCurrent().resource.loadByBundleId(bundle.churchId, bundle.id);
+      if (!Array.isArray(resources)) resources = [];
       console.log(`Found ${resources.length} resources for bundle ${bundle.id}`);
 
-      const variants = await Repositories.getCurrent().variant.loadByResourceIds(bundle.churchId, ArrayHelper.getIds(resources, "id"));
+      // Load variants only if there are resources
+      const resourceIds = ArrayHelper.getIds(resources, "id");
+      let variants: Variant[] = [];
+      if ((resourceIds?.length || 0) > 0) {
+        variants = await Repositories.getCurrent().variant.loadByResourceIds(bundle.churchId, resourceIds);
+      }
+      if (!Array.isArray(variants)) variants = [];
       console.log(`Found ${variants.length} variants for bundle ${bundle.id}`);
 
-      const files = await Repositories.getCurrent().file.loadByIds(bundle.churchId, ArrayHelper.getIds(variants, "fileId"));
+      // Load files only if there are variants
+      const fileIds = (ArrayHelper.getIds(variants, "fileId") || []).filter((id: string) => !!id);
+      let files: File[] = [];
+      if (fileIds.length > 0) {
+        files = await Repositories.getCurrent().file.loadByIds(bundle.churchId, fileIds);
+      }
+      if (!Array.isArray(files)) files = [];
       console.log(`Found ${files.length} files for bundle ${bundle.id}`);
 
       const zipFiles: { name: string; key: string }[] = [];
       files.forEach(f => {
         const variant: Variant = ArrayHelper.getOne(variants, "fileId", f.id);
-        if (variant && !variant.hidden) {
+        // Skip hidden variants or files without required metadata
+        if (variant && !variant.hidden && f?.contentPath && f?.fileName) {
           let filePath = f.contentPath.split("?")[0];
           filePath = filePath.replace("/content/", "").replace(Environment.contentRoot + "/", "");
           zipFiles.push({ name: f.fileName, key: filePath });
