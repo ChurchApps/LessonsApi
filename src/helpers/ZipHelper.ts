@@ -1,7 +1,7 @@
 import { S3Client, HeadObjectCommand, GetObjectCommand, ObjectCannedACL } from "@aws-sdk/client-s3";
 import { Upload } from "@aws-sdk/lib-storage";
 import { Repositories } from "../repositories/Repositories";
-import { File, Variant, Bundle } from "../models";
+import { File, Variant, Bundle, Asset } from "../models";
 import { Environment, FilesHelper } from ".";
 import { Stream } from "stream";
 import Archiver from "archiver";
@@ -179,8 +179,16 @@ export class ZipHelper {
       if (!Array.isArray(variants)) variants = [];
       console.log(`Found ${variants.length} variants for bundle ${bundle.id}`);
 
-      // Load files only if there are variants
-      const fileIds = (ArrayHelper.getIds(variants, "fileId") || []).filter((id: string) => !!id);
+      // Load assets and include their files as well
+      let assets: Asset[] = [];
+      if ((resourceIds?.length || 0) > 0) {
+        assets = await Repositories.getCurrent().asset.loadByResourceIds(bundle.churchId, resourceIds);
+      }
+      if (!Array.isArray(assets)) assets = [];
+      console.log(`Found ${assets.length} assets for bundle ${bundle.id}`);
+
+      // Build combined file id list from variants + assets
+      const fileIds = ((ArrayHelper.getIds(variants, "fileId") || []).concat(ArrayHelper.getIds(assets, "fileId") || [])).filter((id: string) => !!id);
       let files: File[] = [];
       if (fileIds.length > 0) {
         files = await Repositories.getCurrent().file.loadByIds(bundle.churchId, fileIds);
@@ -189,10 +197,13 @@ export class ZipHelper {
       console.log(`Found ${files.length} files for bundle ${bundle.id}`);
 
       const zipFiles: { name: string; key: string }[] = [];
+      const usedFileIds = new Set<string>();
       files.forEach(f => {
-        const variant: Variant = ArrayHelper.getOne(variants, "fileId", f.id);
-        // Skip hidden variants or files without required metadata
-        if (variant && !variant.hidden && f?.contentPath && f?.fileName) {
+        const hasVariant: Variant = ArrayHelper.getOne(variants, "fileId", f.id);
+        const hasAsset: Asset = ArrayHelper.getOne(assets, "fileId", f.id);
+        const include = ((hasVariant && !hasVariant.hidden) || !!hasAsset) && f?.contentPath && f?.fileName;
+        if (include && !usedFileIds.has(f.id)) {
+          usedFileIds.add(f.id);
           let filePath = f.contentPath.split("?")[0];
           filePath = filePath.replace("/content/", "").replace(Environment.contentRoot + "/", "");
           zipFiles.push({ name: f.fileName, key: filePath });
