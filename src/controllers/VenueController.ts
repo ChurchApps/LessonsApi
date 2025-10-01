@@ -80,6 +80,7 @@ export class VenueController extends LessonsBaseController {
                   url: video.videoProvider.toLowerCase() + ":" + video.videoId,
                   seconds: video.seconds,
                   loopVideo: video.loopVideo,
+                  thumbnail: video.thumbnail,
                 });
               else
                 itemFiles.push({
@@ -87,16 +88,18 @@ export class VenueController extends LessonsBaseController {
                   url: resolution === "1080" ? video.play1080 : video.play720,
                   seconds: video.seconds,
                   loopVideo: video.loopVideo,
+                  thumbnail: video.thumbnail,
                 });
             }
           } else {
             const files: any[] = PlaylistHelper.getBestFiles(a, availableFiles);
             files.forEach(file => {
               const contentPath = file.contentPath.indexOf("://") === -1 ? Environment.contentRoot + file.contentPath : file.contentPath;
+              const thumbnail = file.thumbPath ? (file.thumbPath.indexOf("://") === -1 ? Environment.contentRoot + file.thumbPath : file.thumbPath) : null;
               let seconds = parseInt(file.seconds, 0);
               const loopVideo = file.loopVideo ? true : false;
               if (!seconds || seconds === 0 || loopVideo) seconds = 3600;
-              itemFiles.push({ name: file.resourceName, url: contentPath, seconds, loopVideo });
+              itemFiles.push({ name: file.resourceName, url: contentPath, seconds, loopVideo, thumbnail });
             });
           }
         });
