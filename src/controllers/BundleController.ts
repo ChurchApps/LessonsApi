@@ -100,7 +100,6 @@ export class BundleController extends LessonsBaseController {
   @httpGet("/debug/connection")
   public async getConnectionDebug(req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
     return this.actionWrapper(req, res, async au => {
-
       const dns = require("dns");
       const { promisify } = require("util");
       const lookup = promisify(dns.lookup);

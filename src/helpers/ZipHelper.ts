@@ -188,7 +188,7 @@ export class ZipHelper {
       console.log(`Found ${assets.length} assets for bundle ${bundle.id}`);
 
       // Build combined file id list from variants + assets
-      const fileIds = ((ArrayHelper.getIds(variants, "fileId") || []).concat(ArrayHelper.getIds(assets, "fileId") || [])).filter((id: string) => !!id);
+      const fileIds = (ArrayHelper.getIds(variants, "fileId") || []).concat(ArrayHelper.getIds(assets, "fileId") || []).filter((id: string) => !!id);
       let files: File[] = [];
       if (fileIds.length > 0) {
         files = await Repositories.getCurrent().file.loadByIds(bundle.churchId, fileIds);

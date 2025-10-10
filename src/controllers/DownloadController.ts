@@ -32,22 +32,29 @@ export class DownloadController extends LessonsBaseController {
           download.ipAddress = (req.headers["x-forwarded-for"] || req.socket.remoteAddress).toString().split(",")[0];
           download.downloadDate = new Date();
         }
+        // Sanitize empty strings to undefined so they are stored as NULL
+        if (download.userId === "") download.userId = undefined;
+        if (download.churchId === "") download.churchId = undefined;
         promises.push(this.repositories.download.save(download));
       });
       const result = await Promise.all(promises);
-      await this.updateHubspot(req.body[0].churchId);
+      // Only update HubSpot if there's a valid churchId
+      if (req.body[0].churchId && req.body[0].churchId.trim() !== "") {
+        await this.updateHubspot(req.body[0].churchId);
+      }
       return result;
     });
   }
 
   private async updateHubspot(churchId: string) {
-    if (Environment.hubspotKey) {
+    if (Environment.hubspotKey && churchId && churchId.trim() !== "") {
       const countRow = await this.repositories.download.getDownloadCount(churchId);
-      if (!countRow) return;
+      if (!countRow || !countRow.downloadCount) return;
       const downloadDate = new Date(countRow.lastDownload).toISOString().split("T")[0];
       const properties = { lessons_downloaded: countRow.downloadCount, last_lesson_downloaded: downloadDate };
       const company = await HubspotHelper.lookupCompanByChurchId(churchId);
-      if (company) await HubspotHelper.setProperties(churchId, properties);
+      // Use company.id instead of churchId when setting properties
+      if (company) await HubspotHelper.setProperties(company.id, properties);
     }
   }
 
