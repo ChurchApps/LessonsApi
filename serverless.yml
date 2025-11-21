@@ -1,5 +1,7 @@
 service: lessons-api
 
+disableSchemaValidation: true
+
 custom:
   env: ${lower(${opt:stage, self:provider.stage})}
   vpcSettings:
