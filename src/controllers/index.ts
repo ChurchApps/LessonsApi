@@ -19,6 +19,7 @@ export { ProgramController } from "./ProgramController";
 export { ResourceController } from "./ResourceController";
 export { RoleController } from "./RoleController";
 export { ScheduleController } from "./ScheduleController";
+export { SearchController } from "./SearchController";
 export { SectionController } from "./SectionController";
 export { StudyController } from "./StudyController";
 export { StudyCategoryController } from "./StudyCategoryController";
