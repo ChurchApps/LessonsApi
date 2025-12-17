@@ -221,7 +221,7 @@ export class VenueController extends LessonsBaseController {
     return this.actionWrapperAnon(req, res, async () => {
       const venue = await this.repositories.venue.loadPublic(id);
       const lesson = await this.repositories.lesson.loadPublic(venue.lessonId);
-      const sections = await this.repositories.section.loadByLessonId(venue.lessonId);
+      const sections = await this.repositories.section.loadByVenueIdPublic(id);
       const roles = await this.repositories.role.loadByLessonId(venue.lessonId);
       const actions = await this.repositories.action.loadByLessonId(venue.lessonId);
       const durationData = await DurationHelper.loadDurationData(actions, venue.churchId, this.repositories);
