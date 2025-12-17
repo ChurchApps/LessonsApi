@@ -53,6 +53,7 @@ export class SectionController extends LessonsBaseController {
 
       return {
         section: feedSection,
+        lessonId: lesson.id,
         lessonName: fullFeed.lessonName,
         lessonDescription: fullFeed.lessonDescription,
         lessonImage: fullFeed.lessonImage,
