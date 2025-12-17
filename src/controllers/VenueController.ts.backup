@@ -220,32 +220,57 @@ export class VenueController extends LessonsBaseController {
   public async getPublicPlanItems(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
     return this.actionWrapperAnon(req, res, async () => {
       const venue = await this.repositories.venue.loadPublic(id);
-      const lesson = await this.repositories.lesson.loadPublic(venue.lessonId);
       const sections = await this.repositories.section.loadByLessonId(venue.lessonId);
       const roles = await this.repositories.role.loadByLessonId(venue.lessonId);
       const actions = await this.repositories.action.loadByLessonId(venue.lessonId);
+
+      // Load duration data for calculating estimated times
       const durationData = await DurationHelper.loadDurationData(actions, venue.churchId, this.repositories);
 
-      // Create a single header for the lesson with lesson sections as child items
-      const lessonHeader: any = {
-        id: venue.id, churchId: venue.churchId, planId: venue.id, parentId: null, sort: 1,
-        itemType: "header", relatedId: venue.id, label: lesson.name + " - " + venue.name,
-        description: lesson.title || lesson.name, seconds: null, children: [],
-      };
-
-      // Add each lesson section as a child item with totaled duration
+      // Convert sections to PlanItem format
+      const planItems: any[] = [];
       sections.forEach(section => {
+        const sectionPlanItem = {
+          id: section.id,
+          churchId: venue.churchId,
+          planId: venue.id,
+          parentId: null,
+          sort: section.sort,
+          itemType: "header",
+          relatedId: section.id,
+          label: section.name,
+          description: section.name,
+          seconds: null,
+          children: [],
+        };
+
+        // Add actions directly as children of sections
         const sectionRoles = roles.filter(r => r.sectionId === section.id);
-        const sectionActions: Action[] = [];
-        sectionRoles.forEach(role => { sectionActions.push(...actions.filter(a => a.roleId === role.id)); });
-        const sectionSeconds = DurationHelper.calculateSectionSeconds(sectionActions, durationData.externalVideos, durationData.assets, durationData.files);
-        lessonHeader.children.push({
-          id: section.id, churchId: venue.churchId, planId: venue.id, parentId: venue.id, sort: section.sort,
-          itemType: "item", relatedId: section.id, label: section.name, description: "", seconds: sectionSeconds, link: null, children: [],
+        sectionRoles.forEach(role => {
+          const roleActions = actions.filter(a => a.roleId === role.id);
+          roleActions.forEach(action => {
+            const actionPlanItem = {
+              id: action.id,
+              churchId: venue.churchId,
+              planId: venue.id,
+              parentId: section.id,
+              sort: action.sort,
+              itemType: "item",
+              relatedId: null,
+              label: action.actionType,
+              description: action.content || "",
+              seconds: DurationHelper.calculateSeconds(action, durationData.externalVideos, durationData.assets, durationData.files),
+              link: action.actionType === "Play" ? `https://lessons.church/preview/${action.id}?lessonId=${venue.lessonId}` : null,
+              children: [],
+            };
+            sectionPlanItem.children.push(actionPlanItem);
+          });
         });
+
+        planItems.push(sectionPlanItem);
       });
 
-      return [lessonHeader];
+      return planItems;
     });
   }
 
