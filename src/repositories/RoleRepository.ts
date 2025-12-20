@@ -27,6 +27,10 @@ export class RoleRepository {
     return DB.query("SELECT * FROM roles WHERE lessonId=? ORDER BY sort", [lessonId]) as Promise<Role[]>;
   }
 
+  public loadPublicAll(): Promise<Role[]> {
+    return DB.query("SELECT * FROM roles ORDER BY sort", []) as Promise<Role[]>;
+  }
+
   public load(id: string): Promise<Role> {
     return DB.queryOne("SELECT * FROM roles WHERE id=?", [id]) as Promise<Role>;
   }

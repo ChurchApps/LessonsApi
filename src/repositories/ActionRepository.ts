@@ -32,6 +32,10 @@ export class ActionRepository {
     return DB.query("SELECT * FROM actions WHERE lessonId=? ORDER BY sort", [lessonId]) as Promise<Action[]>;
   }
 
+  public loadPublicAll(): Promise<Action[]> {
+    return DB.query("SELECT * FROM actions ORDER BY sort", []) as Promise<Action[]>;
+  }
+
   public load(id: string): Promise<Action> {
     return DB.queryOne("SELECT * FROM actions WHERE id=?", [id]) as Promise<Action>;
   }

@@ -59,7 +59,7 @@ export class SectionController extends LessonsBaseController {
         lessonImage: fullFeed.lessonImage,
         venueName: fullFeed.name,
         studyName: fullFeed.studyName,
-        programName: fullFeed.programName
+        programName: fullFeed.programName,
       };
     });
   }

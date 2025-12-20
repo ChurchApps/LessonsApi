@@ -64,6 +64,76 @@ export class LessonController extends LessonsBaseController {
     });
   }
 
+  @httpGet("/public/actionTree")
+  public async getPublicActionTree(req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
+    return this.actionWrapperAnon(req, res, async () => {
+      const providerId = req.query.providerId as string;
+
+      const programs = providerId ? await this.repositories.program.loadPublicByProviderId(providerId) : await this.repositories.program.loadPublicAll();
+      const studies = await this.repositories.study.loadPublicAll();
+      const lessons = await this.repositories.lesson.loadPublicAll();
+      const venues = await this.repositories.venue.loadPublicAll();
+      const sections = await this.repositories.section.loadPublicAll();
+      const roles = await this.repositories.role.loadPublicAll();
+      const actions = await this.repositories.action.loadPublicAll();
+      const result = { programs: [] };
+
+      programs.forEach(program => {
+        const p = {
+          id: program.id,
+          name: program.name,
+          studies: [],
+        };
+        ArrayHelper.getAll(studies, "programId", program.id).forEach(study => {
+          const s = {
+            id: study.id,
+            name: study.name,
+            lessons: [],
+          };
+          ArrayHelper.getAll(lessons, "studyId", study.id).forEach(lesson => {
+            const l = {
+              id: lesson.id,
+              name: lesson.name + ": " + lesson.title,
+              venues: [],
+            };
+            ArrayHelper.getAll(venues, "lessonId", lesson.id).forEach(venue => {
+              const v = {
+                id: venue.id,
+                name: venue.name,
+                sections: [],
+              };
+              ArrayHelper.getAll(sections, "venueId", venue.id).forEach(section => {
+                const sec = {
+                  id: section.id,
+                  name: section.name,
+                  actions: [],
+                };
+                const sectionRoles = ArrayHelper.getAll(roles, "sectionId", section.id);
+                sectionRoles.forEach(role => {
+                  ArrayHelper.getAll(actions, "roleId", role.id).forEach(action => {
+                    sec.actions.push({
+                      id: action.id,
+                      name: action.content?.substring(0, 50) + (action.content?.length > 50 ? "..." : "") || action.actionType,
+                      actionType: action.actionType,
+                      roleName: role.name,
+                    });
+                  });
+                });
+                if (sec.actions.length > 0) v.sections.push(sec);
+              });
+              if (v.sections.length > 0) l.venues.push(v);
+            });
+            if (l.venues.length > 0) s.lessons.push(l);
+          });
+          if (s.lessons.length > 0) p.studies.push(s);
+        });
+        if (p.studies.length > 0) result.programs.push(p);
+      });
+
+      return result;
+    });
+  }
+
   @httpGet("/public/study/:studyId")
   public async getPublicForStudy(@requestParam("studyId") studyId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
     return this.actionWrapperAnon(req, res, async () => {
