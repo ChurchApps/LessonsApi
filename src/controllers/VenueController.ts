@@ -160,6 +160,7 @@ export class VenueController extends LessonsBaseController {
       const sections = await this.repositories.section.loadByVenueIdPublic(id);
       const roles = await this.repositories.role.loadByLessonId(venue.lessonId);
       const actions = await this.repositories.action.loadByLessonId(venue.lessonId);
+      const durationData = await DurationHelper.loadDurationData(actions, venue.churchId, this.repositories);
 
       const result = {
         venueName: venue.name,
@@ -177,6 +178,7 @@ export class VenueController extends LessonsBaseController {
               name: action.content?.substring(0, 50) + (action.content?.length > 50 ? "..." : "") || action.actionType,
               actionType: action.actionType,
               roleName: role.name,
+              seconds: DurationHelper.calculateSeconds(action, durationData.externalVideos, durationData.assets, durationData.files),
             });
           });
         });
