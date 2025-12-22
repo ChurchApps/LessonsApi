@@ -308,7 +308,7 @@ export class VenueController extends LessonsBaseController {
         });
       });
 
-      return [lessonHeader];
+      return { venueName: venue.name, items: [lessonHeader] };
     });
   }
 
