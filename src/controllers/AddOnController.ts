@@ -11,7 +11,44 @@ export class AddOnController extends LessonsBaseController {
   @httpGet("/public")
   public async loadPublic(req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
     return this.actionWrapperAnon(req, res, async () => {
-      return await this.repositories.addOn.loadPublic();
+      const addOns = await this.repositories.addOn.loadPublic();
+      // Load video durations for all add-ons
+      const addOnIds = addOns.map((a: any) => a.id).filter(Boolean);
+      if (addOnIds.length > 0) {
+        const videos = await this.repositories.externalVideo.loadByContentTypeIds("addon", addOnIds);
+        addOns.forEach((addOn: any) => {
+          const video = videos.find((v: any) => v.contentId === addOn.id);
+          if (video) {
+            addOn.seconds = video.seconds;
+          }
+        });
+      }
+      return addOns;
+    });
+  }
+
+  @httpGet("/public/:id")
+  public async loadPublicById(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
+    return this.actionWrapperAnon(req, res, async () => {
+      const addOn = await this.repositories.addOn.load(id);
+      if (!addOn) return null;
+
+      // Load video for this add-on
+      const videos = await this.repositories.externalVideo.loadByContentTypeIds("addon", [id]);
+      if (videos.length > 0) {
+        (addOn as any).video = videos[0];
+        (addOn as any).seconds = videos[0].seconds;
+      }
+
+      // Load file if fileId is set
+      if (addOn.fileId) {
+        const files = await this.repositories.file.loadPublicByIds([addOn.fileId]);
+        if (files.length > 0) {
+          addOn.file = files[0];
+        }
+      }
+
+      return addOn;
     });
   }
 

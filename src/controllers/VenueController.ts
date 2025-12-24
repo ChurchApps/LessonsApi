@@ -298,7 +298,7 @@ export class VenueController extends LessonsBaseController {
           planId: venue.id,
           parentId: venue.id,
           sort: section.sort,
-          itemType: "item",
+          itemType: "lessonSection",
           relatedId: section.id,
           label: section.name,
           description: "",
