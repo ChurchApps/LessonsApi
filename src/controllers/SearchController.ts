@@ -68,7 +68,7 @@ export class SearchController extends LessonsBaseController {
           studySlug: "",
           lessonSlug: "",
           categories: "",
-          lessonCount: 0
+          lessonCount: 0,
         });
       }
 
@@ -91,7 +91,7 @@ export class SearchController extends LessonsBaseController {
           studySlug: study.slug || "",
           lessonSlug: "",
           categories: categories.join(", "),
-          lessonCount: study.lessonCount || 0
+          lessonCount: study.lessonCount || 0,
         });
       }
 
@@ -117,7 +117,7 @@ export class SearchController extends LessonsBaseController {
               studySlug: study.slug || "",
               lessonSlug: lesson.slug || "",
               categories: categories.join(", "),
-              lessonCount: 0
+              lessonCount: 0,
             });
           }
         } catch (e) {

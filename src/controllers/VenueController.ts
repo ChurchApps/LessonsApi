@@ -153,6 +153,49 @@ export class VenueController extends LessonsBaseController {
     });
   }
 
+  @httpGet("/public/actions/:id")
+  public async getPublicActions(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
+    return this.actionWrapperAnon(req, res, async () => {
+      const venue = await this.repositories.venue.loadPublic(id);
+      const sections = await this.repositories.section.loadByVenueIdPublic(id);
+      const roles = await this.repositories.role.loadByLessonId(venue.lessonId);
+      const actions = await this.repositories.action.loadByLessonId(venue.lessonId);
+      const durationData = await DurationHelper.loadDurationData(actions, venue.churchId, this.repositories);
+
+      const result = {
+        venueName: venue.name,
+        sections: [] as any[],
+      };
+
+      sections.forEach(section => {
+        const sectionRoles = ArrayHelper.getAll(roles, "sectionId", section.id);
+        const sectionActions: any[] = [];
+
+        sectionRoles.forEach(role => {
+          ArrayHelper.getAll(actions, "roleId", role.id).forEach((action: Action) => {
+            sectionActions.push({
+              id: action.id,
+              name: action.content?.substring(0, 50) + (action.content?.length > 50 ? "..." : "") || action.actionType,
+              actionType: action.actionType,
+              roleName: role.name,
+              seconds: DurationHelper.calculateSeconds(action, durationData.externalVideos, durationData.assets, durationData.files),
+            });
+          });
+        });
+
+        if (sectionActions.length > 0) {
+          result.sections.push({
+            id: section.id,
+            name: section.name,
+            actions: sectionActions,
+          });
+        }
+      });
+
+      return result;
+    });
+  }
+
   /*Unused?*/
   @httpGet("/public/lesson/:lessonId")
   public async getPublicForLesson(@requestParam("lessonId") lessonId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
@@ -228,24 +271,44 @@ export class VenueController extends LessonsBaseController {
 
       // Create a single header for the lesson with lesson sections as child items
       const lessonHeader: any = {
-        id: venue.id, churchId: venue.churchId, planId: venue.id, parentId: null, sort: 1,
-        itemType: "header", relatedId: venue.id, label: lesson.name + " - " + venue.name,
-        description: lesson.title || lesson.name, seconds: null, children: [],
+        id: venue.id,
+        churchId: venue.churchId,
+        planId: venue.id,
+        parentId: null,
+        sort: 1,
+        itemType: "header",
+        relatedId: venue.id,
+        label: lesson.name + " - " + venue.name,
+        description: lesson.title || lesson.name,
+        seconds: null,
+        children: [],
       };
 
       // Add each lesson section as a child item with totaled duration
       sections.forEach(section => {
         const sectionRoles = roles.filter(r => r.sectionId === section.id);
         const sectionActions: Action[] = [];
-        sectionRoles.forEach(role => { sectionActions.push(...actions.filter(a => a.roleId === role.id)); });
+        sectionRoles.forEach(role => {
+          sectionActions.push(...actions.filter(a => a.roleId === role.id));
+        });
         const sectionSeconds = DurationHelper.calculateSectionSeconds(sectionActions, durationData.externalVideos, durationData.assets, durationData.files);
         lessonHeader.children.push({
-          id: section.id, churchId: venue.churchId, planId: venue.id, parentId: venue.id, sort: section.sort,
-          itemType: "item", relatedId: section.id, label: section.name, description: "", seconds: sectionSeconds, link: null, children: [],
+          id: section.id,
+          churchId: venue.churchId,
+          planId: venue.id,
+          parentId: venue.id,
+          sort: section.sort,
+          itemType: "item",
+          relatedId: section.id,
+          label: section.name,
+          description: "",
+          seconds: sectionSeconds,
+          link: null,
+          children: [],
         });
       });
 
-      return [lessonHeader];
+      return { venueName: venue.name, items: [lessonHeader] };
     });
   }
 

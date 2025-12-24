@@ -40,6 +40,10 @@ export class SectionRepository {
     return DB.query("SELECT * FROM sections WHERE lessonId=? ORDER BY sort", [lessonId]) as Promise<Section[]>;
   }
 
+  public loadPublicAll(): Promise<Section[]> {
+    return DB.query("SELECT * FROM sections ORDER BY sort", []) as Promise<Section[]>;
+  }
+
   public load(id: string): Promise<Section> {
     return DB.queryOne("SELECT * FROM sections WHERE id=?", [id]) as Promise<Section>;
   }
