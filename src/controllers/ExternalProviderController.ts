@@ -33,6 +33,22 @@ export class ExternalProviderController extends LessonsBaseController {
     });
   }
 
+  @httpGet("/:id/venue/:venueId/planItems")
+  public async getPublicPlanItems(@requestParam("id") id: string, @requestParam("venueId") venueId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
+    return this.actionWrapperAnon(req, res, async () => {
+      const { data, venueName } = await ExternalProviderHelper.loadExternalDataWithVenueName(id, venueId);
+      return ExternalProviderHelper.convertToPlanItems(data, venueName);
+    });
+  }
+
+  @httpGet("/:id/venue/:venueId/actions")
+  public async getPublicActions(@requestParam("id") id: string, @requestParam("venueId") venueId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
+    return this.actionWrapperAnon(req, res, async () => {
+      const { data, venueName } = await ExternalProviderHelper.loadExternalDataWithVenueName(id, venueId);
+      return ExternalProviderHelper.convertToActions(data, venueName);
+    });
+  }
+
   @httpGet("/:id")
   public async get(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
     return this.actionWrapper(req, res, async au => {
