@@ -16,7 +16,7 @@ export class ExternalProviderHelper {
       label: externalData.lessonName + " - " + venueName,
       description: externalData.lessonTitle || externalData.lessonName,
       seconds: null,
-      children: [],
+      children: []
     };
 
     externalData.sections?.forEach((section: any, index: number) => {
@@ -40,7 +40,7 @@ export class ExternalProviderHelper {
         description: "",
         seconds: sectionSeconds || null,
         link: null,
-        children: [],
+        children: []
       });
     });
 
@@ -49,10 +49,7 @@ export class ExternalProviderHelper {
 
   // Converts external venue data to actions format matching /venues/public/actions/:id response
   static convertToActions = (externalData: any, venueName: string) => {
-    const result = {
-      venueName,
-      sections: [] as any[],
-    };
+    const result = { venueName, sections: [] as any[] };
 
     externalData.sections?.forEach((section: any, sectionIndex: number) => {
       const sectionActions: any[] = [];
@@ -69,7 +66,7 @@ export class ExternalProviderHelper {
           name: action.name || action.actionType || "Action",
           actionType: action.actionType || "play",
           roleName: action.roleName || "",
-          seconds: actionSeconds,
+          seconds: actionSeconds
         });
       });
 
@@ -77,7 +74,7 @@ export class ExternalProviderHelper {
         result.sections.push({
           id: sectionId,
           name: section.name,
-          actions: sectionActions,
+          actions: sectionActions
         });
       }
     });
@@ -109,14 +106,7 @@ export class ExternalProviderHelper {
   }
 
   static convertToMessages = (actionData: any) => {
-    const result = {
-      lessonName: actionData.lessonName,
-      lessonTitle: actionData.lessonTitle,
-      lessonImage: actionData.lessonImage,
-      lessonDescription: actionData.lessonDescription,
-      venueName: "",
-      messages: [],
-    };
+    const result = { lessonName: actionData.lessonName, lessonTitle: actionData.lessonTitle, lessonImage: actionData.lessonImage, lessonDescription: actionData.lessonDescription, venueName: "", messages: [] };
 
     actionData.sections.forEach((section: any) => {
       const actions = ArrayHelper.getAll(section.actions, "actionType", "play");
@@ -124,12 +114,7 @@ export class ExternalProviderHelper {
         const message = { name: section.name, files: [] };
         actions.forEach(a => {
           a.files.forEach((f: any) => {
-            const file = {
-              name: f.name,
-              url: f.url,
-              seconds: f.seconds || 3600,
-              loopVideo: f.loopVideo || false,
-            };
+            const file = { name: f.name, url: f.url, seconds: f.seconds || 3600, loopVideo: f.loopVideo || false };
             message.files.push(file);
           });
         });

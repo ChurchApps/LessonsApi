@@ -1,4 +1,4 @@
-import { controller, httpGet, interfaces, requestParam } from "inversify-express-utils";
+import { controller, httpGet, requestParam } from "inversify-express-utils";
 import express from "express";
 import { LessonsBaseController } from "./LessonsBaseController";
 import { ArrayHelper } from "@churchapps/apihelper";
@@ -27,7 +27,7 @@ export class TempController extends LessonsBaseController {
         lessonDescription: lesson.description,
         studyName: study.name,
         programName: program.name,
-        sections: [],
+        sections: []
       };
       sections.forEach(section => {
         const s = { name: section.name, actions: [] };

@@ -1,4 +1,4 @@
-import { controller, httpPost, httpGet, interfaces, requestParam, httpDelete } from "inversify-express-utils";
+import { controller, httpPost, httpGet, requestParam, httpDelete } from "inversify-express-utils";
 import express from "express";
 import { LessonsBaseController } from "./LessonsBaseController";
 import { Resource } from "../models";
@@ -77,16 +77,14 @@ export class ResourceController extends LessonsBaseController {
             assets.forEach(async a => {
               await FilesHelper.deleteFile(au.churchId, a.fileId, a.resourceId);
               await this.repositories.asset.delete(au.churchId, a.id);
-            })
-          )
+            }))
         );
         promises.push(
           this.repositories.variant.loadByResourceId(au.churchId, id).then(variants =>
             variants.forEach(async v => {
               await FilesHelper.deleteFile(au.churchId, v.fileId, v.resourceId);
               await this.repositories.variant.delete(au.churchId, v.id);
-            })
-          )
+            }))
         );
 
         await Promise.all(promises);

@@ -14,7 +14,7 @@ export class HealthController {
       name: "LessonsApi",
       version: "1.0.0",
       status: "running",
-      timestamp: new Date().toISOString(),
+      timestamp: new Date().toISOString()
     });
   }
 

@@ -11,14 +11,18 @@ export class ScheduleRepository {
   public async create(schedule: Schedule) {
     schedule.id = UniqueIdHelper.shortId();
     const sql = "INSERT INTO schedules (id, churchId, classroomId, scheduledDate, externalProviderId, programId, studyId, lessonId, venueId, displayName) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
-    const params = [schedule.id, schedule.churchId, schedule.classroomId, schedule.scheduledDate, schedule.externalProviderId, schedule.programId, schedule.studyId, schedule.lessonId, schedule.venueId, schedule.displayName];
+    const params = [
+      schedule.id, schedule.churchId, schedule.classroomId, schedule.scheduledDate, schedule.externalProviderId, schedule.programId, schedule.studyId, schedule.lessonId, schedule.venueId, schedule.displayName
+    ];
     await DB.query(sql, params);
     return schedule;
   }
 
   public async update(schedule: Schedule) {
     const sql = "UPDATE schedules SET classroomId=?, scheduledDate=?, externalProviderId=?, programId=?, studyId=?, lessonId=?, venueId=?, displayName=? WHERE id=? AND churchId=?";
-    const params = [schedule.classroomId, schedule.scheduledDate, schedule.externalProviderId, schedule.programId, schedule.studyId, schedule.lessonId, schedule.venueId, schedule.displayName, schedule.id, schedule.churchId];
+    const params = [
+      schedule.classroomId, schedule.scheduledDate, schedule.externalProviderId, schedule.programId, schedule.studyId, schedule.lessonId, schedule.venueId, schedule.displayName, schedule.id, schedule.churchId
+    ];
     await DB.query(sql, params);
     return schedule;
   }

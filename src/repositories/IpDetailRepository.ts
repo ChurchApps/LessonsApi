@@ -11,14 +11,18 @@ export class IpDetailRepository {
   public async create(detail: IpDetail) {
     detail.id = UniqueIdHelper.shortId();
     const sql = "INSERT INTO ipDetails (id, ipAddress, city, state, country, lat, lon, isp) VALUES (?, ?, ?, ?, ?, ?, ?, ?);";
-    const params = [detail.id, detail.ipAddress, detail.city, detail.state, detail.country, detail.lat, detail.lon, detail.isp];
+    const params = [
+      detail.id, detail.ipAddress, detail.city, detail.state, detail.country, detail.lat, detail.lon, detail.isp
+    ];
     await DB.query(sql, params);
     return detail;
   }
 
   public async update(detail: IpDetail) {
     const sql = "UPDATE ipDetails SET ipAddress=?, city=?, state=?, country=?, lat=?, lon=?, isp=? WHERE id=?";
-    const params = [detail.ipAddress, detail.city, detail.state, detail.country, detail.lat, detail.lon, detail.isp, detail.id];
+    const params = [
+      detail.ipAddress, detail.city, detail.state, detail.country, detail.lat, detail.lon, detail.isp, detail.id
+    ];
     await DB.query(sql, params);
     return detail;
   }

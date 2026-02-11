@@ -1,4 +1,4 @@
-import { controller, httpPost, httpGet, interfaces, requestParam, httpDelete } from "inversify-express-utils";
+import { controller, httpPost, httpGet, requestParam, httpDelete } from "inversify-express-utils";
 import express from "express";
 import { LessonsBaseController } from "./LessonsBaseController";
 import { Venue, Section, Action, Role, ExternalVideo, Lesson, Download } from "../models";
@@ -25,7 +25,7 @@ export class VenueController extends LessonsBaseController {
       churchId,
       ipAddress,
       downloadDate: new Date(),
-      fileName: "Playlist: " + venueName,
+      fileName: "Playlist: " + venueName
     };
     const existing = await this.repositories.download.loadExisting(download);
     if (!existing) await this.repositories.download.save(download);
@@ -74,22 +74,23 @@ export class VenueController extends LessonsBaseController {
             let video: ExternalVideo = ArrayHelper.getOne(availableVideos, "id", a.externalVideoId);
             if (!video && a.actionType === "Add-on") video = ArrayHelper.getOne(availableVideos, "contentId", a.addOnId);
             if (video) {
-              if (req.query.mode === "web")
+              if (req.query.mode === "web") {
                 itemFiles.push({
                   name: video.name,
                   url: video.videoProvider.toLowerCase() + ":" + video.videoId,
                   seconds: video.seconds,
                   loopVideo: video.loopVideo,
-                  thumbnail: video.thumbnail,
+                  thumbnail: video.thumbnail
                 });
-              else
+              } else {
                 itemFiles.push({
                   name: video.name,
                   url: resolution === "1080" ? video.play1080 : video.play720,
                   seconds: video.seconds,
                   loopVideo: video.loopVideo,
-                  thumbnail: video.thumbnail,
+                  thumbnail: video.thumbnail
                 });
+              }
             }
           } else {
             const files: any[] = PlaylistHelper.getBestFiles(a, availableFiles);
@@ -112,7 +113,7 @@ export class VenueController extends LessonsBaseController {
         lessonTitle: lesson.title,
         lessonImage: lesson.image,
         lessonDescription: lesson.description,
-        venueName: venue.name,
+        venueName: venue.name
       };
     });
   }
@@ -164,7 +165,7 @@ export class VenueController extends LessonsBaseController {
 
       const result = {
         venueName: venue.name,
-        sections: [] as any[],
+        sections: [] as any[]
       };
 
       sections.forEach(section => {
@@ -178,7 +179,7 @@ export class VenueController extends LessonsBaseController {
               name: action.content?.substring(0, 50) + (action.content?.length > 50 ? "..." : "") || action.actionType,
               actionType: action.actionType,
               roleName: role.name,
-              seconds: DurationHelper.calculateSeconds(action, durationData.externalVideos, durationData.assets, durationData.files),
+              seconds: DurationHelper.calculateSeconds(action, durationData.externalVideos, durationData.assets, durationData.files)
             });
           });
         });
@@ -187,7 +188,7 @@ export class VenueController extends LessonsBaseController {
           result.sections.push({
             id: section.id,
             name: section.name,
-            actions: sectionActions,
+            actions: sectionActions
           });
         }
       });
@@ -281,7 +282,7 @@ export class VenueController extends LessonsBaseController {
         label: lesson.name + " - " + venue.name,
         description: lesson.title || lesson.name,
         seconds: null,
-        children: [],
+        children: []
       };
 
       // Add each lesson section as a child item with totaled duration
@@ -304,7 +305,7 @@ export class VenueController extends LessonsBaseController {
           description: "",
           seconds: sectionSeconds,
           link: null,
-          children: [],
+          children: []
         });
       });
 

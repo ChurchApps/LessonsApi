@@ -20,7 +20,7 @@ export const init = async () => {
         origin: true,
         credentials: true,
         methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-        allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "Accept", "Origin"],
+        allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "Accept", "Origin"]
       })
     );
 
@@ -48,9 +48,8 @@ export const init = async () => {
         } catch {
           req.body = {};
         }
-      }
+      } else if (req.body && req.body.type === "Buffer" && Array.isArray(req.body.data)) {
       // Handle Buffer-like objects
-      else if (req.body && req.body.type === "Buffer" && Array.isArray(req.body.data)) {
         try {
           const bodyString = Buffer.from(req.body.data).toString("utf8");
           if (contentType.includes("application/json")) {
@@ -61,9 +60,8 @@ export const init = async () => {
         } catch {
           req.body = {};
         }
-      }
+      } else if (typeof req.body === "string" && req.body.length > 0) {
       // Handle string JSON bodies
-      else if (typeof req.body === "string" && req.body.length > 0) {
         try {
           if (contentType.includes("application/json")) {
             req.body = JSON.parse(req.body);

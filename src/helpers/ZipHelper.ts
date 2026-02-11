@@ -55,8 +55,8 @@ export class ZipHelper {
             Key: zipKey,
             Body: streamPassThrough,
             ContentType: "application/zip",
-            ACL: ObjectCannedACL.public_read,
-          },
+            ACL: ObjectCannedACL.public_read
+          }
         });
 
         console.log(`Starting upload for: ${zipKey}`);
@@ -137,7 +137,7 @@ export class ZipHelper {
           churchId: bundle.churchId,
           error: (error as any).message,
           stack: (error as any).stack,
-          processingTime: Date.now() - bundleStartTime,
+          processingTime: Date.now() - bundleStartTime
         });
 
         // Reset pending flag so it can be retried later
@@ -156,7 +156,7 @@ export class ZipHelper {
         totalProcessed: processed,
         successful,
         failed,
-        failureRate: ((failed / processed) * 100).toFixed(1) + "%",
+        failureRate: ((failed / processed) * 100).toFixed(1) + "%"
       });
     }
   }
@@ -245,7 +245,7 @@ export class ZipHelper {
           contentPath: Environment.contentRoot + "/" + zipName + "?dt=" + now.getTime().toString(),
           churchId: bundle.churchId,
           fileName: bundle.name + ".zip",
-          fileType: "application/zip",
+          fileType: "application/zip"
         };
       } else {
         file.dateModified = now;
@@ -266,7 +266,7 @@ export class ZipHelper {
         bundleName: bundle.name,
         churchId: bundle.churchId,
         error: (error as any).message,
-        stack: (error as any).stack,
+        stack: (error as any).stack
       });
       throw error; // Re-throw to be handled by zipPendingBundles
     }

@@ -1,4 +1,4 @@
-import { controller, httpPost, httpGet, interfaces, requestParam, httpDelete } from "inversify-express-utils";
+import { controller, httpPost, httpGet, requestParam, httpDelete } from "inversify-express-utils";
 import express from "express";
 import { LessonsBaseController } from "./LessonsBaseController";
 import { StudyCategory } from "../models";
@@ -13,10 +13,11 @@ export class StudyCategoryController extends LessonsBaseController {
       else {
         const data = await this.repositories.studyCategory.loadCategoryNames(programId);
         const result: string[] = [];
-        if (data)
+        if (data) {
           data.forEach(d => {
             result.push(d.categoryName);
           });
+        }
         return result;
       }
     });

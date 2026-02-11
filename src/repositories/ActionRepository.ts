@@ -11,14 +11,18 @@ export class ActionRepository {
   public async create(action: Action) {
     action.id = UniqueIdHelper.shortId();
     const sql = "INSERT INTO actions (id, churchId, lessonId, roleId, actionType, content, sort, resourceId, assetId, externalVideoId, addOnId) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
-    const params = [action.id, action.churchId, action.lessonId, action.roleId, action.actionType, action.content, action.sort, action.resourceId, action.assetId, action.externalVideoId, action.addOnId];
+    const params = [
+      action.id, action.churchId, action.lessonId, action.roleId, action.actionType, action.content, action.sort, action.resourceId, action.assetId, action.externalVideoId, action.addOnId
+    ];
     await DB.query(sql, params);
     return action;
   }
 
   public async update(action: Action) {
     const sql = "UPDATE actions SET lessonId=?, roleId=?, actionType=?, content=?, sort=?, resourceId=?, assetId=?, externalVideoId=?, addOnId=? WHERE id=? AND churchId=?";
-    const params = [action.lessonId, action.roleId, action.actionType, action.content, action.sort, action.resourceId, action.assetId, action.externalVideoId, action.addOnId, action.id, action.churchId];
+    const params = [
+      action.lessonId, action.roleId, action.actionType, action.content, action.sort, action.resourceId, action.assetId, action.externalVideoId, action.addOnId, action.id, action.churchId
+    ];
     await DB.query(sql, params);
     return action;
   }

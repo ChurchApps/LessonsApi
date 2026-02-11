@@ -1,7 +1,6 @@
 // import Hubspot from "@hubspot/api-client";
 import { Environment } from ".";
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { PublicObjectSearchRequest } from "@hubspot/api-client/lib/codegen/crm/companies";
+
 
 export class HubspotHelper {
   static contactId: string = "";
@@ -24,12 +23,8 @@ export class HubspotHelper {
   static lookupCompanByChurchId = async (churchId: string) => {
     const client = this.getClient();
     const req: any = {
-      filterGroups: [
-        {
-          filters: [{ propertyName: "church_id", operator: "EQ", value: churchId }],
-        },
-      ],
-      limit: 1,
+      filterGroups: [{ filters: [{ propertyName: "church_id", operator: "EQ", value: churchId }] }],
+      limit: 1
     };
     const response = await client.crm.companies.searchApi.doSearch(req);
     return response.results[0];

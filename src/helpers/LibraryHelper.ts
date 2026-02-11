@@ -13,7 +13,7 @@ export class LibraryHelper {
 
     const result = {
       treeLabels: ["Program", "Study", "Lesson", "Playlist"],
-      playlists: [],
+      playlists: []
     };
 
     programs.forEach((program: any) => {
@@ -22,7 +22,7 @@ export class LibraryHelper {
         name: program.name,
         description: program.description,
         image: program.image,
-        children: [],
+        children: []
       };
       this.appendStudies(studies, lessons, venues, programNode);
       result.playlists.push(programNode);
@@ -39,7 +39,7 @@ export class LibraryHelper {
           name: study.name,
           description: study.description,
           image: study.image,
-          children: [],
+          children: []
         };
         this.appendLessons(allLessons, allVenues, studyNode);
         programNode.children.push(studyNode);
@@ -55,7 +55,7 @@ export class LibraryHelper {
           name: lesson.name,
           description: lesson.description,
           image: lesson.image,
-          children: [],
+          children: []
         };
         this.appendVenues(allVenues, lessonNode);
         studyNode.children.push(lessonNode);
@@ -71,7 +71,7 @@ export class LibraryHelper {
           name: venue.name,
           description: "",
           image: lessonNode.image,
-          apiUrl: "/venues/playlistNew/" + venue.id,
+          apiUrl: "/venues/playlistNew/" + venue.id
         };
         lessonNode.children.push(venueNode);
       }
@@ -79,13 +79,7 @@ export class LibraryHelper {
   };
 
   static getPlaylist = async (venue: Venue, lesson: Lesson, sections: Section[], actions: Action[], availableFiles: File[], availableVideos: ExternalVideo[], stream: boolean, resolution: string) => {
-    const result = {
-      id: venue.id,
-      name: venue.name,
-      prefetch: false,
-      playOrder: "sequential",
-      messages: [],
-    };
+    const result = { id: venue.id, name: venue.name, prefetch: false, playOrder: "sequential", messages: [] };
 
     sections.forEach(s => {
       const sectionActions: Action[] = ArrayHelper.getAll(actions, "sectionId", s.id);
@@ -116,12 +110,7 @@ export class LibraryHelper {
       const loopVideo = file.loopVideo ? true : false;
       if (!seconds || seconds === 0 || loopVideo) seconds = 3600;
 
-      const slide: any = {
-        id: file.id,
-        seconds,
-        type: file.fileType.split("/")[0],
-        url: contentPath,
-      };
+      const slide: any = { id: file.id, seconds, type: file.fileType.split("/")[0], url: contentPath };
       if (loopVideo) slide.loop = true;
       message.slides.push(slide);
     });
@@ -135,15 +124,7 @@ export class LibraryHelper {
     if (!video && action.actionType === "Add-on") video = ArrayHelper.getOne(availableVideos, "contentId", action.addOnId);
 
     if (video) {
-      const slide = {
-        id: video.id,
-        name: video.name,
-        seconds: video.seconds,
-        type: stream ? "stream" : "video",
-
-        loop: video.loopVideo,
-        files: [],
-      };
+      const slide = { id: video.id, name: video.name, seconds: video.seconds, type: stream ? "stream" : "video", loop: video.loopVideo, files: [] };
 
       if (stream) slide.files.push(video.videoProvider.toLowerCase() + ":" + video.videoId);
       else slide.files.push(resolution === "1080" ? video.play1080 : video.play720);

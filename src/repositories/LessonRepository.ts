@@ -11,14 +11,18 @@ export class LessonRepository {
   public async create(lesson: Lesson) {
     lesson.id = UniqueIdHelper.shortId();
     const sql = "INSERT INTO lessons (id, churchId, studyId, name, slug, title, sort, image, live, description, videoEmbedUrl) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
-    const params = [lesson.id, lesson.churchId, lesson.studyId, lesson.name, lesson.slug, lesson.title, lesson.sort, lesson.image, lesson.live, lesson.description, lesson.videoEmbedUrl];
+    const params = [
+      lesson.id, lesson.churchId, lesson.studyId, lesson.name, lesson.slug, lesson.title, lesson.sort, lesson.image, lesson.live, lesson.description, lesson.videoEmbedUrl
+    ];
     await DB.query(sql, params);
     return lesson;
   }
 
   public async update(lesson: Lesson) {
     const sql = "UPDATE lessons SET studyId=?, name=?, slug=?, title=?, sort=?, image=?, live=?, description=?, videoEmbedUrl=? WHERE id=? AND churchId=?";
-    const params = [lesson.studyId, lesson.name, lesson.slug, lesson.title, lesson.sort, lesson.image, lesson.live, lesson.description, lesson.videoEmbedUrl, lesson.id, lesson.churchId];
+    const params = [
+      lesson.studyId, lesson.name, lesson.slug, lesson.title, lesson.sort, lesson.image, lesson.live, lesson.description, lesson.videoEmbedUrl, lesson.id, lesson.churchId
+    ];
     await DB.query(sql, params);
     return lesson;
   }

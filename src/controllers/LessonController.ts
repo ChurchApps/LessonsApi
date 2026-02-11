@@ -1,4 +1,4 @@
-import { controller, httpPost, httpGet, interfaces, requestParam, httpDelete } from "inversify-express-utils";
+import { controller, httpPost, httpGet, requestParam, httpDelete } from "inversify-express-utils";
 import express from "express";
 import { LessonsBaseController } from "./LessonsBaseController";
 import { ExternalVideo, Lesson } from "../models";
@@ -23,35 +23,13 @@ export class LessonController extends LessonsBaseController {
       const result = { programs: [] };
 
       programs.forEach(program => {
-        const p = {
-          id: program.id,
-          name: program.name,
-          description: program.shortDescription || program.description || "",
-          image: program.image,
-          studies: [],
-        };
+        const p = { id: program.id, name: program.name, description: program.shortDescription || program.description || "", image: program.image, studies: [] };
         ArrayHelper.getAll(studies, "programId", program.id).forEach(study => {
-          const s = {
-            id: study.id,
-            name: study.name,
-            description: study.shortDescription || study.description || "",
-            image: study.image,
-            lessons: [],
-          };
+          const s = { id: study.id, name: study.name, description: study.shortDescription || study.description || "", image: study.image, lessons: [] };
           ArrayHelper.getAll(lessons, "studyId", study.id).forEach(lesson => {
-            const l = {
-              id: lesson.id,
-              name: lesson.name + ": " + lesson.title,
-              description: lesson.description,
-              image: lesson.image,
-              venues: [],
-            };
+            const l = { id: lesson.id, name: lesson.name + ": " + lesson.title, description: lesson.description, image: lesson.image, venues: [] };
             ArrayHelper.getAll(venues, "lessonId", lesson.id).forEach(venue => {
-              l.venues.push({
-                id: venue.id,
-                name: venue.name,
-                apiUrl: "https://api.lessons.church/venues/public/feed/" + venue.id,
-              });
+              l.venues.push({ id: venue.id, name: venue.name, apiUrl: "https://api.lessons.church/venues/public/feed/" + venue.id });
             });
             s.lessons.push(l);
           });
@@ -79,44 +57,19 @@ export class LessonController extends LessonsBaseController {
       const result = { programs: [] };
 
       programs.forEach(program => {
-        const p = {
-          id: program.id,
-          name: program.name,
-          studies: [],
-        };
+        const p = { id: program.id, name: program.name, studies: [] };
         ArrayHelper.getAll(studies, "programId", program.id).forEach(study => {
-          const s = {
-            id: study.id,
-            name: study.name,
-            lessons: [],
-          };
+          const s = { id: study.id, name: study.name, lessons: [] };
           ArrayHelper.getAll(lessons, "studyId", study.id).forEach(lesson => {
-            const l = {
-              id: lesson.id,
-              name: lesson.name + ": " + lesson.title,
-              venues: [],
-            };
+            const l = { id: lesson.id, name: lesson.name + ": " + lesson.title, venues: [] };
             ArrayHelper.getAll(venues, "lessonId", lesson.id).forEach(venue => {
-              const v = {
-                id: venue.id,
-                name: venue.name,
-                sections: [],
-              };
+              const v = { id: venue.id, name: venue.name, sections: [] };
               ArrayHelper.getAll(sections, "venueId", venue.id).forEach(section => {
-                const sec = {
-                  id: section.id,
-                  name: section.name,
-                  actions: [],
-                };
+                const sec = { id: section.id, name: section.name, actions: [] };
                 const sectionRoles = ArrayHelper.getAll(roles, "sectionId", section.id);
                 sectionRoles.forEach(role => {
                   ArrayHelper.getAll(actions, "roleId", role.id).forEach(action => {
-                    sec.actions.push({
-                      id: action.id,
-                      name: action.content?.substring(0, 50) + (action.content?.length > 50 ? "..." : "") || action.actionType,
-                      actionType: action.actionType,
-                      roleName: role.name,
-                    });
+                    sec.actions.push({ id: action.id, name: action.content?.substring(0, 50) + (action.content?.length > 50 ? "..." : "") || action.actionType, actionType: action.actionType, roleName: role.name });
                   });
                 });
                 if (sec.actions.length > 0) v.sections.push(sec);

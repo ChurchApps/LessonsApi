@@ -11,14 +11,18 @@ export class ExternalVideoRepository {
   public async create(externalVideo: ExternalVideo) {
     externalVideo.id = UniqueIdHelper.shortId();
     const sql = "INSERT INTO externalVideos (id, churchId, contentType, contentId, name, videoProvider, videoId, seconds, loopVideo, download720, download1080, download4k, play720, play1080, play4k, thumbnail, downloadsExpire) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
-    const params = [externalVideo.id, externalVideo.churchId, externalVideo.contentType, externalVideo.contentId, externalVideo.name, externalVideo.videoProvider, externalVideo.videoId, externalVideo.seconds, externalVideo.loopVideo, externalVideo.download720, externalVideo.download1080, externalVideo.download4k, externalVideo.play720, externalVideo.play1080, externalVideo.play4k, externalVideo.thumbnail, externalVideo.downloadsExpire];
+    const params = [
+      externalVideo.id, externalVideo.churchId, externalVideo.contentType, externalVideo.contentId, externalVideo.name, externalVideo.videoProvider, externalVideo.videoId, externalVideo.seconds, externalVideo.loopVideo, externalVideo.download720, externalVideo.download1080, externalVideo.download4k, externalVideo.play720, externalVideo.play1080, externalVideo.play4k, externalVideo.thumbnail, externalVideo.downloadsExpire
+    ];
     await DB.query(sql, params);
     return externalVideo;
   }
 
   public async update(externalVideo: ExternalVideo) {
     const sql = "UPDATE externalVideos SET contentType=?, contentId=?, name=?, videoProvider=?, videoId=?, seconds=?, loopVideo=?, download720=?, download1080=?, download4k=?, play720=?, play1080=?, play4k=?, thumbnail=?, downloadsExpire=? WHERE id=? AND churchId=?";
-    const params = [externalVideo.contentType, externalVideo.contentId, externalVideo.name, externalVideo.videoProvider, externalVideo.videoId, externalVideo.seconds, externalVideo.loopVideo, externalVideo.download720, externalVideo.download1080, externalVideo.play4k, externalVideo.play720, externalVideo.play1080, externalVideo.download4k, externalVideo.thumbnail, externalVideo.downloadsExpire, externalVideo.id, externalVideo.churchId];
+    const params = [
+      externalVideo.contentType, externalVideo.contentId, externalVideo.name, externalVideo.videoProvider, externalVideo.videoId, externalVideo.seconds, externalVideo.loopVideo, externalVideo.download720, externalVideo.download1080, externalVideo.play4k, externalVideo.play720, externalVideo.play1080, externalVideo.download4k, externalVideo.thumbnail, externalVideo.downloadsExpire, externalVideo.id, externalVideo.churchId
+    ];
     await DB.query(sql, params);
     return externalVideo;
   }

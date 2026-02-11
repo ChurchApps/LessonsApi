@@ -1,11 +1,10 @@
-import { controller, httpPost, httpGet, interfaces, requestParam, httpDelete } from "inversify-express-utils";
+import { controller, httpPost, httpGet, requestParam, httpDelete } from "inversify-express-utils";
 import express from "express";
 import { LessonsBaseController } from "./LessonsBaseController";
 import { Bundle, Resource } from "../models";
 import { Permissions } from "../helpers/Permissions";
 import { FilesHelper, Environment } from "../helpers";
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { ArrayHelper } from "@churchapps/apihelper";
+
 import { ZipHelper } from "../helpers/ZipHelper";
 
 @controller("/bundles")
@@ -60,8 +59,8 @@ export class BundleController extends LessonsBaseController {
         timestamp: new Date().toISOString(),
         metrics: {
           queueUtilization: ((pendingBundles.length / Math.max(totalBundles.length, 1)) * 100).toFixed(1) + "%",
-          recommendedAction: stuckBundles.length > 0 ? "Manual intervention required" : pendingBundles.length > 10 ? "Monitor closely" : "No action needed",
-        },
+          recommendedAction: stuckBundles.length > 0 ? "Manual intervention required" : pendingBundles.length > 10 ? "Monitor closely" : "No action needed"
+        }
       };
 
       console.log("Bundle queue health check:", healthStatus);
@@ -92,7 +91,7 @@ export class BundleController extends LessonsBaseController {
       return {
         clearedCount: stuckBundles.length,
         clearedBundleIds: stuckBundles.map(b => b.id),
-        timestamp: new Date().toISOString(),
+        timestamp: new Date().toISOString()
       };
     });
   }
@@ -106,12 +105,7 @@ export class BundleController extends LessonsBaseController {
 
       try {
         // Get environment info
-        const envInfo = {
-          APP_ENV: process.env.APP_ENV,
-          NODE_ENV: process.env.NODE_ENV,
-          AWS_REGION: process.env.AWS_REGION,
-          AWS_LAMBDA_FUNCTION_NAME: process.env.AWS_LAMBDA_FUNCTION_NAME,
-        };
+        const envInfo = { APP_ENV: process.env.APP_ENV, NODE_ENV: process.env.NODE_ENV, AWS_REGION: process.env.AWS_REGION, AWS_LAMBDA_FUNCTION_NAME: process.env.AWS_LAMBDA_FUNCTION_NAME };
 
         // Get connection string (safely - don't expose password)
         const connectionString = Environment.connectionString;
@@ -122,13 +116,7 @@ export class BundleController extends LessonsBaseController {
           // Parse MySQL connection string format: mysql://user:password@host:port/database
           const match = connectionString.match(/mysql:\/\/([^:]+):([^@]+)@([^:\/]+):?(\d+)?\/(.+)/);
           if (match) {
-            parsedConnection = {
-              user: match[1],
-              password: "***HIDDEN***",
-              host: match[3],
-              port: match[4] || "3306",
-              database: match[5],
-            };
+            parsedConnection = { user: match[1], password: "***HIDDEN***", host: match[3], port: match[4] || "3306", database: match[5] };
             hostname = match[3];
           }
         }
@@ -137,16 +125,9 @@ export class BundleController extends LessonsBaseController {
         let dnsResults = {};
         try {
           const result = await lookup(hostname);
-          dnsResults = {
-            hostname: hostname,
-            resolvedIP: result.address,
-            family: result.family,
-          };
+          dnsResults = { hostname: hostname, resolvedIP: result.address, family: result.family };
         } catch (dnsError) {
-          dnsResults = {
-            hostname: hostname,
-            error: (dnsError as any).message,
-          };
+          dnsResults = { hostname: hostname, error: (dnsError as any).message };
         }
 
         // Get local network info
@@ -157,11 +138,7 @@ export class BundleController extends LessonsBaseController {
         for (const interfaceName in networkInterfaces) {
           for (const iface of networkInterfaces[interfaceName]) {
             if (iface.family === "IPv4" && !iface.internal) {
-              localIPs.push({
-                interface: interfaceName,
-                address: iface.address,
-                netmask: iface.netmask,
-              });
+              localIPs.push({ interface: interfaceName, address: iface.address, netmask: iface.netmask });
             }
           }
         }
@@ -172,13 +149,13 @@ export class BundleController extends LessonsBaseController {
           connectionConfig: parsedConnection,
           dnsResolution: dnsResults,
           localNetworkInfo: localIPs,
-          rawConnectionString: connectionString ? connectionString.replace(/:[^:@]*@/, ":***@") : "NOT_SET",
+          rawConnectionString: connectionString ? connectionString.replace(/:[^:@]*@/, ":***@") : "NOT_SET"
         };
       } catch (error) {
         return {
           error: "Failed to get connection debug info",
           message: (error as any).message,
-          timestamp: new Date().toISOString(),
+          timestamp: new Date().toISOString()
         };
       }
     });
@@ -251,16 +228,14 @@ export class BundleController extends LessonsBaseController {
         assets.forEach(async a => {
           await FilesHelper.deleteFile(churchId, a.fileId, a.resourceId);
           await this.repositories.asset.delete(churchId, a.id);
-        })
-      )
+        }))
     );
     promises.push(
       this.repositories.variant.loadByResourceId(churchId, resourceId).then(variants =>
         variants.forEach(async v => {
           await FilesHelper.deleteFile(churchId, v.fileId, v.resourceId);
           await this.repositories.variant.delete(churchId, v.id);
-        })
-      )
+        }))
     );
 
     await Promise.all(promises);

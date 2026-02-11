@@ -11,14 +11,18 @@ export class ProgramRepository {
   public async create(program: Program) {
     program.id = UniqueIdHelper.shortId();
     const sql = "INSERT INTO programs (id, churchId, providerId, name, slug, image, shortDescription, description, videoEmbedUrl, live, aboutSection, age, sort) VALUES (?, ?, (SELECT id FROM providers WHERE churchId = ?), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
-    const params = [program.id, program.churchId, program.churchId, program.name, program.slug, program.image, program.shortDescription, program.description, program.videoEmbedUrl, program.live, program.aboutSection, program.age, program.sort];
+    const params = [
+      program.id, program.churchId, program.churchId, program.name, program.slug, program.image, program.shortDescription, program.description, program.videoEmbedUrl, program.live, program.aboutSection, program.age, program.sort
+    ];
     await DB.query(sql, params);
     return program;
   }
 
   public async update(program: Program) {
     const sql = "UPDATE programs SET name=?, slug=?, image=?, shortDescription=?, description=?, videoEmbedUrl=?, live=?, aboutSection=?, age=?, sort=? WHERE id=? AND churchId=?";
-    const params = [program.name, program.slug, program.image, program.shortDescription, program.description, program.videoEmbedUrl, program.live, program.aboutSection, program.age, program.sort, program.id, program.churchId];
+    const params = [
+      program.name, program.slug, program.image, program.shortDescription, program.description, program.videoEmbedUrl, program.live, program.aboutSection, program.age, program.sort, program.id, program.churchId
+    ];
     await DB.query(sql, params);
     return program;
   }

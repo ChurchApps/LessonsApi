@@ -108,16 +108,11 @@ export class LessonFeedHelper {
       programSlug: program.slug,
       programAbout: program.aboutSection,
       downloads: [],
-      sections: [],
+      sections: []
     };
 
     venue.sections.forEach(section => {
-      const fs: FeedSection = {
-        name: section.name,
-        id: section.id,
-        sort: section.sort,
-        actions: [],
-      };
+      const fs: FeedSection = { name: section.name, id: section.id, sort: section.sort, actions: [] };
 
       if (section.materials) fs.materials = section.materials;
 
@@ -125,13 +120,7 @@ export class LessonFeedHelper {
       section.roles.forEach(role => {
         role.actions.forEach(action => {
           if (action.actionType !== "Download") {
-            const fa: FeedAction = {
-              actionType: action.actionType.toLowerCase(),
-              content: action.content,
-              id: action.id,
-              sort: action.sort,
-              roleId: action.roleId,
-            };
+            const fa: FeedAction = { actionType: action.actionType.toLowerCase(), content: action.content, id: action.id, sort: action.sort, roleId: action.roleId };
             if (role.name !== lastRole && role.name) {
               lastRole = role.name;
               fa.role = role.name;
@@ -160,18 +149,15 @@ export class LessonFeedHelper {
               name: b.file.fileName,
               url: b.file.contentPath,
               bytes: b.file.size,
-              fileType: b.file.fileType,
-            },
-          ],
+              fileType: b.file.fileType
+            }
+          ]
         };
         result.push(fd);
       }
     });
     externalVideos.forEach(v => {
-      const fd: FeedDownload = {
-        name: v.name,
-        files: [this.convertVideoFile(v, true)],
-      };
+      const fd: FeedDownload = { name: v.name, files: [this.convertVideoFile(v, true)] };
       result.push(fd);
     });
     return result;
@@ -198,13 +184,8 @@ export class LessonFeedHelper {
   }
 
   private static convertVideoFile(video: ExternalVideo, download: boolean) {
-    const file: FeedFile = {
-      // url: video.download1080 || video.download720,
-      url: "https://api.lessons.church/externalVideos/download/" + video.id,
-      name: video.name,
-      id: video.id,
-      expires: video.downloadsExpire,
-    };
+    // url: video.download1080 || video.download720,
+    const file: FeedFile = { url: "https://api.lessons.church/externalVideos/download/" + video.id, name: video.name, id: video.id, expires: video.downloadsExpire };
     if (video.thumbnail) file.thumbnail = video.thumbnail;
     if (download) {
       // file.bytes = video.?.file?.size;
@@ -218,11 +199,7 @@ export class LessonFeedHelper {
   }
 
   private static convertAssetFile(asset: Asset, resource: Resource, download: boolean) {
-    const file: FeedFile = {
-      url: asset?.file?.contentPath,
-      name: resource?.name + ": " + asset?.name,
-      id: asset?.file?.id,
-    };
+    const file: FeedFile = { url: asset?.file?.contentPath, name: resource?.name + ": " + asset?.name, id: asset?.file?.id };
     if (asset?.file?.thumbPath) file.thumbnail = asset?.file?.thumbPath;
     if (download) {
       file.bytes = asset?.file?.size;
@@ -232,13 +209,7 @@ export class LessonFeedHelper {
   }
 
   private static convertAddOnFile(addOn: AddOn) {
-    const file: FeedFile = {
-      url: addOn?.file?.contentPath,
-      name: addOn?.name,
-      bytes: addOn?.file?.size,
-      fileType: addOn?.file?.fileType,
-      id: addOn?.file?.id,
-    };
+    const file: FeedFile = { url: addOn?.file?.contentPath, name: addOn?.name, bytes: addOn?.file?.size, fileType: addOn?.file?.fileType, id: addOn?.file?.id };
     if (addOn?.image) file.thumbnail = addOn.image;
     return file;
   }
@@ -247,33 +218,19 @@ export class LessonFeedHelper {
     const result: FeedFile[] = [];
     if (download) {
       resource.variants.forEach(variant => {
-        const file: FeedFile = {
-          url: resource.variants[0]?.file?.contentPath,
-          name: resource.name,
-          bytes: variant?.file?.size,
-          fileType: variant?.file?.fileType,
-          id: variant?.file?.id,
-        };
+        const file: FeedFile = { url: resource.variants[0]?.file?.contentPath, name: resource.name, bytes: variant?.file?.size, fileType: variant?.file?.fileType, id: variant?.file?.id };
         if (resource?.variants[0]?.file?.thumbPath) file.thumbnail = resource?.variants[0]?.file?.thumbPath;
         result.push(file);
       });
     } else {
       if (resource.assets?.length > 0) {
         resource.assets.forEach(asset => {
-          const file: FeedFile = {
-            url: asset?.file?.contentPath,
-            name: asset.name,
-            id: asset?.file?.id,
-          };
+          const file: FeedFile = { url: asset?.file?.contentPath, name: asset.name, id: asset?.file?.id };
           if (asset.file?.thumbPath) file.thumbnail = asset.file?.thumbPath;
           result.push(file);
         });
       } else {
-        const file: FeedFile = {
-          url: resource.variants[0]?.file?.contentPath,
-          name: resource.name,
-          id: resource.variants[0]?.file?.id,
-        };
+        const file: FeedFile = { url: resource.variants[0]?.file?.contentPath, name: resource.name, id: resource.variants[0]?.file?.id };
         if (resource?.variants[0]?.file?.thumbPath) file.thumbnail = resource?.variants[0]?.file?.thumbPath;
         result.push(file);
       }

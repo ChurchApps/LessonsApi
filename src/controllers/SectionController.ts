@@ -1,7 +1,7 @@
-import { controller, httpPost, httpGet, interfaces, requestParam, httpDelete } from "inversify-express-utils";
+import { controller, httpPost, httpGet, requestParam, httpDelete } from "inversify-express-utils";
 import express from "express";
 import { LessonsBaseController } from "./LessonsBaseController";
-import { Section, Venue, Action, Role } from "../models";
+import { Section, Venue, Action } from "../models";
 import { Permissions } from "../helpers/Permissions";
 import { ArrayHelper } from "@churchapps/apihelper";
 import { LessonFeedHelper } from "../helpers/LessonFeedHelper";
@@ -59,7 +59,7 @@ export class SectionController extends LessonsBaseController {
         lessonImage: fullFeed.lessonImage,
         venueName: fullFeed.name,
         studyName: fullFeed.studyName,
-        programName: fullFeed.programName,
+        programName: fullFeed.programName
       };
     });
   }

@@ -1,4 +1,4 @@
-import { controller, httpPost, httpGet, interfaces, requestParam, httpDelete } from "inversify-express-utils";
+import { controller, httpPost, httpGet, requestParam, httpDelete } from "inversify-express-utils";
 import express from "express";
 import { LessonsBaseController } from "./LessonsBaseController";
 import { Action, Classroom, Download, ExternalVideo, Lesson, Schedule, Venue } from "../models";
@@ -38,7 +38,7 @@ export class ClassroomController extends LessonsBaseController {
               name: video.name,
               url: resolution === "1080" ? video.play1080 : video.play720,
               seconds,
-              loopVideo: video.loopVideo,
+              loopVideo: video.loopVideo
             });
           }
         } else {
@@ -61,7 +61,7 @@ export class ClassroomController extends LessonsBaseController {
       lessonTitle: lesson.title,
       lessonImage: lesson.image,
       lessonDescription: lesson.description,
-      venueName: venue.name,
+      venueName: venue.name
     };
   }
 
@@ -84,14 +84,14 @@ export class ClassroomController extends LessonsBaseController {
       const classrooms = classroomIds.length > 0 ? await this.repositories.classroom.loadByIds(churchId, classroomIds) : await this.repositories.classroom.loadByChurchId(churchId);
       const result = {
         treeLabels: ["Classroom"],
-        playlists: [],
+        playlists: []
       };
       classrooms.forEach(c => {
         result.playlists.push({
           id: c.id,
           name: c.name,
           image: "https://lessons.church/images/og-image.png",
-          apiUrl: "https://api.lessons.church/classrooms/playlistNew/" + c.id,
+          apiUrl: "https://api.lessons.church/classrooms/playlistNew/" + c.id
         });
       });
       return result;
@@ -160,7 +160,7 @@ export class ClassroomController extends LessonsBaseController {
 
       const result = {
         treeLabels: ["Classroom"],
-        playlists: [],
+        playlists: []
       };
       classRooms.forEach(c => {
         result.playlists.push({
@@ -168,7 +168,7 @@ export class ClassroomController extends LessonsBaseController {
           name: c.name,
           description: "",
           image: "https://lessons.church/images/og-image.png",
-          apiUrl: "https://api.lessons.church/classrooms/playlistNew/" + c.id,
+          apiUrl: "https://api.lessons.church/classrooms/playlistNew/" + c.id
         });
       });
 
@@ -223,7 +223,7 @@ export class ClassroomController extends LessonsBaseController {
       churchId,
       ipAddress,
       downloadDate: new Date(),
-      fileName: "Playlist: " + venueName,
+      fileName: "Playlist: " + venueName
     };
     const existing = await this.repositories.download.loadExisting(download);
     if (!existing) await this.repositories.download.save(download);

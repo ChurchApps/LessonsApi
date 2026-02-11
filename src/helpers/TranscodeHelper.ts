@@ -65,7 +65,7 @@ export class TranscodeHelper {
         size,
         dateModified,
         seconds,
-        thumbPath,
+        thumbPath
       };
       file = await repo.file.save(file);
 
@@ -76,7 +76,7 @@ export class TranscodeHelper {
         name: "WEBM",
         downloadDefault: false,
         playerDefault: true,
-        hidden: true,
+        hidden: true
       };
       await repo.variant.save(variant);
 
@@ -88,9 +88,7 @@ export class TranscodeHelper {
   }
 
   private static getEncoder() {
-    return new ElasticTranscoderClient({
-      region: "us-east-1",
-    });
+    return new ElasticTranscoderClient({ region: "us-east-1" });
   }
 
   static async encodeWebm(sourcePath: string, destPath: string, destFile: string) {
@@ -110,7 +108,7 @@ export class TranscodeHelper {
       PipelineId: Environment.transcodePipeline,
       OutputKeyPrefix: destPath,
       Input: { Key: sourcePath },
-      Outputs: [{ Key: destFile, PresetId: Environment.transcodePreset, ThumbnailPattern: thumbPattern }],
+      Outputs: [{ Key: destFile, PresetId: Environment.transcodePreset, ThumbnailPattern: thumbPattern }]
     };
 
     const encoder = this.getEncoder();

@@ -34,7 +34,7 @@ export class VimeoHelper {
       play1080p: this.getFileDetails(resp, "1080p"),
       play4k: this.getFileDetails(resp, "4k"),
       thumbnail: this.getPictureDetails(resp, 640),
-      downloadsExpire: this.getDownloadExpiration(resp),
+      downloadsExpire: this.getDownloadExpiration(resp)
     };
     return result;
   }

@@ -26,7 +26,7 @@ export class GeoHelper {
           country: resp.data.country_name,
           isp: resp.data.isp,
           lat: parseFloat(resp.data.latitude),
-          lon: parseFloat(resp.data.longitude),
+          lon: parseFloat(resp.data.longitude)
         };
         await Repositories.getCurrent().ipDetails.save(detail);
         // small delay to avoid hammering the API

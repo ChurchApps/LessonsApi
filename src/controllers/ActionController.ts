@@ -1,4 +1,4 @@
-import { controller, httpPost, httpGet, interfaces, requestParam, httpDelete } from "inversify-express-utils";
+import { controller, httpPost, httpGet, requestParam, httpDelete } from "inversify-express-utils";
 import express from "express";
 import { LessonsBaseController } from "./LessonsBaseController";
 import { Action } from "../models";
@@ -58,7 +58,7 @@ export class ActionController extends LessonsBaseController {
         venueName: fullFeed.name,
         studyName: fullFeed.studyName,
         programName: fullFeed.programName,
-        roleName: role.name,
+        roleName: role.name
       };
     });
   }
