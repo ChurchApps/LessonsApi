@@ -82,10 +82,7 @@ export class ClassroomController extends LessonsBaseController {
       const classroomIds = req.query.classrooms ? req.query.classrooms.toString().split(",") : [];
 
       const classrooms = classroomIds.length > 0 ? await this.repositories.classroom.loadByIds(churchId, classroomIds) : await this.repositories.classroom.loadByChurchId(churchId);
-      const result = {
-        treeLabels: ["Classroom"],
-        playlists: []
-      };
+      const result = { treeLabels: ["Classroom"], playlists: [] };
       classrooms.forEach(c => {
         result.playlists.push({
           id: c.id,
@@ -158,10 +155,7 @@ export class ClassroomController extends LessonsBaseController {
     return this.actionWrapperAnon(req, res, async () => {
       const classRooms = await this.repositories.classroom.loadByChurchId(churchId);
 
-      const result = {
-        treeLabels: ["Classroom"],
-        playlists: []
-      };
+      const result = { treeLabels: ["Classroom"], playlists: [] };
       classRooms.forEach(c => {
         result.playlists.push({
           id: c.id,
@@ -218,13 +212,7 @@ export class ClassroomController extends LessonsBaseController {
   }
 
   public async logDownload(lessonId: string, venueName: string, churchId: string, ipAddress: string) {
-    const download: Download = {
-      lessonId,
-      churchId,
-      ipAddress,
-      downloadDate: new Date(),
-      fileName: "Playlist: " + venueName
-    };
+    const download: Download = { lessonId, churchId, ipAddress, downloadDate: new Date(), fileName: "Playlist: " + venueName };
     const existing = await this.repositories.download.loadExisting(download);
     if (!existing) await this.repositories.download.save(download);
   }

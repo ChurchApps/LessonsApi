@@ -21,14 +21,7 @@ export class TempController extends LessonsBaseController {
       const availableFiles = await PlaylistHelper.loadPlaylistFiles(actions);
       const availableVideos = await PlaylistHelper.loadPlaylistVideos(actions);
 
-      const result = {
-        name: venue.name,
-        lessonName: lesson.title,
-        lessonDescription: lesson.description,
-        studyName: study.name,
-        programName: program.name,
-        sections: []
-      };
+      const result = { name: venue.name, lessonName: lesson.title, lessonDescription: lesson.description, studyName: study.name, programName: program.name, sections: [] };
       sections.forEach(section => {
         const s = { name: section.name, actions: [] };
         ArrayHelper.getAll(roles, "sectionId", section.id).forEach(role => {

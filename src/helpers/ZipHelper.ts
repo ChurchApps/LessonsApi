@@ -239,14 +239,7 @@ export class ZipHelper {
       }
       const now = new Date();
       if (file === null) {
-        file = {
-          id: "",
-          dateModified: now,
-          contentPath: Environment.contentRoot + "/" + zipName + "?dt=" + now.getTime().toString(),
-          churchId: bundle.churchId,
-          fileName: bundle.name + ".zip",
-          fileType: "application/zip"
-        };
+        file = { id: "", dateModified: now, contentPath: Environment.contentRoot + "/" + zipName + "?dt=" + now.getTime().toString(), churchId: bundle.churchId, fileName: bundle.name + ".zip", fileType: "application/zip" };
       } else {
         file.dateModified = now;
         file.contentPath = Environment.contentRoot + "/" + zipName + "?dt=" + now.getTime().toString();

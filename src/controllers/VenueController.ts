@@ -20,13 +20,7 @@ export class VenueController extends LessonsBaseController {
   }
 
   public async logDownload(lessonId: string, venueName: string, churchId: string, ipAddress: string) {
-    const download: Download = {
-      lessonId,
-      churchId,
-      ipAddress,
-      downloadDate: new Date(),
-      fileName: "Playlist: " + venueName
-    };
+    const download: Download = { lessonId, churchId, ipAddress, downloadDate: new Date(), fileName: "Playlist: " + venueName };
     const existing = await this.repositories.download.loadExisting(download);
     if (!existing) await this.repositories.download.save(download);
   }
@@ -75,21 +69,9 @@ export class VenueController extends LessonsBaseController {
             if (!video && a.actionType === "Add-on") video = ArrayHelper.getOne(availableVideos, "contentId", a.addOnId);
             if (video) {
               if (req.query.mode === "web") {
-                itemFiles.push({
-                  name: video.name,
-                  url: video.videoProvider.toLowerCase() + ":" + video.videoId,
-                  seconds: video.seconds,
-                  loopVideo: video.loopVideo,
-                  thumbnail: video.thumbnail
-                });
+                itemFiles.push({ name: video.name, url: video.videoProvider.toLowerCase() + ":" + video.videoId, seconds: video.seconds, loopVideo: video.loopVideo, thumbnail: video.thumbnail });
               } else {
-                itemFiles.push({
-                  name: video.name,
-                  url: resolution === "1080" ? video.play1080 : video.play720,
-                  seconds: video.seconds,
-                  loopVideo: video.loopVideo,
-                  thumbnail: video.thumbnail
-                });
+                itemFiles.push({ name: video.name, url: resolution === "1080" ? video.play1080 : video.play720, seconds: video.seconds, loopVideo: video.loopVideo, thumbnail: video.thumbnail });
               }
             }
           } else {
@@ -107,14 +89,7 @@ export class VenueController extends LessonsBaseController {
         messages.push({ name: s.name, files: itemFiles });
       });
 
-      return {
-        messages,
-        lessonName: lesson.name,
-        lessonTitle: lesson.title,
-        lessonImage: lesson.image,
-        lessonDescription: lesson.description,
-        venueName: venue.name
-      };
+      return { messages, lessonName: lesson.name, lessonTitle: lesson.title, lessonImage: lesson.image, lessonDescription: lesson.description, venueName: venue.name };
     });
   }
 
@@ -163,10 +138,7 @@ export class VenueController extends LessonsBaseController {
       const actions = await this.repositories.action.loadByLessonId(venue.lessonId);
       const durationData = await DurationHelper.loadDurationData(actions, venue.churchId, this.repositories);
 
-      const result = {
-        venueName: venue.name,
-        sections: [] as any[]
-      };
+      const result = { venueName: venue.name, sections: [] as any[] };
 
       sections.forEach(section => {
         const sectionRoles = ArrayHelper.getAll(roles, "sectionId", section.id);
@@ -185,11 +157,7 @@ export class VenueController extends LessonsBaseController {
         });
 
         if (sectionActions.length > 0) {
-          result.sections.push({
-            id: section.id,
-            name: section.name,
-            actions: sectionActions
-          });
+          result.sections.push({ id: section.id, name: section.name, actions: sectionActions });
         }
       });
 

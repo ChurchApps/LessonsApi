@@ -61,21 +61,11 @@ export class ExternalProviderHelper {
           actionSeconds += file.seconds || 0;
         });
 
-        sectionActions.push({
-          id: action.id || sectionId + "-action-" + actionIndex,
-          name: action.name || action.actionType || "Action",
-          actionType: action.actionType || "play",
-          roleName: action.roleName || "",
-          seconds: actionSeconds
-        });
+        sectionActions.push({ id: action.id || sectionId + "-action-" + actionIndex, name: action.name || action.actionType || "Action", actionType: action.actionType || "play", roleName: action.roleName || "", seconds: actionSeconds });
       });
 
       if (sectionActions.length > 0) {
-        result.sections.push({
-          id: sectionId,
-          name: section.name,
-          actions: sectionActions
-        });
+        result.sections.push({ id: sectionId, name: section.name, actions: sectionActions });
       }
     });
 

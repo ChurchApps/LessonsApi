@@ -19,15 +19,7 @@ export class GeoHelper {
     for (const ip of pending) {
       try {
         const resp = await Axios.get(baseUrl + ip);
-        const detail: IpDetail = {
-          ipAddress: resp.data.ip,
-          city: resp.data.city,
-          state: resp.data.state_prov,
-          country: resp.data.country_name,
-          isp: resp.data.isp,
-          lat: parseFloat(resp.data.latitude),
-          lon: parseFloat(resp.data.longitude)
-        };
+        const detail: IpDetail = { ipAddress: resp.data.ip, city: resp.data.city, state: resp.data.state_prov, country: resp.data.country_name, isp: resp.data.isp, lat: parseFloat(resp.data.latitude), lon: parseFloat(resp.data.longitude) };
         await Repositories.getCurrent().ipDetails.save(detail);
         // small delay to avoid hammering the API
         await new Promise(r => setTimeout(r, 200));

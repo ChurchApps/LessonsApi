@@ -104,12 +104,7 @@ export class TranscodeHelper {
 
     const thumbPattern = destFile.replace(".webm", "thumb-{count}");
 
-    const params = {
-      PipelineId: Environment.transcodePipeline,
-      OutputKeyPrefix: destPath,
-      Input: { Key: sourcePath },
-      Outputs: [{ Key: destFile, PresetId: Environment.transcodePreset, ThumbnailPattern: thumbPattern }]
-    };
+    const params = { PipelineId: Environment.transcodePipeline, OutputKeyPrefix: destPath, Input: { Key: sourcePath }, Outputs: [{ Key: destFile, PresetId: Environment.transcodePreset, ThumbnailPattern: thumbPattern }] };
 
     const encoder = this.getEncoder();
     const command = new CreateJobCommand(params);
