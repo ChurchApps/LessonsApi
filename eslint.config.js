@@ -1,8 +1,8 @@
-const typescriptEslint = require("@typescript-eslint/eslint-plugin");
-const tsParser = require("@typescript-eslint/parser");
-const unusedImports = require("eslint-plugin-unused-imports");
+import tsPlugin from "@typescript-eslint/eslint-plugin";
+import tsParser from "@typescript-eslint/parser";
+import unusedImports from "eslint-plugin-unused-imports";
 
-module.exports = [
+export default [
   {
     ignores: ["node_modules/", "dist/", "build/", ".next/", "coverage/", "*.config.js"]
   },
@@ -16,7 +16,7 @@ module.exports = [
       }
     },
     plugins: {
-      "@typescript-eslint": typescriptEslint,
+      "@typescript-eslint": tsPlugin,
       "unused-imports": unusedImports
     },
     rules: {

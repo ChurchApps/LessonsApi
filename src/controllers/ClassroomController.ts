@@ -34,12 +34,7 @@ export class ClassroomController extends LessonsBaseController {
             let seconds = video.seconds;
             const loopVideo = video.loopVideo ? true : false;
             if (!seconds || seconds === 0 || loopVideo) seconds = 3600;
-            itemFiles.push({
-              name: video.name,
-              url: resolution === "1080" ? video.play1080 : video.play720,
-              seconds,
-              loopVideo: video.loopVideo
-            });
+            itemFiles.push({ name: video.name, url: resolution === "1080" ? video.play1080 : video.play720, seconds, loopVideo: video.loopVideo });
           }
         } else {
           const files: any[] = PlaylistHelper.getBestFiles(a, availableFiles);
@@ -84,12 +79,7 @@ export class ClassroomController extends LessonsBaseController {
       const classrooms = classroomIds.length > 0 ? await this.repositories.classroom.loadByIds(churchId, classroomIds) : await this.repositories.classroom.loadByChurchId(churchId);
       const result = { treeLabels: ["Classroom"], playlists: [] };
       classrooms.forEach(c => {
-        result.playlists.push({
-          id: c.id,
-          name: c.name,
-          image: "https://lessons.church/images/og-image.png",
-          apiUrl: "https://api.lessons.church/classrooms/playlistNew/" + c.id
-        });
+        result.playlists.push({ id: c.id, name: c.name, image: "https://lessons.church/images/og-image.png", apiUrl: "https://api.lessons.church/classrooms/playlistNew/" + c.id });
       });
       return result;
     });
@@ -157,13 +147,7 @@ export class ClassroomController extends LessonsBaseController {
 
       const result = { treeLabels: ["Classroom"], playlists: [] };
       classRooms.forEach(c => {
-        result.playlists.push({
-          id: c.id,
-          name: c.name,
-          description: "",
-          image: "https://lessons.church/images/og-image.png",
-          apiUrl: "https://api.lessons.church/classrooms/playlistNew/" + c.id
-        });
+        result.playlists.push({ id: c.id, name: c.name, description: "", image: "https://lessons.church/images/og-image.png", apiUrl: "https://api.lessons.church/classrooms/playlistNew/" + c.id });
       });
 
       return result;

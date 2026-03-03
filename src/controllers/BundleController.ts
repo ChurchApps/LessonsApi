@@ -88,11 +88,7 @@ export class BundleController extends LessonsBaseController {
         console.log(`Cleared stuck bundle ${bundle.id} from queue`);
       }
 
-      return {
-        clearedCount: stuckBundles.length,
-        clearedBundleIds: stuckBundles.map(b => b.id),
-        timestamp: new Date().toISOString()
-      };
+      return { clearedCount: stuckBundles.length, clearedBundleIds: stuckBundles.map(b => b.id), timestamp: new Date().toISOString() };
     });
   }
 
@@ -152,11 +148,7 @@ export class BundleController extends LessonsBaseController {
           rawConnectionString: connectionString ? connectionString.replace(/:[^:@]*@/, ":***@") : "NOT_SET"
         };
       } catch (error) {
-        return {
-          error: "Failed to get connection debug info",
-          message: (error as any).message,
-          timestamp: new Date().toISOString()
-        };
+        return { error: "Failed to get connection debug info", message: (error as any).message, timestamp: new Date().toISOString() };
       }
     });
   }

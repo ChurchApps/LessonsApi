@@ -10,12 +10,7 @@ export class HealthController {
 
   @httpGet("/")
   public async root(req: express.Request, res: express.Response): Promise<void> {
-    res.status(200).json({
-      name: "LessonsApi",
-      version: "1.0.0",
-      status: "running",
-      timestamp: new Date().toISOString()
-    });
+    res.status(200).json({ name: "LessonsApi", version: "1.0.0", status: "running", timestamp: new Date().toISOString() });
   }
 
   @httpGet("/favicon.ico")
