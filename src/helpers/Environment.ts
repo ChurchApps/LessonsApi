@@ -1,6 +1,9 @@
 import fs from "fs";
 import path from "path";
+import { fileURLToPath } from "url";
 import { AwsHelper, EnvironmentBase } from "@churchapps/apihelper";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export class Environment extends EnvironmentBase {
   static transcodePipeline: string;
