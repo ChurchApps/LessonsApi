@@ -1,12 +1,12 @@
-const { configure } = require("@codegenie/serverless-express");
+import { configure } from "@codegenie/serverless-express";
+import { init } from "./dist/App.js";
+import { Pool } from "@churchapps/apihelper";
+import { TranscodeHelper } from "./dist/helpers/TranscodeHelper.js";
+import { Environment } from "./dist/helpers/Environment.js";
+import { ZipHelper } from "./dist/helpers/ZipHelper.js";
+import { GeoHelper } from "./dist/helpers/GeoHelper.js";
 
 let serverlessExpress;
-const { init } = require("./dist/App");
-const { Pool } = require("@churchapps/apihelper");
-const { TranscodeHelper } = require("./dist/helpers/TranscodeHelper");
-const { Environment } = require("./dist/helpers/Environment");
-const { ZipHelper } = require("./dist/helpers/ZipHelper");
-const { GeoHelper } = require("./dist/helpers/GeoHelper");
 
 const checkPool = async () => {
   if (!Environment.connectionString) {
@@ -15,7 +15,7 @@ const checkPool = async () => {
   }
 };
 
-const universal = async (event, context) => {
+export const universal = async (event, context) => {
   try {
     await checkPool();
 
@@ -50,12 +50,12 @@ const universal = async (event, context) => {
   }
 };
 
-const videoPingback = async (event, _context) => {
+export const videoPingback = async (event, _context) => {
   await checkPool();
   await TranscodeHelper.handlePingback(event);
 };
 
-const zipBundles = async (event, context) => {
+export const zipBundles = async (event, context) => {
   const startTime = Date.now();
   console.log("Lambda zipBundles invoked", {
     requestId: context.awsRequestId,
@@ -66,7 +66,7 @@ const zipBundles = async (event, context) => {
     await checkPool();
 
     // Get initial queue depth for metrics
-    const { Repositories } = require("./dist/repositories/Repositories");
+    const { Repositories } = await import("./dist/repositories/Repositories.js");
     const initialPending = await Repositories.getCurrent().bundle.loadPendingUpdate(50);
     console.log(`Initial queue depth: ${initialPending.length}`);
 
@@ -118,7 +118,3 @@ const zipBundles = async (event, context) => {
     };
   }
 };
-
-module.exports.universal = universal;
-module.exports.videoPingback = videoPingback;
-module.exports.zipBundles = zipBundles;
