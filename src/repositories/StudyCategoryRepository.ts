@@ -1,4 +1,4 @@
-import { DB } from "@churchapps/apihelper";
+import { getDb } from "../db";
 import { StudyCategory } from "../models";
 import { UniqueIdHelper } from "../helpers";
 
@@ -10,32 +10,34 @@ export class StudyCategoryRepository {
 
   public async create(studyCategory: StudyCategory) {
     studyCategory.id = UniqueIdHelper.shortId();
-    const sql = "INSERT INTO studyCategories (id, programId, studyId, categoryName, sort) VALUES (?, ?, ?, ?, ?);";
-    const params = [studyCategory.id, studyCategory.programId, studyCategory.studyId, studyCategory.categoryName, studyCategory.sort];
-    await DB.query(sql, params);
+    await getDb().insertInto("studyCategories").values({
+      id: studyCategory.id,
+      programId: studyCategory.programId,
+      studyId: studyCategory.studyId,
+      categoryName: studyCategory.categoryName,
+      sort: studyCategory.sort
+    }).execute();
     return studyCategory;
   }
 
   public async update(studyCategory: StudyCategory) {
-    const sql = "UPDATE studyCategories SET studyId=?, categoryName=?, sort=? WHERE id=?";
-    const params = [studyCategory.studyId, studyCategory.categoryName, studyCategory.sort, studyCategory.id];
-    await DB.query(sql, params);
+    await getDb().updateTable("studyCategories").set({ studyId: studyCategory.studyId, categoryName: studyCategory.categoryName, sort: studyCategory.sort }).where("id", "=", studyCategory.id).execute();
     return studyCategory;
   }
 
-  public loadByCategoryName(programId: string, categoryName: string): Promise<StudyCategory[]> {
-    return DB.query("SELECT * FROM studyCategories WHERE programId=? AND categoryName=? ORDER BY sort", [programId, categoryName]) as Promise<StudyCategory[]>;
+  public async loadByCategoryName(programId: string, categoryName: string): Promise<StudyCategory[]> {
+    return await getDb().selectFrom("studyCategories").selectAll().where("programId", "=", programId).where("categoryName", "=", categoryName).orderBy("sort").execute() as StudyCategory[];
   }
 
-  public loadPublicByProgram(programId: string): Promise<StudyCategory[]> {
-    return DB.query("SELECT * FROM studyCategories WHERE programId=? ORDER BY sort", [programId]) as Promise<StudyCategory[]>;
+  public async loadPublicByProgram(programId: string): Promise<StudyCategory[]> {
+    return await getDb().selectFrom("studyCategories").selectAll().where("programId", "=", programId).orderBy("sort").execute() as StudyCategory[];
   }
 
-  public loadCategoryNames(programId: string): Promise<StudyCategory[]> {
-    return DB.query("SELECT categoryName FROM studyCategories WHERE programId=? GROUP BY categoryName ORDER BY categoryName", [programId]) as Promise<StudyCategory[]>;
+  public async loadCategoryNames(programId: string): Promise<StudyCategory[]> {
+    return await getDb().selectFrom("studyCategories").select("categoryName").where("programId", "=", programId).groupBy("categoryName").orderBy("categoryName").execute() as StudyCategory[];
   }
 
-  public delete(churchId: string, id: string): Promise<any> {
-    return DB.query("DELETE FROM studyCategories WHERE id=?", [id]) as Promise<any>;
+  public async delete(churchId: string, id: string): Promise<any> {
+    return await getDb().deleteFrom("studyCategories").where("id", "=", id).execute();
   }
 }

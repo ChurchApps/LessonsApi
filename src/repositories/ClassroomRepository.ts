@@ -1,4 +1,4 @@
-import { ArrayHelper, DB } from "@churchapps/apihelper";
+import { getDb } from "../db";
 import { Classroom } from "../models";
 import { UniqueIdHelper } from "../helpers";
 
@@ -10,38 +10,45 @@ export class ClassroomRepository {
 
   public async create(classroom: Classroom) {
     classroom.id = UniqueIdHelper.shortId();
-    const sql = "INSERT INTO classrooms (id, churchId, name, recentGroupId, upcomingGroupId) VALUES (?, ?, ?, ?, ?);";
-    const params = [classroom.id, classroom.churchId, classroom.name, classroom.recentGroupId, classroom.upcomingGroupId];
-    await DB.query(sql, params);
+    await getDb().insertInto("classrooms").values({
+      id: classroom.id,
+      churchId: classroom.churchId,
+      name: classroom.name,
+      recentGroupId: classroom.recentGroupId,
+      upcomingGroupId: classroom.upcomingGroupId
+    }).execute();
     return classroom;
   }
 
   public async update(classroom: Classroom) {
-    const sql = "UPDATE classrooms SET name=?, recentGroupId=?, upcomingGroupId=? WHERE id=? AND churchId=?";
-    const params = [classroom.name, classroom.recentGroupId, classroom.upcomingGroupId, classroom.id, classroom.churchId];
-    await DB.query(sql, params);
+    await getDb().updateTable("classrooms").set({ name: classroom.name, recentGroupId: classroom.recentGroupId, upcomingGroupId: classroom.upcomingGroupId }).where("id", "=", classroom.id).where("churchId", "=", classroom.churchId).execute();
     return classroom;
   }
 
-  public loadForPerson(churchId: string, groupIds: string[]): Promise<Classroom[]> {
-    const sql = "SELECT * FROM classrooms WHERE churchId=? AND (recentGroupId IN (?) OR upcomingGroupId IN (?)) ORDER BY name";
-    return DB.query(sql, [churchId, groupIds, groupIds]) as Promise<Classroom[]>;
+  public async loadForPerson(churchId: string, groupIds: string[]): Promise<Classroom[]> {
+    return await getDb().selectFrom("classrooms").selectAll()
+      .where("churchId", "=", churchId)
+      .where((eb) => eb.or([
+        eb("recentGroupId", "in", groupIds),
+        eb("upcomingGroupId", "in", groupIds)
+      ]))
+      .orderBy("name")
+      .execute() as Classroom[];
   }
 
-  public loadByIds(churchId: string, ids: string[]): Promise<Classroom[]> {
-    const sql = "SELECT * FROM classrooms WHERE churchId=? AND id IN (" + ArrayHelper.fillArray("?", ids.length) + ")";
-    return DB.query(sql, [churchId].concat(ids)) as Promise<Classroom[]>;
+  public async loadByIds(churchId: string, ids: string[]): Promise<Classroom[]> {
+    return await getDb().selectFrom("classrooms").selectAll().where("churchId", "=", churchId).where("id", "in", ids).execute() as Classroom[];
   }
 
-  public loadByChurchId(churchId: string): Promise<Classroom[]> {
-    return DB.query("SELECT * FROM classrooms WHERE churchId=? ORDER BY name", [churchId]) as Promise<Classroom[]>;
+  public async loadByChurchId(churchId: string): Promise<Classroom[]> {
+    return await getDb().selectFrom("classrooms").selectAll().where("churchId", "=", churchId).orderBy("name").execute() as Classroom[];
   }
 
-  public load(id: string): Promise<Classroom> {
-    return DB.queryOne("SELECT * FROM classrooms WHERE id=?", [id]) as Promise<Classroom>;
+  public async load(id: string): Promise<Classroom> {
+    return await getDb().selectFrom("classrooms").selectAll().where("id", "=", id).executeTakeFirst() as Classroom;
   }
 
-  public delete(churchId: string, id: string): Promise<any> {
-    return DB.query("DELETE FROM classrooms WHERE id=? AND churchId=?", [id, churchId]) as Promise<any>;
+  public async delete(churchId: string, id: string): Promise<any> {
+    return await getDb().deleteFrom("classrooms").where("id", "=", id).where("churchId", "=", churchId).execute();
   }
 }

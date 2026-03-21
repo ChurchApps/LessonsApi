@@ -1,4 +1,4 @@
-import { DB } from "@churchapps/apihelper";
+import { getDb } from "../db";
 import { Customization } from "../models";
 import { UniqueIdHelper } from "../helpers";
 
@@ -10,32 +10,40 @@ export class CustomizationRepository {
 
   public async create(customization: Customization) {
     customization.id = UniqueIdHelper.shortId();
-    const sql = "INSERT INTO customizations (id, churchId, venueId, classroomId, contentType, contentId, action, actionContent) VALUES (?, ?, ?, ?, ?, ?, ?, ?);";
-    const params = [
-      customization.id, customization.churchId, customization.venueId, customization.classroomId, customization.contentType, customization.contentId, customization.action, customization.actionContent
-    ];
-    await DB.query(sql, params);
+    await getDb().insertInto("customizations").values({
+      id: customization.id,
+      churchId: customization.churchId,
+      venueId: customization.venueId,
+      classroomId: customization.classroomId,
+      contentType: customization.contentType,
+      contentId: customization.contentId,
+      action: customization.action,
+      actionContent: customization.actionContent
+    }).execute();
     return customization;
   }
 
   public async update(customization: Customization) {
-    const sql = "UPDATE customizations SET venueId=?, classroomId=?, contentType=?, contentId=?, action=?, actionContent=? WHERE id=? AND churchId=?";
-    const params = [
-      customization.venueId, customization.classroomId, customization.contentType, customization.contentId, customization.action, customization.actionContent, customization.id, customization.churchId
-    ];
-    await DB.query(sql, params);
+    await getDb().updateTable("customizations").set({
+      venueId: customization.venueId,
+      classroomId: customization.classroomId,
+      contentType: customization.contentType,
+      contentId: customization.contentId,
+      action: customization.action,
+      actionContent: customization.actionContent
+    }).where("id", "=", customization.id).where("churchId", "=", customization.churchId).execute();
     return customization;
   }
 
-  public loadByVenueId(churchId: string, venueId: string): Promise<Customization[]> {
-    return DB.query("SELECT * FROM customizations WHERE churchId=? and venueId=?", [churchId, venueId]) as Promise<Customization[]>;
+  public async loadByVenueId(churchId: string, venueId: string): Promise<Customization[]> {
+    return await getDb().selectFrom("customizations").selectAll().where("churchId", "=", churchId).where("venueId", "=", venueId).execute() as Customization[];
   }
 
-  public load(churchId: string, id: string): Promise<Customization> {
-    return DB.queryOne("SELECT * FROM customizations WHERE id=? and churchId=?", [id, churchId]) as Promise<Customization>;
+  public async load(churchId: string, id: string): Promise<Customization> {
+    return await getDb().selectFrom("customizations").selectAll().where("id", "=", id).where("churchId", "=", churchId).executeTakeFirst() as Customization;
   }
 
-  public delete(churchId: string, id: string): Promise<any> {
-    return DB.query("DELETE FROM customizations WHERE id=? AND churchId=?", [id, churchId]) as Promise<any>;
+  public async delete(churchId: string, id: string): Promise<any> {
+    return await getDb().deleteFrom("customizations").where("id", "=", id).where("churchId", "=", churchId).execute();
   }
 }

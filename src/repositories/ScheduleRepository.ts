@@ -1,4 +1,5 @@
-import { DB } from "@churchapps/apihelper";
+import { sql } from "kysely";
+import { getDb } from "../db";
 import { Schedule } from "../models";
 import { UniqueIdHelper } from "../helpers";
 
@@ -10,40 +11,57 @@ export class ScheduleRepository {
 
   public async create(schedule: Schedule) {
     schedule.id = UniqueIdHelper.shortId();
-    const sql = "INSERT INTO schedules (id, churchId, classroomId, scheduledDate, externalProviderId, programId, studyId, lessonId, venueId, displayName) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
-    const params = [
-      schedule.id, schedule.churchId, schedule.classroomId, schedule.scheduledDate, schedule.externalProviderId, schedule.programId, schedule.studyId, schedule.lessonId, schedule.venueId, schedule.displayName
-    ];
-    await DB.query(sql, params);
+    await getDb().insertInto("schedules").values({
+      id: schedule.id,
+      churchId: schedule.churchId,
+      classroomId: schedule.classroomId,
+      scheduledDate: schedule.scheduledDate,
+      externalProviderId: schedule.externalProviderId,
+      programId: schedule.programId,
+      studyId: schedule.studyId,
+      lessonId: schedule.lessonId,
+      venueId: schedule.venueId,
+      displayName: schedule.displayName
+    }).execute();
     return schedule;
   }
 
   public async update(schedule: Schedule) {
-    const sql = "UPDATE schedules SET classroomId=?, scheduledDate=?, externalProviderId=?, programId=?, studyId=?, lessonId=?, venueId=?, displayName=? WHERE id=? AND churchId=?";
-    const params = [
-      schedule.classroomId, schedule.scheduledDate, schedule.externalProviderId, schedule.programId, schedule.studyId, schedule.lessonId, schedule.venueId, schedule.displayName, schedule.id, schedule.churchId
-    ];
-    await DB.query(sql, params);
+    await getDb().updateTable("schedules").set({
+      classroomId: schedule.classroomId,
+      scheduledDate: schedule.scheduledDate,
+      externalProviderId: schedule.externalProviderId,
+      programId: schedule.programId,
+      studyId: schedule.studyId,
+      lessonId: schedule.lessonId,
+      venueId: schedule.venueId,
+      displayName: schedule.displayName
+    }).where("id", "=", schedule.id).where("churchId", "=", schedule.churchId).execute();
     return schedule;
   }
 
-  public loadByChurchIdClassroomId(churchId: string, classroomId: string): Promise<Schedule[]> {
-    return DB.query("SELECT * FROM schedules WHERE churchId=? AND classroomId=? ORDER BY scheduledDate", [churchId, classroomId]) as Promise<Schedule[]>;
+  public async loadByChurchIdClassroomId(churchId: string, classroomId: string): Promise<Schedule[]> {
+    return await getDb().selectFrom("schedules").selectAll().where("churchId", "=", churchId).where("classroomId", "=", classroomId).orderBy("scheduledDate").execute() as Schedule[];
   }
 
-  public loadByClassroomId(classroomId: string): Promise<Schedule[]> {
-    return DB.query("SELECT * FROM schedules WHERE classroomId=? ORDER BY scheduledDate", [classroomId]) as Promise<Schedule[]>;
+  public async loadByClassroomId(classroomId: string): Promise<Schedule[]> {
+    return await getDb().selectFrom("schedules").selectAll().where("classroomId", "=", classroomId).orderBy("scheduledDate").execute() as Schedule[];
   }
 
-  public loadCurrent(classroomId: string, date: Date): Promise<Schedule> {
-    return DB.queryOne("SELECT * FROM schedules WHERE classroomId=? AND scheduledDate > (? - INTERVAL 1 DAY) ORDER BY scheduledDate LIMIT 1", [classroomId, date]);
+  public async loadCurrent(classroomId: string, date: Date): Promise<Schedule> {
+    const result = await sql<any>`
+      SELECT * FROM schedules
+      WHERE classroomId=${classroomId} AND scheduledDate > (${date} - INTERVAL 1 DAY)
+      ORDER BY scheduledDate LIMIT 1
+    `.execute(getDb());
+    return (result.rows[0] ?? null) as Schedule;
   }
 
-  public load(id: string): Promise<Schedule> {
-    return DB.queryOne("SELECT * FROM schedules WHERE id=?", [id]) as Promise<Schedule>;
+  public async load(id: string): Promise<Schedule> {
+    return await getDb().selectFrom("schedules").selectAll().where("id", "=", id).executeTakeFirst() as Schedule;
   }
 
-  public delete(churchId: string, id: string): Promise<any> {
-    return DB.query("DELETE FROM schedules WHERE id=? AND churchId=?", [id, churchId]) as Promise<any>;
+  public async delete(churchId: string, id: string): Promise<any> {
+    return await getDb().deleteFrom("schedules").where("id", "=", id).where("churchId", "=", churchId).execute();
   }
 }

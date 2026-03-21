@@ -1,6 +1,5 @@
 import { configure } from "@codegenie/serverless-express";
 import { init } from "./dist/App.js";
-import { Pool } from "@churchapps/apihelper";
 import { TranscodeHelper } from "./dist/helpers/TranscodeHelper.js";
 import { Environment } from "./dist/helpers/Environment.js";
 import { ZipHelper } from "./dist/helpers/ZipHelper.js";
@@ -8,16 +7,15 @@ import { GeoHelper } from "./dist/helpers/GeoHelper.js";
 
 let serverlessExpress;
 
-const checkPool = async () => {
+const checkInit = async () => {
   if (!Environment.connectionString) {
     await Environment.init(process.env.APP_ENV);
-    Pool.initPool();
   }
 };
 
 export const universal = async (event, context) => {
   try {
-    await checkPool();
+    await checkInit();
 
     // Initialize the handler only once
     if (!serverlessExpress) {
@@ -51,7 +49,7 @@ export const universal = async (event, context) => {
 };
 
 export const videoPingback = async (event, _context) => {
-  await checkPool();
+  await checkInit();
   await TranscodeHelper.handlePingback(event);
 };
 
@@ -63,7 +61,7 @@ export const zipBundles = async (event, context) => {
   });
 
   try {
-    await checkPool();
+    await checkInit();
 
     // Get initial queue depth for metrics
     const { Repositories } = await import("./dist/repositories/Repositories.js");

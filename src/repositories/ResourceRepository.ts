@@ -1,4 +1,4 @@
-import { DB } from "@churchapps/apihelper";
+import { getDb } from "../db";
 import { Resource } from "../models";
 import { UniqueIdHelper } from "../helpers";
 
@@ -10,45 +10,61 @@ export class ResourceRepository {
 
   public async create(resource: Resource) {
     resource.id = UniqueIdHelper.shortId();
-    const sql = "INSERT INTO resources (id, churchId, name, category, bundleId, loopVideo) VALUES (?, ?, ?, ?, ?, ?);";
-    const params = [resource.id, resource.churchId, resource.name, resource.category, resource.bundleId, resource.loopVideo];
-    await DB.query(sql, params);
+    await getDb().insertInto("resources").values({
+      id: resource.id,
+      churchId: resource.churchId,
+      name: resource.name,
+      category: resource.category,
+      bundleId: resource.bundleId,
+      loopVideo: resource.loopVideo
+    }).execute();
     return resource;
   }
 
   public async update(resource: Resource) {
-    const sql = "UPDATE resources SET name=?, category=?, bundleId=?, loopVideo=? WHERE id=? AND churchId=?";
-    const params = [resource.name, resource.category, resource.bundleId, resource.loopVideo, resource.id, resource.churchId];
-    await DB.query(sql, params);
+    await getDb().updateTable("resources").set({ name: resource.name, category: resource.category, bundleId: resource.bundleId, loopVideo: resource.loopVideo }).where("id", "=", resource.id).where("churchId", "=", resource.churchId).execute();
     return resource;
   }
 
-  public loadByContentTypeId(churchId: string, contentType: string, contentId: string): Promise<Resource[]> {
-    return DB.query("SELECT * FROM resources WHERE bundleId in (SELECT id from bundles WHERE churchId=? AND contentType=? AND contentId=?) order by name", [churchId, contentType, contentId]) as Promise<Resource[]>;
+  public async loadByContentTypeId(churchId: string, contentType: string, contentId: string): Promise<Resource[]> {
+    return await getDb().selectFrom("resources").selectAll()
+      .where("bundleId", "in", getDb().selectFrom("bundles").select("id")
+        .where("churchId", "=", churchId).where("contentType", "=", contentType).where("contentId", "=", contentId))
+      .orderBy("name")
+      .execute() as Resource[];
   }
 
-  public loadByBundleId(churchId: string, bundleId: string): Promise<Resource[]> {
-    return DB.query("SELECT * FROM resources WHERE churchId=? AND bundleId=? order by name", [churchId, bundleId]) as Promise<Resource[]>;
+  public async loadByBundleId(churchId: string, bundleId: string): Promise<Resource[]> {
+    return await getDb().selectFrom("resources").selectAll().where("churchId", "=", churchId).where("bundleId", "=", bundleId).orderBy("name").execute() as Resource[];
   }
 
-  public loadPublicForLesson(lessonId: string): Promise<Resource[]> {
-    return DB.query("SELECT * FROM resources WHERE id in (SELECT resourceId from actions WHERE lessonId=?)", [lessonId]) as Promise<Resource[]>;
+  public async loadPublicForLesson(lessonId: string): Promise<Resource[]> {
+    return await getDb().selectFrom("resources").selectAll()
+      .where("id", "in", getDb().selectFrom("actions").select("resourceId").where("lessonId", "=", lessonId))
+      .execute() as Resource[];
   }
 
-  public load(churchId: string, id: string): Promise<Resource> {
-    return DB.queryOne("SELECT * FROM resources WHERE id=? and churchId=?", [id, churchId]) as Promise<Resource>;
+  public async load(churchId: string, id: string): Promise<Resource> {
+    return await getDb().selectFrom("resources").selectAll().where("id", "=", id).where("churchId", "=", churchId).executeTakeFirst() as Resource;
   }
 
-  public loadWithoutChurchId(id: string): Promise<Resource> {
-    return DB.queryOne("SELECT * FROM resources WHERE id=?", [id]) as Promise<Resource>;
+  public async loadWithoutChurchId(id: string): Promise<Resource> {
+    return await getDb().selectFrom("resources").selectAll().where("id", "=", id).executeTakeFirst() as Resource;
   }
 
-  public loadNeedingWebm(): Promise<any[]> {
-    const sql = "select r.churchId, r.id, r.name, f.contentPath" + " from files f" + " inner join variants v on v.fileId=f.id" + " inner join resources r on r.id=v.resourceId" + " left outer join variants v2 on v2.resourceId=v.resourceId and v2.name='WEBM'" + " where f.contentPath like '%.mp4%' and v2.id is null";
-    return DB.query(sql, []) as Promise<Resource[]>;
+  public async loadNeedingWebm(): Promise<any[]> {
+    return await getDb().selectFrom("files as f")
+      .innerJoin("variants as v", "v.fileId", "f.id")
+      .innerJoin("resources as r", "r.id", "v.resourceId")
+      .leftJoin("variants as v2", (join) =>
+        join.onRef("v2.resourceId", "=", "v.resourceId").on("v2.name", "=", "WEBM"))
+      .select(["r.churchId", "r.id", "r.name", "f.contentPath"])
+      .where("f.contentPath", "like", "%.mp4%")
+      .where("v2.id", "is", null)
+      .execute() as any[];
   }
 
-  public delete(churchId: string, id: string): Promise<any> {
-    return DB.query("DELETE FROM resources WHERE id=? AND churchId=?", [id, churchId]) as Promise<any>;
+  public async delete(churchId: string, id: string): Promise<any> {
+    return await getDb().deleteFrom("resources").where("id", "=", id).where("churchId", "=", churchId).execute();
   }
 }

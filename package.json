@@ -18,8 +18,8 @@
     "fix-esm": "node tools/fix-esm-imports.js",
     "build": "npm-run-all clean lint tsc fix-esm",
     "build-fast": "npm-run-all clean tsc fix-esm",
-    "dev:ts": "ts-node src/index.ts",
-    "dev": "nodemon --watch src -e ts,ejs --exec \"ts-node src/index.ts\"",
+    "dev:ts": "tsx src/index.ts",
+    "dev": "nodemon --watch src -e ts,ejs --exec \"tsx src/index.ts\"",
     "dev:start": "npm-run-all build start",
     "dev:old": "nodemon --watch src -e ts,ejs --exec npm run dev:start",
     "start": "node .",
@@ -43,6 +43,7 @@
     "fs-extra": "^11.3.0",
     "inversify": "^6.2.2",
     "inversify-express-utils": "^6.5.0",
+    "kysely": "^0.28.14",
     "mysql2": "^3.14.1",
     "reflect-metadata": "^0.2.2"
   },
@@ -62,6 +63,7 @@
     "serverless": "^3.38.0",
     "serverless-plugin-utils": "^0.2.0",
     "ts-node": "^10.9.2",
+    "tsx": "^4.21.0",
     "typescript": "^5.8.3"
   },
   "engines": {

@@ -1,4 +1,4 @@
-import { DB } from "@churchapps/apihelper";
+import { getDb } from "../db";
 import { Role } from "../models";
 import { UniqueIdHelper } from "../helpers";
 
@@ -10,32 +10,28 @@ export class RoleRepository {
 
   public async create(role: Role) {
     role.id = UniqueIdHelper.shortId();
-    const sql = "INSERT INTO roles (id, churchId, lessonId, sectionId, name, sort) VALUES (?, ?, ?, ?, ?, ?);";
-    const params = [role.id, role.churchId, role.lessonId, role.sectionId, role.name, role.sort];
-    await DB.query(sql, params);
+    await getDb().insertInto("roles").values({ id: role.id, churchId: role.churchId, lessonId: role.lessonId, sectionId: role.sectionId, name: role.name, sort: role.sort }).execute();
     return role;
   }
 
   public async update(role: Role) {
-    const sql = "UPDATE roles SET lessonId=?, sectionId=?, name=?, sort=? WHERE id=? AND churchId=?";
-    const params = [role.lessonId, role.sectionId, role.name, role.sort, role.id, role.churchId];
-    await DB.query(sql, params);
+    await getDb().updateTable("roles").set({ lessonId: role.lessonId, sectionId: role.sectionId, name: role.name, sort: role.sort }).where("id", "=", role.id).where("churchId", "=", role.churchId).execute();
     return role;
   }
 
-  public loadByLessonId(lessonId: string): Promise<Role[]> {
-    return DB.query("SELECT * FROM roles WHERE lessonId=? ORDER BY sort", [lessonId]) as Promise<Role[]>;
+  public async loadByLessonId(lessonId: string): Promise<Role[]> {
+    return await getDb().selectFrom("roles").selectAll().where("lessonId", "=", lessonId).orderBy("sort").execute() as Role[];
   }
 
-  public loadPublicAll(): Promise<Role[]> {
-    return DB.query("SELECT * FROM roles ORDER BY sort", []) as Promise<Role[]>;
+  public async loadPublicAll(): Promise<Role[]> {
+    return await getDb().selectFrom("roles").selectAll().orderBy("sort").execute() as Role[];
   }
 
-  public load(id: string): Promise<Role> {
-    return DB.queryOne("SELECT * FROM roles WHERE id=?", [id]) as Promise<Role>;
+  public async load(id: string): Promise<Role> {
+    return await getDb().selectFrom("roles").selectAll().where("id", "=", id).executeTakeFirst() as Role;
   }
 
-  public delete(churchId: string, id: string): Promise<any> {
-    return DB.query("DELETE FROM roles WHERE id=? AND churchId=?", [id, churchId]) as Promise<any>;
+  public async delete(churchId: string, id: string): Promise<any> {
+    return await getDb().deleteFrom("roles").where("id", "=", id).where("churchId", "=", churchId).execute();
   }
 }

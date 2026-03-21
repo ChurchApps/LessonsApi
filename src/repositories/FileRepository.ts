@@ -1,7 +1,7 @@
-import { DB } from "@churchapps/apihelper";
+import { sql } from "kysely";
+import { getDb } from "../db";
 import { File } from "../models";
 import { UniqueIdHelper } from "../helpers";
-import { ArrayHelper } from "@churchapps/apihelper";
 
 export class FileRepository {
   public save(file: File) {
@@ -11,51 +11,57 @@ export class FileRepository {
 
   public async create(file: File) {
     file.id = UniqueIdHelper.shortId();
-    const sql = "INSERT INTO files (id, churchId, fileName, contentPath, fileType, size, seconds, dateModified, thumbPath) VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), ?);";
-    const params = [
-      file.id, file.churchId, file.fileName, file.contentPath, file.fileType, file.size, file.seconds, file.thumbPath
-    ];
-    await DB.query(sql, params);
+    await sql`INSERT INTO files (id, churchId, fileName, contentPath, fileType, size, seconds, dateModified, thumbPath)
+      VALUES (${file.id}, ${file.churchId}, ${file.fileName}, ${file.contentPath}, ${file.fileType}, ${file.size}, ${file.seconds}, NOW(), ${file.thumbPath})`.execute(getDb());
     return file;
   }
 
   public async update(file: File) {
-    const sql = "UPDATE files SET fileName=?, contentPath=?, fileType=?, size=?, seconds=?, dateModified=?, thumbPath=? WHERE id=? AND churchId=?";
-    const params = [
-      file.fileName, file.contentPath, file.fileType, file.size, file.seconds, file.dateModified, file.thumbPath, file.id, file.churchId
-    ];
-    await DB.query(sql, params);
+    await getDb().updateTable("files").set({
+      fileName: file.fileName,
+      contentPath: file.contentPath,
+      fileType: file.fileType,
+      size: file.size,
+      seconds: file.seconds,
+      dateModified: file.dateModified,
+      thumbPath: file.thumbPath
+    }).where("id", "=", file.id).where("churchId", "=", file.churchId).execute();
     return file;
   }
 
-  public load(churchId: string, id: string): Promise<File> {
-    return DB.queryOne("SELECT * FROM files WHERE id=? AND churchId=?", [id, churchId]) as Promise<File>;
+  public async load(churchId: string, id: string): Promise<File> {
+    return await getDb().selectFrom("files").selectAll().where("id", "=", id).where("churchId", "=", churchId).executeTakeFirst() as File;
   }
 
-  public loadPublicByIds(ids: string[]): Promise<File[]> {
-    const sql = "SELECT * FROM files WHERE id IN (" + ArrayHelper.fillArray("?", ids.length) + ")";
-    return DB.query(sql, ids) as Promise<File[]>;
+  public async loadPublicByIds(ids: string[]): Promise<File[]> {
+    return await getDb().selectFrom("files").selectAll().where("id", "in", ids).execute() as File[];
   }
 
-  public loadByIds(churchId: string, ids: string[]): Promise<File[]> {
-    const sql = "SELECT * FROM files WHERE churchId=? AND id IN (" + ArrayHelper.fillArray("?", ids.length) + ")";
-    return DB.query(sql, [churchId].concat(ids)) as Promise<File[]>;
+  public async loadByIds(churchId: string, ids: string[]): Promise<File[]> {
+    return await getDb().selectFrom("files").selectAll().where("churchId", "=", churchId).where("id", "in", ids).execute() as File[];
   }
 
-  public loadForChurch(churchId: string): Promise<File[]> {
-    return DB.query("SELECT * FROM files WHERE churchId=?", [churchId]) as Promise<File[]>;
+  public async loadForChurch(churchId: string): Promise<File[]> {
+    return await getDb().selectFrom("files").selectAll().where("churchId", "=", churchId).execute() as File[];
   }
 
-  public loadAll(): Promise<File[]> {
-    return DB.query("SELECT * FROM files", []) as Promise<File[]>;
+  public async loadAll(): Promise<File[]> {
+    return await getDb().selectFrom("files").selectAll().execute() as File[];
   }
 
-  public delete(churchId: string, id: string): Promise<any> {
-    return DB.query("DELETE FROM files WHERE id=? AND churchId=?", [id, churchId]) as Promise<any>;
+  public async delete(churchId: string, id: string): Promise<any> {
+    return await getDb().deleteFrom("files").where("id", "=", id).where("churchId", "=", churchId).execute();
   }
 
-  public cleanUp(): Promise<any> {
-    const sql = "DELETE FROM files WHERE id NOT IN (" + " SELECT fileId FROM bundles where fileId is not null" + " UNION ALL" + " SELECT fileId FROM assets where fileId is not null" + " UNION ALL" + " SELECT fileId FROM variants where fileId is not null" + " )";
-    return DB.query(sql, []) as Promise<any>;
+  public async cleanUp(): Promise<any> {
+    return await sql`
+      DELETE FROM files WHERE id NOT IN (
+        SELECT fileId FROM bundles WHERE fileId IS NOT NULL
+        UNION ALL
+        SELECT fileId FROM assets WHERE fileId IS NOT NULL
+        UNION ALL
+        SELECT fileId FROM variants WHERE fileId IS NOT NULL
+      )
+    `.execute(getDb());
   }
 }

@@ -1,4 +1,4 @@
-import { DB } from "@churchapps/apihelper";
+import { getDb } from "../db";
 import { Bundle } from "../models";
 import { UniqueIdHelper } from "../helpers";
 
@@ -10,50 +10,67 @@ export class BundleRepository {
 
   public async create(bundle: Bundle) {
     bundle.id = UniqueIdHelper.shortId();
-    const sql = "INSERT INTO bundles (id, churchId, contentType, contentId, name, fileId, pendingUpdate) VALUES (?, ?, ?, ?, ?, ?, ?);";
-    const params = [bundle.id, bundle.churchId, bundle.contentType, bundle.contentId, bundle.name, bundle.fileId, bundle.pendingUpdate];
-    await DB.query(sql, params);
+    await getDb().insertInto("bundles").values({
+      id: bundle.id,
+      churchId: bundle.churchId,
+      contentType: bundle.contentType,
+      contentId: bundle.contentId,
+      name: bundle.name,
+      fileId: bundle.fileId,
+      pendingUpdate: bundle.pendingUpdate
+    }).execute();
     return bundle;
   }
 
   public async update(bundle: Bundle) {
-    const sql = "UPDATE bundles SET contentType=?, contentId=?, name=?, fileId=?, pendingUpdate=? WHERE id=? AND churchId=?";
-    const params = [bundle.contentType, bundle.contentId, bundle.name, bundle.fileId, bundle.pendingUpdate, bundle.id, bundle.churchId];
-    await DB.query(sql, params);
+    await getDb().updateTable("bundles").set({
+      contentType: bundle.contentType,
+      contentId: bundle.contentId,
+      name: bundle.name,
+      fileId: bundle.fileId,
+      pendingUpdate: bundle.pendingUpdate
+    }).where("id", "=", bundle.id).where("churchId", "=", bundle.churchId).execute();
     return bundle;
   }
 
-  public loadByContentTypeId(churchId: string, contentType: string, contentId: string): Promise<Bundle[]> {
-    return DB.query("SELECT * FROM bundles WHERE churchId=? AND contentType=? AND contentId=? order by name", [churchId, contentType, contentId]) as Promise<Bundle[]>;
+  public async loadByContentTypeId(churchId: string, contentType: string, contentId: string): Promise<Bundle[]> {
+    return await getDb().selectFrom("bundles").selectAll()
+      .where("churchId", "=", churchId).where("contentType", "=", contentType).where("contentId", "=", contentId)
+      .orderBy("name").execute() as Bundle[];
   }
 
-  public loadPendingUpdate(limit: number): Promise<Bundle[]> {
-    return DB.query("SELECT * FROM bundles WHERE pendingUpdate=1 limit " + limit.toString(), []) as Promise<Bundle[]>;
+  public async loadPendingUpdate(limit: number): Promise<Bundle[]> {
+    return await getDb().selectFrom("bundles").selectAll().where("pendingUpdate", "=", true).limit(limit).execute() as Bundle[];
   }
 
-  public loadAll(churchId: string): Promise<Bundle[]> {
-    return DB.query("SELECT * FROM bundles WHERE churchId=? order by name", [churchId]) as Promise<Bundle[]>;
+  public async loadAll(churchId: string): Promise<Bundle[]> {
+    return await getDb().selectFrom("bundles").selectAll().where("churchId", "=", churchId).orderBy("name").execute() as Bundle[];
   }
 
-  public loadAvailable(churchId: string, programId: string, studyId: string): Promise<Bundle[]> {
-    const params = [churchId, programId];
-    let sql = "SELECT * FROM labelledBundles WHERE churchId=? AND ";
+  public async loadAvailable(churchId: string, programId: string, studyId: string): Promise<Bundle[]> {
+    let query = getDb().selectFrom("labelledBundles").selectAll().where("churchId", "=", churchId);
     if (studyId) {
-      sql += "(programId=? OR studyId=?)";
-      params.push(studyId);
-    } else sql += "programId=?";
-    return DB.query(sql, params) as Promise<Bundle[]>;
+      query = query.where((eb) => eb.or([
+        eb("programId", "=", programId),
+        eb("studyId", "=", studyId)
+      ]));
+    } else {
+      query = query.where("programId", "=", programId);
+    }
+    return await query.execute() as Bundle[];
   }
 
-  public loadPublicForLesson(lessonId: string): Promise<Bundle[]> {
-    return DB.query("SELECT * FROM bundles WHERE id in (SELECT bundleId FROM resources WHERE id in (SELECT resourceId from actions WHERE lessonId=?))", [lessonId]) as Promise<Bundle[]>;
+  public async loadPublicForLesson(lessonId: string): Promise<Bundle[]> {
+    return await getDb().selectFrom("bundles").selectAll()
+      .where("id", "in", getDb().selectFrom("resources").select("bundleId")
+        .where("id", "in", getDb().selectFrom("actions").select("resourceId").where("lessonId", "=", lessonId))).execute() as Bundle[];
   }
 
-  public load(churchId: string, id: string): Promise<Bundle> {
-    return DB.queryOne("SELECT * FROM bundles WHERE id=? and churchId=?", [id, churchId]) as Promise<Bundle>;
+  public async load(churchId: string, id: string): Promise<Bundle> {
+    return await getDb().selectFrom("bundles").selectAll().where("id", "=", id).where("churchId", "=", churchId).executeTakeFirst() as Bundle;
   }
 
-  public delete(churchId: string, id: string): Promise<any> {
-    return DB.query("DELETE FROM bundles WHERE id=? AND churchId=?", [id, churchId]) as Promise<any>;
+  public async delete(churchId: string, id: string): Promise<any> {
+    return await getDb().deleteFrom("bundles").where("id", "=", id).where("churchId", "=", churchId).execute();
   }
 }

@@ -1,4 +1,4 @@
-import { DB } from "@churchapps/apihelper";
+import { getDb } from "../db";
 import { ExternalProvider } from "../models";
 import { UniqueIdHelper } from "../helpers";
 
@@ -10,32 +10,28 @@ export class ExternalProviderRepository {
 
   public async create(externalProvider: ExternalProvider) {
     externalProvider.id = UniqueIdHelper.shortId();
-    const sql = "INSERT INTO externalProviders (id, churchId, name, apiUrl) VALUES (?, ?, ?, ?);";
-    const params = [externalProvider.id, externalProvider.churchId, externalProvider.name, externalProvider.apiUrl];
-    await DB.query(sql, params);
+    await getDb().insertInto("externalProviders").values({ id: externalProvider.id, churchId: externalProvider.churchId, name: externalProvider.name, apiUrl: externalProvider.apiUrl }).execute();
     return externalProvider;
   }
 
   public async update(externalProvider: ExternalProvider) {
-    const sql = "UPDATE externalProviders SET name=?, apiUrl=? WHERE id=? AND churchId=?";
-    const params = [externalProvider.name, externalProvider.apiUrl, externalProvider.id, externalProvider.churchId];
-    await DB.query(sql, params);
+    await getDb().updateTable("externalProviders").set({ name: externalProvider.name, apiUrl: externalProvider.apiUrl }).where("id", "=", externalProvider.id).where("churchId", "=", externalProvider.churchId).execute();
     return externalProvider;
   }
 
-  public loadPublic(id: string): Promise<ExternalProvider> {
-    return DB.queryOne("SELECT * FROM externalProviders WHERE id=?", [id]) as Promise<ExternalProvider>;
+  public async loadPublic(id: string): Promise<ExternalProvider> {
+    return await getDb().selectFrom("externalProviders").selectAll().where("id", "=", id).executeTakeFirst() as ExternalProvider;
   }
 
-  public load(churchId: string, id: string): Promise<ExternalProvider> {
-    return DB.queryOne("SELECT * FROM externalProviders WHERE id=? AND churchId=?", [id, churchId]) as Promise<ExternalProvider>;
+  public async load(churchId: string, id: string): Promise<ExternalProvider> {
+    return await getDb().selectFrom("externalProviders").selectAll().where("id", "=", id).where("churchId", "=", churchId).executeTakeFirst() as ExternalProvider;
   }
 
-  public loadAll(churchId: string): Promise<ExternalProvider[]> {
-    return DB.query("SELECT * FROM externalProviders WHERE churchId=?", [churchId]) as Promise<ExternalProvider[]>;
+  public async loadAll(churchId: string): Promise<ExternalProvider[]> {
+    return await getDb().selectFrom("externalProviders").selectAll().where("churchId", "=", churchId).execute() as ExternalProvider[];
   }
 
-  public delete(churchId: string, id: string): Promise<any> {
-    return DB.query("DELETE FROM externalProviders WHERE id=? AND churchId=?", [id, churchId]) as Promise<any>;
+  public async delete(churchId: string, id: string): Promise<any> {
+    return await getDb().deleteFrom("externalProviders").where("id", "=", id).where("churchId", "=", churchId).execute();
   }
 }
