@@ -49,12 +49,12 @@ export class ScheduleRepository {
   }
 
   public async loadCurrent(classroomId: string, date: Date): Promise<Schedule> {
-    const result = await sql<any>`
-      SELECT * FROM schedules
-      WHERE classroomId=${classroomId} AND scheduledDate > (${date} - INTERVAL 1 DAY)
-      ORDER BY scheduledDate LIMIT 1
-    `.execute(getDb());
-    return (result.rows[0] ?? null) as Schedule;
+    return (await getDb().selectFrom("schedules").selectAll()
+      .where("classroomId", "=", classroomId)
+      .where("scheduledDate", ">", sql<Date>`(${date} - INTERVAL 1 DAY)`)
+      .orderBy("scheduledDate")
+      .limit(1)
+      .executeTakeFirst() ?? null) as Schedule;
   }
 
   public async load(id: string): Promise<Schedule> {

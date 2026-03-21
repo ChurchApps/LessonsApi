@@ -11,8 +11,21 @@ export class ProgramRepository {
 
   public async create(program: Program) {
     program.id = UniqueIdHelper.shortId();
-    await sql`INSERT INTO programs (id, churchId, providerId, name, slug, image, shortDescription, description, videoEmbedUrl, live, aboutSection, age, sort)
-      VALUES (${program.id}, ${program.churchId}, (SELECT id FROM providers WHERE churchId = ${program.churchId}), ${program.name}, ${program.slug}, ${program.image}, ${program.shortDescription}, ${program.description}, ${program.videoEmbedUrl}, ${program.live}, ${program.aboutSection}, ${program.age}, ${program.sort})`.execute(getDb());
+    await getDb().insertInto("programs").values({
+      id: program.id,
+      churchId: program.churchId,
+      providerId: sql`(SELECT id FROM providers WHERE churchId = ${program.churchId})`,
+      name: program.name,
+      slug: program.slug,
+      image: program.image,
+      shortDescription: program.shortDescription,
+      description: program.description,
+      videoEmbedUrl: program.videoEmbedUrl,
+      live: program.live,
+      aboutSection: program.aboutSection,
+      age: program.age,
+      sort: program.sort
+    }).execute();
     return program;
   }
 

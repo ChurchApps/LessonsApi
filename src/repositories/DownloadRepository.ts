@@ -10,19 +10,22 @@ export class DownloadRepository {
   }
 
   public async getDownloadCounts() {
-    const result = await sql<any>`
-      SELECT churchId, count(distinct(lessonId)) as downloadCount, max(downloadDate) as lastDownload
-      FROM downloads WHERE churchId<>'' GROUP BY churchId HAVING count(distinct(lessonId)) > 0
-    `.execute(getDb());
-    return result.rows;
+    return await getDb().selectFrom("downloads")
+      .select("churchId")
+      .select(sql`count(distinct lessonId)`.as("downloadCount"))
+      .select((eb) => eb.fn.max("downloadDate").as("lastDownload"))
+      .where("churchId", "<>", "")
+      .groupBy("churchId")
+      .having(sql`count(distinct lessonId)`, ">", sql`0`)
+      .execute();
   }
 
   public async getDownloadCount(churchId: string) {
-    const result = await sql<any>`
-      SELECT count(distinct(lessonId)) as downloadCount, max(downloadDate) as lastDownload
-      FROM downloads WHERE churchId=${churchId}
-    `.execute(getDb());
-    return result.rows[0] ?? null;
+    return await getDb().selectFrom("downloads")
+      .select(sql`count(distinct lessonId)`.as("downloadCount"))
+      .select((eb) => eb.fn.max("downloadDate").as("lastDownload"))
+      .where("churchId", "=", churchId)
+      .executeTakeFirst() ?? null;
   }
 
   public async create(download: Download) {
@@ -69,42 +72,45 @@ export class DownloadRepository {
   }
 
   public async geo(programId: string, startDate: Date, endDate: Date): Promise<any[]> {
-    const result = await sql<any>`
-      SELECT ip.lat, ip.lon, ip.city, ip.state, ip.country, count(*) as totalDownloads
-      FROM downloads d
-      INNER JOIN ipDetails ip ON ip.ipAddress=d.ipAddress
-      INNER JOIN lessons l ON l.id=d.lessonId
-      INNER JOIN studies s ON s.id=l.studyId
-      WHERE s.programId=${programId} AND d.downloadDate BETWEEN ${startDate} AND ${endDate}
-      GROUP BY ip.lat, ip.lon, ip.city, ip.state, ip.country
-    `.execute(getDb());
-    return result.rows;
+    return await getDb().selectFrom("downloads as d")
+      .innerJoin("ipDetails as ip", "ip.ipAddress", "d.ipAddress")
+      .innerJoin("lessons as l", "l.id", "d.lessonId")
+      .innerJoin("studies as s", "s.id", "l.studyId")
+      .select(["ip.lat", "ip.lon", "ip.city", "ip.state", "ip.country"])
+      .select((eb) => eb.fn.countAll().as("totalDownloads"))
+      .where("s.programId", "=", programId)
+      .where("d.downloadDate", ">=", startDate)
+      .where("d.downloadDate", "<=", endDate)
+      .groupBy(["ip.lat", "ip.lon", "ip.city", "ip.state", "ip.country"])
+      .execute();
   }
 
   public async countsByStudy(programId: string, startDate: Date, endDate: Date): Promise<any[]> {
-    const result = await sql<any>`
-      SELECT s.id, s.name as studyName, count(distinct(ipAddress)) as downloadCount
-      FROM downloads d
-      INNER JOIN lessons l ON l.id=d.lessonId
-      INNER JOIN studies s ON s.id=l.studyId
-      WHERE s.programId=${programId} AND d.downloadDate BETWEEN ${startDate} AND ${endDate}
-      GROUP BY s.id, s.name
-      ORDER BY s.name
-    `.execute(getDb());
-    return result.rows;
+    return await getDb().selectFrom("downloads as d")
+      .innerJoin("lessons as l", "l.id", "d.lessonId")
+      .innerJoin("studies as s", "s.id", "l.studyId")
+      .select(["s.id", "s.name"])
+      .select(sql`count(distinct d.ipAddress)`.as("downloadCount"))
+      .where("s.programId", "=", programId)
+      .where("d.downloadDate", ">=", startDate)
+      .where("d.downloadDate", "<=", endDate)
+      .groupBy(["s.id", "s.name"])
+      .orderBy("s.name")
+      .execute();
   }
 
   public async uniqueChurches(programId: string, startDate: Date, endDate: Date): Promise<any[]> {
-    const result = await sql<any>`
-      SELECT d.churchId
-      FROM downloads d
-      INNER JOIN lessons l ON l.id=d.lessonId
-      INNER JOIN studies s ON s.id=l.studyId
-      WHERE s.programId=${programId} AND d.downloadDate BETWEEN ${startDate} AND ${endDate}
-        AND d.churchId IS NOT NULL AND d.churchId<>''
-      GROUP BY d.churchId
-    `.execute(getDb());
-    return result.rows;
+    return await getDb().selectFrom("downloads as d")
+      .innerJoin("lessons as l", "l.id", "d.lessonId")
+      .innerJoin("studies as s", "s.id", "l.studyId")
+      .select("d.churchId")
+      .where("s.programId", "=", programId)
+      .where("d.downloadDate", ">=", startDate)
+      .where("d.downloadDate", "<=", endDate)
+      .where("d.churchId", "is not", null)
+      .where("d.churchId", "<>", "")
+      .groupBy("d.churchId")
+      .execute();
   }
 
   public async delete(churchId: string, id: string): Promise<any> {

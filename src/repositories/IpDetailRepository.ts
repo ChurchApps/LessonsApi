@@ -1,4 +1,3 @@
-import { sql } from "kysely";
 import { getDb } from "../db";
 import { IpDetail } from "../models";
 import { UniqueIdHelper } from "../helpers";
@@ -38,12 +37,14 @@ export class IpDetailRepository {
   }
 
   public async loadPendingLookup() {
-    const result = await sql<any>`
-      SELECT ipAddress FROM downloads
-      WHERE ipAddress LIKE '%.%.%.%'
-        AND ipAddress NOT IN (SELECT ipAddress FROM ipDetails)
-      GROUP BY ipAddress LIMIT 10
-    `.execute(getDb());
-    return result.rows.map((d: any) => d.ipAddress);
+    const rows = await getDb().selectFrom("downloads")
+      .select("ipAddress")
+      .where("ipAddress", "like", "%.%.%.%")
+      .where("ipAddress", "not in",
+        getDb().selectFrom("ipDetails").select("ipAddress"))
+      .groupBy("ipAddress")
+      .limit(10)
+      .execute();
+    return rows.map((d) => d.ipAddress);
   }
 }

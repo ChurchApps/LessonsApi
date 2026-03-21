@@ -11,8 +11,17 @@ export class FileRepository {
 
   public async create(file: File) {
     file.id = UniqueIdHelper.shortId();
-    await sql`INSERT INTO files (id, churchId, fileName, contentPath, fileType, size, seconds, dateModified, thumbPath)
-      VALUES (${file.id}, ${file.churchId}, ${file.fileName}, ${file.contentPath}, ${file.fileType}, ${file.size}, ${file.seconds}, NOW(), ${file.thumbPath})`.execute(getDb());
+    await getDb().insertInto("files").values({
+      id: file.id,
+      churchId: file.churchId,
+      fileName: file.fileName,
+      contentPath: file.contentPath,
+      fileType: file.fileType,
+      size: file.size,
+      seconds: file.seconds,
+      dateModified: sql`NOW()`,
+      thumbPath: file.thumbPath
+    }).execute();
     return file;
   }
 
