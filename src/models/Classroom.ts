@@ -1,7 +1,7 @@
-export class Classroom {
-  public id?: string;
-  public churchId?: string;
-  public name?: string;
-  public recentGroupId?: string;
-  public upcomingGroupId?: string;
+export interface Classroom {
+  id?: string;
+  churchId?: string;
+  name?: string;
+  recentGroupId?: string;
+  upcomingGroupId?: string;
 }

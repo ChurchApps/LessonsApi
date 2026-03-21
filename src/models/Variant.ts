@@ -1,14 +1,14 @@
 import { File } from "./File";
 
-export class Variant {
-  public id?: string;
-  public churchId?: string;
-  public resourceId?: string;
-  public fileId?: string;
-  public name?: string;
-  public downloadDefault?: boolean;
-  public playerDefault?: boolean;
-  public hidden?: boolean;
+export interface Variant {
+  id?: string;
+  churchId?: string;
+  resourceId?: string;
+  fileId?: string;
+  name?: string;
+  downloadDefault?: boolean;
+  playerDefault?: boolean;
+  hidden?: boolean;
 
-  public file?: File;
+  file?: File;
 }

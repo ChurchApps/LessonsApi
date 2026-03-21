@@ -1,13 +1,13 @@
 import { Role } from "./Role";
 
-export class Section {
-  public id?: string;
-  public churchId?: string;
-  public lessonId?: string;
-  public venueId?: string;
-  public name?: string;
-  public sort?: number;
-  public materials?: string;
+export interface Section {
+  id?: string;
+  churchId?: string;
+  lessonId?: string;
+  venueId?: string;
+  name?: string;
+  sort?: number;
+  materials?: string;
 
-  public roles?: Role[];
+  roles?: Role[];
 }

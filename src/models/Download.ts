@@ -1,10 +1,10 @@
-export class Download {
-  public id?: string;
-  public lessonId?: string;
-  public fileId?: string;
-  public userId?: string;
-  public churchId?: string;
-  public ipAddress?: string;
-  public downloadDate?: Date;
-  public fileName?: string;
+export interface Download {
+  id?: string;
+  lessonId?: string;
+  fileId?: string;
+  userId?: string;
+  churchId?: string;
+  ipAddress?: string;
+  downloadDate?: Date;
+  fileName?: string;
 }

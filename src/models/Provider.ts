@@ -1,5 +1,6 @@
-export class Provider {
-  public id?: string;
-  public churchId?: string;
-  public name?: string;
+export interface Provider {
+  id?: string;
+  churchId?: string;
+  name?: string;
+  live?: boolean;
 }

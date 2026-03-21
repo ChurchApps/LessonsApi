@@ -1,7 +1,7 @@
-export class StudyCategory {
-  public id?: string;
-  public programId?: string;
-  public studyId?: string;
-  public categoryName?: string;
-  public sort?: number;
+export interface StudyCategory {
+  id?: string;
+  programId?: string;
+  studyId?: string;
+  categoryName?: string;
+  sort?: number;
 }
