@@ -40,8 +40,7 @@ export class IpDetailRepository {
     const rows = await getDb().selectFrom("downloads")
       .select("ipAddress")
       .where("ipAddress", "like", "%.%.%.%")
-      .where("ipAddress", "not in",
-        getDb().selectFrom("ipDetails").select("ipAddress"))
+      .where("ipAddress", "not in", getDb().selectFrom("ipDetails").select("ipAddress"))
       .groupBy("ipAddress")
       .limit(10)
       .execute();
