@@ -2,7 +2,7 @@ import { Kysely, MysqlDialect } from "kysely";
 import { createPool } from "mysql2";
 import dotenv from "dotenv";
 import { EnvironmentBase } from "@churchapps/apihelper";
-import { Environment } from "../../src/helpers/Environment.js";
+import { Environment } from "../src/helpers/Environment.js";
 
 let initialized = false;
 
@@ -53,11 +53,6 @@ export function createKysely(): Kysely<any> {
   });
 
   return new Kysely({ dialect });
-}
-
-export function getDatabaseName(): string {
-  const config = parseConnectionString(EnvironmentBase.connectionString);
-  return config.database;
 }
 
 export async function ensureDatabaseExists() {

@@ -2,7 +2,7 @@ import * as path from "path";
 import { fileURLToPath } from "url";
 import { Migrator, FileMigrationProvider } from "kysely";
 import * as fs from "fs";
-import { ensureEnvironment, createKysely, ensureDatabaseExists } from "./migrations/kysely-config.js";
+import { ensureEnvironment, createKysely, ensureDatabaseExists } from "./kysely-config.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
