@@ -50,10 +50,10 @@
     "inversify-express-utils": "^6.5.0",
     "kysely": "^0.28.14",
     "mysql2": "^3.14.1",
+    "@aws-sdk/client-elastic-transcoder": "^3.840.0",
     "reflect-metadata": "^0.2.2"
   },
   "devDependencies": {
-    "@aws-sdk/client-elastic-transcoder": "^3.840.0",
     "@types/archiver": "^6.0.3",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.3",
