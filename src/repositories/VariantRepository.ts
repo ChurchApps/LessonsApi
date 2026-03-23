@@ -1,7 +1,7 @@
-import { DB } from "@churchapps/apihelper";
+import { sql } from "kysely";
+import { getDb } from "../db";
 import { Variant } from "../models";
 import { UniqueIdHelper } from "../helpers";
-import { ArrayHelper } from "@churchapps/apihelper";
 
 export class VariantRepository {
   public save(variant: Variant) {
@@ -11,47 +11,70 @@ export class VariantRepository {
 
   public async create(variant: Variant) {
     variant.id = UniqueIdHelper.shortId();
-    const sql = "INSERT INTO variants (id, churchId, resourceId, fileId, name, downloadDefault, playerDefault, hidden) VALUES (?, ?, ?, ?, ?, ?, ?, ?);";
-    const params = [
-      variant.id, variant.churchId, variant.resourceId, variant.fileId, variant.name, variant.downloadDefault, variant.playerDefault, variant.hidden
-    ];
-    await DB.query(sql, params);
+    await getDb().insertInto("variants").values({
+      id: variant.id,
+      churchId: variant.churchId,
+      resourceId: variant.resourceId,
+      fileId: variant.fileId,
+      name: variant.name,
+      downloadDefault: variant.downloadDefault,
+      playerDefault: variant.playerDefault,
+      hidden: variant.hidden
+    }).execute();
     return variant;
   }
 
   public async update(variant: Variant) {
-    const sql = "UPDATE variants SET resourceId=?, fileId=?, name=?, downloadDefault=?, playerDefault=?, hidden=? WHERE id=? AND churchId=?";
-    const params = [
-      variant.resourceId, variant.fileId, variant.name, variant.downloadDefault, variant.playerDefault, variant.hidden, variant.id, variant.churchId
-    ];
-    await DB.query(sql, params);
+    await getDb().updateTable("variants").set({
+      resourceId: variant.resourceId,
+      fileId: variant.fileId,
+      name: variant.name,
+      downloadDefault: variant.downloadDefault,
+      playerDefault: variant.playerDefault,
+      hidden: variant.hidden
+    }).where("id", "=", variant.id).where("churchId", "=", variant.churchId).execute();
     return variant;
   }
 
-  public loadByResourceId(churchId: string, resourceId: string): Promise<Variant[]> {
-    return DB.query("SELECT * FROM variants WHERE churchId=? AND resourceId=? ORDER BY name", [churchId, resourceId]) as Promise<Variant[]>;
+  public async loadByResourceId(churchId: string, resourceId: string): Promise<Variant[]> {
+    return await getDb().selectFrom("variants").selectAll().where("churchId", "=", churchId).where("resourceId", "=", resourceId).orderBy("name").execute() as Variant[];
   }
 
-  public loadByResourceIds(churchId: string, resourceIds: string[]): Promise<Variant[]> {
-    const sql = "SELECT * FROM variants WHERE churchId=? AND resourceId IN (" + ArrayHelper.fillArray("?", resourceIds.length) + ") ORDER BY name";
-    return DB.query(sql, [churchId].concat(resourceIds)) as Promise<Variant[]>;
+  public async loadByResourceIds(churchId: string, resourceIds: string[]): Promise<Variant[]> {
+    return await getDb().selectFrom("variants").selectAll().where("churchId", "=", churchId).where("resourceId", "in", resourceIds).orderBy("name").execute() as Variant[];
   }
 
-  public loadByContentTypeId(churchId: string, contentType: string, contentId: string): Promise<Variant[]> {
-    const subQuery = "SELECT r.id from resources r INNER JOIN bundles b on b.id=r.bundleId WHERE b.churchId=? AND b.contentType=? AND b.contentId=?";
-    return DB.query("SELECT * FROM variants WHERE churchId=? AND resourceId in (" + subQuery + ") order by name", [churchId, churchId, contentType, contentId]) as Promise<Variant[]>;
+  public async loadByContentTypeId(churchId: string, contentType: string, contentId: string): Promise<Variant[]> {
+    return await getDb().selectFrom("variants").selectAll()
+      .where("churchId", "=", churchId)
+      .where("resourceId", "in", getDb().selectFrom("resources as r")
+        .innerJoin("bundles as b", "b.id", "r.bundleId")
+        .select("r.id")
+        .where("b.churchId", "=", churchId)
+        .where("b.contentType", "=", contentType)
+        .where("b.contentId", "=", contentId))
+      .orderBy("name")
+      .execute() as Variant[];
   }
 
-  public load(churchId: string, id: string): Promise<Variant> {
-    return DB.queryOne("SELECT * FROM variants WHERE id=? AND churchId=?", [id, churchId]) as Promise<Variant>;
+  public async load(churchId: string, id: string): Promise<Variant> {
+    return await getDb().selectFrom("variants").selectAll().where("id", "=", id).where("churchId", "=", churchId).executeTakeFirst() as Variant;
   }
 
-  public loadPlaylist(resourceIds: string[]): Promise<any> {
-    const sql = "select f.contentPath, r.id as resourceId, r.name as resourceName, '' as assetId, f.fileType, f.seconds, r.loopVideo from resources r" + " inner join variants v on v.resourceId=r.id" + " inner join files f on f.id=v.fileId" + " where r.id in (" + ArrayHelper.fillArray("?", resourceIds.length).join(", ") + ");";
-    return DB.query(sql, resourceIds) as Promise<Variant[]>;
+  public async loadPlaylist(resourceIds: string[]): Promise<any> {
+    if (resourceIds.length === 0) return [];
+    const result = await sql<any>`
+      SELECT f.contentPath, r.id as resourceId, r.name as resourceName, '' as assetId,
+        f.fileType, f.seconds, r.loopVideo
+      FROM resources r
+      INNER JOIN variants v ON v.resourceId=r.id
+      INNER JOIN files f ON f.id=v.fileId
+      WHERE r.id IN (${sql.join(resourceIds)})
+    `.execute(getDb());
+    return result.rows;
   }
 
-  public delete(churchId: string, id: string): Promise<any> {
-    return DB.query("DELETE FROM variants WHERE id=? AND churchId=?", [id, churchId]) as Promise<any>;
+  public async delete(churchId: string, id: string): Promise<any> {
+    return await getDb().deleteFrom("variants").where("id", "=", id).where("churchId", "=", churchId).execute();
   }
 }

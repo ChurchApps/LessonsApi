@@ -5,6 +5,8 @@ import { Environment } from "../src/helpers/Environment";
 import { DBCreator } from "@churchapps/apihelper"
 
 const init = async () => {
+  console.log("\n⚠️  initdb is deprecated. Use 'npm run migrate' instead.\n");
+
   dotenv.config();
   await Environment.init(process.env.APP_ENV);
   console.log("Connecting");

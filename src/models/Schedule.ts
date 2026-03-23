@@ -1,12 +1,12 @@
-export class Schedule {
-  public id?: string;
-  public churchId?: string;
-  public classroomId?: string;
-  public displayName?: string;
-  public externalProviderId?: string;
-  public lessonId?: string;
-  public programId?: string;
-  public scheduledDate?: Date;
-  public studyId?: string;
-  public venueId?: string;
+export interface Schedule {
+  id?: string;
+  churchId?: string;
+  classroomId?: string;
+  displayName?: string;
+  externalProviderId?: string;
+  lessonId?: string;
+  programId?: string;
+  scheduledDate?: Date;
+  studyId?: string;
+  venueId?: string;
 }

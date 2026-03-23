@@ -1,6 +1,6 @@
-import { DB } from "@churchapps/apihelper";
+import { getDb } from "../db";
 import { Study } from "../models";
-import { UniqueIdHelper, MySqlHelper } from "../helpers";
+import { UniqueIdHelper } from "../helpers";
 
 export class StudyRepository {
   public save(study: Study) {
@@ -10,61 +10,75 @@ export class StudyRepository {
 
   public async create(study: Study) {
     study.id = UniqueIdHelper.shortId();
-    const sql = "INSERT INTO studies (id, churchId, programId, name, slug, image, shortDescription, description, videoEmbedUrl, sort, live) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
-    const params = [
-      study.id, study.churchId, study.programId, study.name, study.slug, study.image, study.shortDescription, study.description, study.videoEmbedUrl, study.sort, study.live
-    ];
-    await DB.query(sql, params);
+    await getDb().insertInto("studies").values({
+      id: study.id,
+      churchId: study.churchId,
+      programId: study.programId,
+      name: study.name,
+      slug: study.slug,
+      image: study.image,
+      shortDescription: study.shortDescription,
+      description: study.description,
+      videoEmbedUrl: study.videoEmbedUrl,
+      sort: study.sort,
+      live: study.live
+    }).execute();
     return study;
   }
 
   public async update(study: Study) {
-    const sql = "UPDATE studies SET name=?, slug=?, image=?, shortDescription=?, description=?, videoEmbedUrl=?, sort=?, live=? WHERE id=? AND churchId=?";
-    const params = [
-      study.name, study.slug, study.image, study.shortDescription, study.description, study.videoEmbedUrl, study.sort, study.live, study.id, study.churchId
-    ];
-    await DB.query(sql, params);
+    await getDb().updateTable("studies").set({
+      name: study.name,
+      slug: study.slug,
+      image: study.image,
+      shortDescription: study.shortDescription,
+      description: study.description,
+      videoEmbedUrl: study.videoEmbedUrl,
+      sort: study.sort,
+      live: study.live
+    }).where("id", "=", study.id).where("churchId", "=", study.churchId).execute();
     return study;
   }
 
-  public loadByProgramId(churchId: string, programId: string): Promise<Study[]> {
-    return DB.query("SELECT * FROM studies WHERE churchId=? AND programId=? ORDER BY sort", [churchId, programId]) as Promise<Study[]>;
+  public async loadByProgramId(churchId: string, programId: string): Promise<Study[]> {
+    return await getDb().selectFrom("studies").selectAll().where("churchId", "=", churchId).where("programId", "=", programId).orderBy("sort").execute() as Study[];
   }
 
-  public loadPublicByProgramId(programId: string): Promise<Study[]> {
-    const sql = "SELECT *" + " , (SELECT COUNT(*) FROM lessons WHERE studyId=s.id) AS lessonCount" + " FROM studies s" + " WHERE programId=? AND live=1 ORDER BY sort";
-    return DB.query(sql, [programId]) as Promise<Study[]>;
+  public async loadPublicByProgramId(programId: string): Promise<Study[]> {
+    return await getDb().selectFrom("studies as s").selectAll("s")
+      .select((eb) => eb.selectFrom("lessons").whereRef("lessons.studyId", "=", "s.id").select((eb2) => eb2.fn.countAll().as("count")).as("lessonCount"))
+      .where("programId", "=", programId).where("live", "=", true).orderBy("sort").execute() as Study[];
   }
 
-  public loadPublicByProgramIds(programIds: string[]): Promise<Study[]> {
-    return DB.query("SELECT * FROM studies WHERE programId IN (" + MySqlHelper.toQuotedAndCommaSeparatedString(programIds) + ") AND live=1 ORDER BY sort", []) as Promise<Study[]>;
+  public async loadPublicByProgramIds(programIds: string[]): Promise<Study[]> {
+    return await getDb().selectFrom("studies").selectAll().where("programId", "in", programIds).where("live", "=", true).orderBy("sort").execute() as Study[];
   }
 
-  public load(churchId: string, id: string): Promise<Study> {
-    return DB.queryOne("SELECT * FROM studies WHERE id=? AND churchId=?", [id, churchId]) as Promise<Study>;
+  public async load(churchId: string, id: string): Promise<Study> {
+    return await getDb().selectFrom("studies").selectAll().where("id", "=", id).where("churchId", "=", churchId).executeTakeFirst() as Study;
   }
 
-  public loadPublicBySlug(programId: string, slug: string): Promise<Study> {
-    return DB.queryOne("SELECT * FROM studies WHERE programId=? AND slug=? AND live=1 ORDER BY sort", [programId, slug]) as Promise<Study>;
+  public async loadPublicBySlug(programId: string, slug: string): Promise<Study> {
+    return await getDb().selectFrom("studies").selectAll().where("programId", "=", programId).where("slug", "=", slug).where("live", "=", true).orderBy("sort").executeTakeFirst() as Study;
   }
 
-  public loadPublicByIds(ids: string[]): Promise<Study[]> {
-    return DB.query("SELECT * FROM studies WHERE id IN (?) and live=1", [ids]) as Promise<Study[]>;
+  public async loadPublicByIds(ids: string[]): Promise<Study[]> {
+    return await getDb().selectFrom("studies").selectAll().where("id", "in", ids).where("live", "=", true).execute() as Study[];
   }
 
-  public loadPublicAll(): Promise<Study[]> {
-    return DB.query("SELECT * FROM studies WHERE live=1", []) as Promise<Study[]>;
+  public async loadPublicAll(): Promise<Study[]> {
+    return await getDb().selectFrom("studies").selectAll().where("live", "=", true).execute() as Study[];
   }
 
-  public loadPublic(id: string): Promise<Study> {
-    return DB.queryOne("SELECT * FROM studies WHERE id=? AND live=1 ORDER BY sort", [id]) as Promise<Study>;
+  public async loadPublic(id: string): Promise<Study> {
+    return await getDb().selectFrom("studies").selectAll().where("id", "=", id).where("live", "=", true).orderBy("sort").executeTakeFirst() as Study;
   }
 
-  public loadAll(churchId: string): Promise<Study[]> {
-    return DB.query("SELECT * FROM studies WHERE churchId=? ORDER BY sort", [churchId]) as Promise<Study[]>;
+  public async loadAll(churchId: string): Promise<Study[]> {
+    return await getDb().selectFrom("studies").selectAll().where("churchId", "=", churchId).orderBy("sort").execute() as Study[];
   }
 
-  public delete(churchId: string, id: string): Promise<any> {
-    return DB.query("DELETE FROM studies WHERE id=? AND churchId=?", [id, churchId]) as Promise<any>;
+  public async delete(churchId: string, id: string): Promise<any> {
+    return await getDb().deleteFrom("studies").where("id", "=", id).where("churchId", "=", churchId).execute();
   }
 }

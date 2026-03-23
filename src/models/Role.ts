@@ -1,12 +1,12 @@
 import { Action } from "./Action";
 
-export class Role {
-  public id?: string;
-  public churchId?: string;
-  public lessonId?: string;
-  public sectionId?: string;
-  public name?: string;
-  public sort?: number;
+export interface Role {
+  id?: string;
+  churchId?: string;
+  lessonId?: string;
+  sectionId?: string;
+  name?: string;
+  sort?: number;
 
-  public actions?: Action[];
+  actions?: Action[];
 }

@@ -1,4 +1,4 @@
-import { DB } from "@churchapps/apihelper";
+import { getDb } from "../db";
 import { IpDetail } from "../models";
 import { UniqueIdHelper } from "../helpers";
 
@@ -10,28 +10,40 @@ export class IpDetailRepository {
 
   public async create(detail: IpDetail) {
     detail.id = UniqueIdHelper.shortId();
-    const sql = "INSERT INTO ipDetails (id, ipAddress, city, state, country, lat, lon, isp) VALUES (?, ?, ?, ?, ?, ?, ?, ?);";
-    const params = [
-      detail.id, detail.ipAddress, detail.city, detail.state, detail.country, detail.lat, detail.lon, detail.isp
-    ];
-    await DB.query(sql, params);
+    await getDb().insertInto("ipDetails").values({
+      id: detail.id,
+      ipAddress: detail.ipAddress,
+      city: detail.city,
+      state: detail.state,
+      country: detail.country,
+      lat: detail.lat,
+      lon: detail.lon,
+      isp: detail.isp
+    }).execute();
     return detail;
   }
 
   public async update(detail: IpDetail) {
-    const sql = "UPDATE ipDetails SET ipAddress=?, city=?, state=?, country=?, lat=?, lon=?, isp=? WHERE id=?";
-    const params = [
-      detail.ipAddress, detail.city, detail.state, detail.country, detail.lat, detail.lon, detail.isp, detail.id
-    ];
-    await DB.query(sql, params);
+    await getDb().updateTable("ipDetails").set({
+      ipAddress: detail.ipAddress,
+      city: detail.city,
+      state: detail.state,
+      country: detail.country,
+      lat: detail.lat,
+      lon: detail.lon,
+      isp: detail.isp
+    }).where("id", "=", detail.id).execute();
     return detail;
   }
 
   public async loadPendingLookup() {
-    const sql = "select ipAddress from downloads" + " where ipAddress like '%.%.%.%'" + " and ipAddress not in (select ipAddress from ipDetails)" + " group by ipAddress limit 10";
-    const data: any[] = (await DB.query(sql, [])) as any[];
-    const result: string[] = [];
-    data.forEach(d => result.push(d.ipAddress));
-    return result;
+    const rows = await getDb().selectFrom("downloads")
+      .select("ipAddress")
+      .where("ipAddress", "like", "%.%.%.%")
+      .where("ipAddress", "not in", getDb().selectFrom("ipDetails").select("ipAddress"))
+      .groupBy("ipAddress")
+      .limit(10)
+      .execute();
+    return rows.map((d) => d.ipAddress);
   }
 }

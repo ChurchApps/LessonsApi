@@ -1,4 +1,5 @@
-import { DB } from "@churchapps/apihelper";
+import { sql } from "kysely";
+import { getDb } from "../db";
 import { Provider } from "../models";
 import { UniqueIdHelper } from "../helpers";
 
@@ -10,41 +11,42 @@ export class ProviderRepository {
 
   public async create(provider: Provider) {
     provider.id = UniqueIdHelper.shortId();
-    const sql = "INSERT INTO providers (id, churchId, name) VALUES (?, ?, ?);";
-    const params = [provider.id, provider.churchId, provider.name];
-    await DB.query(sql, params);
+    await getDb().insertInto("providers").values({ id: provider.id, churchId: provider.churchId, name: provider.name }).execute();
     return provider;
   }
 
   public async update(provider: Provider) {
-    const sql = "UPDATE providers SET name=? WHERE id=? AND churchId=?";
-    const params = [provider.name, provider.id, provider.churchId];
-    await DB.query(sql, params);
+    await getDb().updateTable("providers").set({ name: provider.name }).where("id", "=", provider.id).where("churchId", "=", provider.churchId).execute();
     return provider;
   }
 
-  public loadStats(): Promise<Provider> {
-    const sql = "select " + "(select count(*) from providers) as providers, " + "(select count(*) from studies where live=1) as studies, " + "(select count(*) from lessons where live=1) as lessons";
-    return DB.queryOne(sql, []) as Promise<Provider>;
+  public async loadStats(): Promise<Provider> {
+    const result = await sql<any>`
+      SELECT
+        (SELECT count(*) FROM providers) as providers,
+        (SELECT count(*) FROM studies WHERE live=1) as studies,
+        (SELECT count(*) FROM lessons WHERE live=1) as lessons
+    `.execute(getDb());
+    return result.rows[0] as Provider;
   }
 
-  public loadPublic(id: string): Promise<Provider> {
-    return DB.queryOne("SELECT * FROM providers WHERE id=?", [id]) as Promise<Provider>;
+  public async loadPublic(id: string): Promise<Provider> {
+    return await getDb().selectFrom("providers").selectAll().where("id", "=", id).executeTakeFirst() as Provider;
   }
 
-  public load(churchId: string, id: string): Promise<Provider> {
-    return DB.queryOne("SELECT * FROM providers WHERE id=? AND churchId=?", [id, churchId]) as Promise<Provider>;
+  public async load(churchId: string, id: string): Promise<Provider> {
+    return await getDb().selectFrom("providers").selectAll().where("id", "=", id).where("churchId", "=", churchId).executeTakeFirst() as Provider;
   }
 
-  public loadAll(churchId: string): Promise<Provider[]> {
-    return DB.query("SELECT * FROM providers WHERE churchId=?", [churchId]) as Promise<Provider[]>;
+  public async loadAll(churchId: string): Promise<Provider[]> {
+    return await getDb().selectFrom("providers").selectAll().where("churchId", "=", churchId).execute() as Provider[];
   }
 
-  public loadPublicAll(): Promise<Provider[]> {
-    return DB.query("SELECT * FROM providers", []) as Promise<Provider[]>;
+  public async loadPublicAll(): Promise<Provider[]> {
+    return await getDb().selectFrom("providers").selectAll().execute() as Provider[];
   }
 
-  public delete(churchId: string, id: string): Promise<any> {
-    return DB.query("DELETE FROM providers WHERE id=? AND churchId=?", [id, churchId]) as Promise<any>;
+  public async delete(churchId: string, id: string): Promise<any> {
+    return await getDb().deleteFrom("providers").where("id", "=", id).where("churchId", "=", churchId).execute();
   }
 }

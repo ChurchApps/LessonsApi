@@ -1,13 +1,13 @@
-export class Action {
-  public id?: string;
-  public churchId?: string;
-  public lessonId?: string;
-  public roleId?: string;
-  public actionType?: string;
-  public content?: string;
-  public sort?: number;
-  public resourceId?: string;
-  public assetId?: string;
-  public externalVideoId?: string;
-  public addOnId?: string;
+export interface Action {
+  id?: string;
+  churchId?: string;
+  lessonId?: string;
+  roleId?: string;
+  actionType?: string;
+  content?: string;
+  sort?: number;
+  resourceId?: string;
+  assetId?: string;
+  externalVideoId?: string;
+  addOnId?: string;
 }

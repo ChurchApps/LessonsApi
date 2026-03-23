@@ -1,4 +1,4 @@
-import { DB } from "@churchapps/apihelper";
+import { getDb } from "../db";
 import { AddOnPlaylist } from "../models";
 import { UniqueIdHelper } from "../helpers";
 
@@ -10,24 +10,20 @@ export class AddOnPlaylistRepository {
 
   public async create(addOnPlaylist: AddOnPlaylist) {
     addOnPlaylist.id = UniqueIdHelper.shortId();
-    const sql = "INSERT INTO addOnPlaylists (id, churchId, providerId, name) VALUES (?, ?, ?, ?);";
-    const params = [addOnPlaylist.id, addOnPlaylist.churchId, addOnPlaylist.providerId, addOnPlaylist.name];
-    await DB.query(sql, params);
+    await getDb().insertInto("addOnPlaylists").values({ id: addOnPlaylist.id, churchId: addOnPlaylist.churchId, providerId: addOnPlaylist.providerId, name: addOnPlaylist.name }).execute();
     return addOnPlaylist;
   }
 
   public async update(addOnPlaylist: AddOnPlaylist) {
-    const sql = "UPDATE addOnPlaylists SET providerId=?, name=? WHERE id=? AND churchId=?";
-    const params = [addOnPlaylist.providerId, addOnPlaylist.name, addOnPlaylist.id, addOnPlaylist.churchId];
-    await DB.query(sql, params);
+    await getDb().updateTable("addOnPlaylists").set({ providerId: addOnPlaylist.providerId, name: addOnPlaylist.name }).where("id", "=", addOnPlaylist.id).where("churchId", "=", addOnPlaylist.churchId).execute();
     return addOnPlaylist;
   }
 
-  public load(id: string): Promise<AddOnPlaylist> {
-    return DB.queryOne("SELECT * FROM addOnPlaylists WHERE id=?", [id]) as Promise<AddOnPlaylist>;
+  public async load(id: string): Promise<AddOnPlaylist> {
+    return await getDb().selectFrom("addOnPlaylists").selectAll().where("id", "=", id).executeTakeFirst() as AddOnPlaylist;
   }
 
-  public delete(churchId: string, id: string): Promise<any> {
-    return DB.query("DELETE FROM addOnPlaylists WHERE id=? AND churchId=?", [id, churchId]) as Promise<any>;
+  public async delete(churchId: string, id: string): Promise<any> {
+    return await getDb().deleteFrom("addOnPlaylists").where("id", "=", id).where("churchId", "=", churchId).execute();
   }
 }

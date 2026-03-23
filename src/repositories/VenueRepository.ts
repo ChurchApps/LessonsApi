@@ -1,14 +1,21 @@
-import { DB } from "@churchapps/apihelper";
+import { sql } from "kysely";
+import { getDb } from "../db";
 import { Venue } from "../models";
 import { UniqueIdHelper } from "../helpers";
 
 export class VenueRepository {
   public async loadTimeline(venueIds: string[]) {
-    const sql = "select 'venue' as postType, v.id as postId, s.name as studyName, l.name, l.description, l.image, concat('/', p.slug, '/', s.slug, '/', l.slug) as slug" + " from venues v" + " inner join lessons l on l.id=v.lessonId" + " inner join studies s on s.id=l.studyId" + " inner join programs p on p.id=s.programId" + " where v.id in (?)";
-
-    const params = [venueIds];
-    const result = await DB.query(sql, params);
-    return result;
+    if (venueIds.length === 0) return [];
+    const result = await sql<any>`
+      SELECT 'venue' as postType, v.id as postId, s.name as studyName, l.name, l.description, l.image,
+        CONCAT('/', p.slug, '/', s.slug, '/', l.slug) as slug
+      FROM venues v
+      INNER JOIN lessons l ON l.id=v.lessonId
+      INNER JOIN studies s ON s.id=l.studyId
+      INNER JOIN programs p ON p.id=s.programId
+      WHERE v.id IN (${sql.join(venueIds)})
+    `.execute(getDb());
+    return result.rows;
   }
 
   public save(venue: Venue) {
@@ -18,49 +25,52 @@ export class VenueRepository {
 
   public async create(venue: Venue) {
     venue.id = UniqueIdHelper.shortId();
-    const sql = "INSERT INTO venues (id, churchId, lessonId, name, sort) VALUES (?, ?, ?, ?, ?);";
-    const params = [venue.id, venue.churchId, venue.lessonId, venue.name, venue.sort];
-    await DB.query(sql, params);
+    await getDb().insertInto("venues").values({ id: venue.id, churchId: venue.churchId, lessonId: venue.lessonId, name: venue.name, sort: venue.sort }).execute();
     return venue;
   }
 
   public async update(venue: Venue) {
-    const sql = "UPDATE venues SET lessonId=?, name=?, sort=? WHERE id=? AND churchId=?";
-    const params = [venue.lessonId, venue.name, venue.sort, venue.id, venue.churchId];
-    await DB.query(sql, params);
+    await getDb().updateTable("venues").set({ lessonId: venue.lessonId, name: venue.name, sort: venue.sort }).where("id", "=", venue.id).where("churchId", "=", venue.churchId).execute();
     return venue;
   }
 
-  public loadNamesForClassroom(churchId: string, lessonId: string): Promise<string[]> {
-    const sql = "select v.name" + " from schedules s" + " inner join venues v on v.lessonId=s.lessonId" + " where s.churchId=? AND s.classroomId=?" + " group by v.name" + " order by v.name;";
-    return DB.query(sql, [churchId, lessonId]) as Promise<string[]>;
+  public async loadNamesForClassroom(churchId: string, lessonId: string): Promise<string[]> {
+    const rows = await getDb().selectFrom("schedules as s")
+      .innerJoin("venues as v", "v.lessonId", "s.lessonId")
+      .select("v.name")
+      .where("s.churchId", "=", churchId)
+      .where("s.classroomId", "=", lessonId)
+      .groupBy("v.name")
+      .orderBy("v.name")
+      .execute();
+    return rows.map(r => r.name) as string[];
   }
 
-  public loadByLessonId(churchId: string, lessonId: string): Promise<Venue[]> {
-    return DB.query("SELECT * FROM venues WHERE churchId=? AND lessonId=? ORDER BY sort", [churchId, lessonId]) as Promise<Venue[]>;
+  public async loadByLessonId(churchId: string, lessonId: string): Promise<Venue[]> {
+    return await getDb().selectFrom("venues").selectAll().where("churchId", "=", churchId).where("lessonId", "=", lessonId).orderBy("sort").execute() as Venue[];
   }
 
-  public loadPublicByLessonId(lessonId: string): Promise<Venue[]> {
-    return DB.query("SELECT * FROM venues WHERE lessonId=? ORDER BY sort", [lessonId]) as Promise<Venue[]>;
+  public async loadPublicByLessonId(lessonId: string): Promise<Venue[]> {
+    return await getDb().selectFrom("venues").selectAll().where("lessonId", "=", lessonId).orderBy("sort").execute() as Venue[];
   }
 
-  public loadPublic(id: string): Promise<Venue> {
-    return DB.queryOne("SELECT * FROM venues WHERE id=?", [id]) as Promise<Venue>;
+  public async loadPublic(id: string): Promise<Venue> {
+    return await getDb().selectFrom("venues").selectAll().where("id", "=", id).executeTakeFirst() as Venue;
   }
 
-  public loadPublicAll(): Promise<Venue[]> {
-    return DB.query("SELECT * FROM venues order by name", []) as Promise<Venue[]>;
+  public async loadPublicAll(): Promise<Venue[]> {
+    return await getDb().selectFrom("venues").selectAll().orderBy("name").execute() as Venue[];
   }
 
-  public load(churchId: string, id: string): Promise<Venue> {
-    return DB.queryOne("SELECT * FROM venues WHERE id=? AND churchId=?", [id, churchId]) as Promise<Venue>;
+  public async load(churchId: string, id: string): Promise<Venue> {
+    return await getDb().selectFrom("venues").selectAll().where("id", "=", id).where("churchId", "=", churchId).executeTakeFirst() as Venue;
   }
 
-  public loadAll(churchId: string): Promise<Venue[]> {
-    return DB.query("SELECT * FROM venues WHERE churchId=? ORDER BY sort", [churchId]) as Promise<Venue[]>;
+  public async loadAll(churchId: string): Promise<Venue[]> {
+    return await getDb().selectFrom("venues").selectAll().where("churchId", "=", churchId).orderBy("sort").execute() as Venue[];
   }
 
-  public delete(churchId: string, id: string): Promise<any> {
-    return DB.query("DELETE FROM venues WHERE id=? AND churchId=?", [id, churchId]) as Promise<any>;
+  public async delete(churchId: string, id: string): Promise<any> {
+    return await getDb().deleteFrom("venues").where("id", "=", id).where("churchId", "=", churchId).execute();
   }
 }

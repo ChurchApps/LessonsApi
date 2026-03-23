@@ -1,7 +1,7 @@
-export class AddOnPlaylistItem {
-  public id?: string;
-  public churchId?: string;
-  public playlistId?: string;
-  public addOnId?: string;
-  public sort?: number;
+export interface AddOnPlaylistItem {
+  id?: string;
+  churchId?: string;
+  playlistId?: string;
+  addOnId?: string;
+  sort?: number;
 }

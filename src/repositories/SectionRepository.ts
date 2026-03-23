@@ -1,4 +1,5 @@
-import { DB } from "@churchapps/apihelper";
+import { sql } from "kysely";
+import { getDb } from "../db";
 import { Section } from "../models";
 import { UniqueIdHelper } from "../helpers";
 
@@ -10,45 +11,58 @@ export class SectionRepository {
 
   public async create(section: Section) {
     section.id = UniqueIdHelper.shortId();
-    const sql = "INSERT INTO sections (id, churchId, lessonId, venueId, name, sort, materials) VALUES (?, ?, ?, ?, ?, ?, ?);";
-    const params = [section.id, section.churchId, section.lessonId, section.venueId, section.name, section.sort, section.materials];
-    await DB.query(sql, params);
+    await getDb().insertInto("sections").values({
+      id: section.id,
+      churchId: section.churchId,
+      lessonId: section.lessonId,
+      venueId: section.venueId,
+      name: section.name,
+      sort: section.sort,
+      materials: section.materials
+    }).execute();
     return section;
   }
 
   public async update(section: Section) {
-    const sql = "UPDATE sections SET lessonId=?, venueId=?, name=?, sort=?, materials=? WHERE id=? AND churchId=?";
-    const params = [section.lessonId, section.venueId, section.name, section.sort, section.materials, section.id, section.churchId];
-    await DB.query(sql, params);
+    await getDb().updateTable("sections").set({ lessonId: section.lessonId, venueId: section.venueId, name: section.name, sort: section.sort, materials: section.materials }).where("id", "=", section.id).where("churchId", "=", section.churchId).execute();
     return section;
   }
 
-  public loadByVenueId(churchId: string, venueId: string): Promise<Section[]> {
-    return DB.query("SELECT * FROM sections WHERE churchId=? AND venueId=? ORDER BY sort", [churchId, venueId]) as Promise<Section[]>;
+  public async loadByVenueId(churchId: string, venueId: string): Promise<Section[]> {
+    return await getDb().selectFrom("sections").selectAll().where("churchId", "=", churchId).where("venueId", "=", venueId).orderBy("sort").execute() as Section[];
   }
 
-  public loadForPlaylist(churchId: string, venueId: string, classRoomChurchId: string): Promise<Section[]> {
-    const sql = "SELECT s.* FROM sections s" + " left join customizations sectionSort on sectionSort.churchId=? AND sectionSort.venueId=s.venueId AND sectionSort.action='sort' AND sectionSort.contentId=s.id" + " WHERE s.churchId=? AND s.venueId=?" + " ORDER BY IFNULL(cast(sectionSort.actionContent as unsigned), s.sort)";
-    return DB.query(sql, [classRoomChurchId, churchId, venueId]) as Promise<Section[]>;
+  public async loadForPlaylist(churchId: string, venueId: string, classRoomChurchId: string): Promise<Section[]> {
+    const result = await sql<any>`
+      SELECT s.* FROM sections s
+      LEFT JOIN customizations sectionSort
+        ON sectionSort.churchId=${classRoomChurchId}
+        AND sectionSort.venueId=s.venueId
+        AND sectionSort.action='sort'
+        AND sectionSort.contentId=s.id
+      WHERE s.churchId=${churchId} AND s.venueId=${venueId}
+      ORDER BY IFNULL(CAST(sectionSort.actionContent AS UNSIGNED), s.sort)
+    `.execute(getDb());
+    return result.rows as Section[];
   }
 
-  public loadByVenueIdPublic(venueId: string): Promise<Section[]> {
-    return DB.query("SELECT * FROM sections WHERE venueId=? ORDER BY sort", [venueId]) as Promise<Section[]>;
+  public async loadByVenueIdPublic(venueId: string): Promise<Section[]> {
+    return await getDb().selectFrom("sections").selectAll().where("venueId", "=", venueId).orderBy("sort").execute() as Section[];
   }
 
-  public loadByLessonId(lessonId: string): Promise<Section[]> {
-    return DB.query("SELECT * FROM sections WHERE lessonId=? ORDER BY sort", [lessonId]) as Promise<Section[]>;
+  public async loadByLessonId(lessonId: string): Promise<Section[]> {
+    return await getDb().selectFrom("sections").selectAll().where("lessonId", "=", lessonId).orderBy("sort").execute() as Section[];
   }
 
-  public loadPublicAll(): Promise<Section[]> {
-    return DB.query("SELECT * FROM sections ORDER BY sort", []) as Promise<Section[]>;
+  public async loadPublicAll(): Promise<Section[]> {
+    return await getDb().selectFrom("sections").selectAll().orderBy("sort").execute() as Section[];
   }
 
-  public load(id: string): Promise<Section> {
-    return DB.queryOne("SELECT * FROM sections WHERE id=?", [id]) as Promise<Section>;
+  public async load(id: string): Promise<Section> {
+    return await getDb().selectFrom("sections").selectAll().where("id", "=", id).executeTakeFirst() as Section;
   }
 
-  public delete(churchId: string, id: string): Promise<any> {
-    return DB.query("DELETE FROM sections WHERE id=? AND churchId=?", [id, churchId]) as Promise<any>;
+  public async delete(churchId: string, id: string): Promise<any> {
+    return await getDb().deleteFrom("sections").where("id", "=", id).where("churchId", "=", churchId).execute();
   }
 }

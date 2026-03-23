@@ -1,4 +1,5 @@
-import { DB } from "@churchapps/apihelper";
+import { sql } from "kysely";
+import { getDb } from "../db";
 import { Action } from "../models";
 import { UniqueIdHelper } from "../helpers";
 
@@ -10,41 +11,66 @@ export class ActionRepository {
 
   public async create(action: Action) {
     action.id = UniqueIdHelper.shortId();
-    const sql = "INSERT INTO actions (id, churchId, lessonId, roleId, actionType, content, sort, resourceId, assetId, externalVideoId, addOnId) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
-    const params = [
-      action.id, action.churchId, action.lessonId, action.roleId, action.actionType, action.content, action.sort, action.resourceId, action.assetId, action.externalVideoId, action.addOnId
-    ];
-    await DB.query(sql, params);
+    await getDb().insertInto("actions").values({
+      id: action.id,
+      churchId: action.churchId,
+      lessonId: action.lessonId,
+      roleId: action.roleId,
+      actionType: action.actionType,
+      content: action.content,
+      sort: action.sort,
+      resourceId: action.resourceId,
+      assetId: action.assetId,
+      externalVideoId: action.externalVideoId,
+      addOnId: action.addOnId
+    }).execute();
     return action;
   }
 
   public async update(action: Action) {
-    const sql = "UPDATE actions SET lessonId=?, roleId=?, actionType=?, content=?, sort=?, resourceId=?, assetId=?, externalVideoId=?, addOnId=? WHERE id=? AND churchId=?";
-    const params = [
-      action.lessonId, action.roleId, action.actionType, action.content, action.sort, action.resourceId, action.assetId, action.externalVideoId, action.addOnId, action.id, action.churchId
-    ];
-    await DB.query(sql, params);
+    await getDb().updateTable("actions").set({
+      lessonId: action.lessonId,
+      roleId: action.roleId,
+      actionType: action.actionType,
+      content: action.content,
+      sort: action.sort,
+      resourceId: action.resourceId,
+      assetId: action.assetId,
+      externalVideoId: action.externalVideoId,
+      addOnId: action.addOnId
+    }).where("id", "=", action.id).where("churchId", "=", action.churchId).execute();
     return action;
   }
 
-  public loadPlaylistActions(venueId: string, churchId: string): Promise<Action[]> {
-    const sql = "select a.*, s.id as sectionId " + " from sections s" + " inner join roles r on r.sectionId=s.id" + " inner join actions a on a.roleId=r.id and a.actionType in ('Play', 'Add-on')" + " left join customizations c on c.churchId=? AND c.venueId=s.venueId AND c.action='remove' AND c.contentId IN (s.id, r.id, a.id)" + " left join customizations ac on ac.churchId=? AND ac.venueId=s.venueId AND ac.action='sort' AND ac.contentId=a.id" + " left join customizations rc on rc.churchId=? AND rc.venueId=s.venueId AND rc.action='sort' AND rc.contentId=r.id" + " left join customizations sc on sc.churchId=? AND sc.venueId=s.venueId AND sc.action='sort' AND sc.contentId=s.id" + " where s.venueId=? and c.id is null" + " order by IFNULL(cast(sc.actionContent as unsigned), s.sort), IFNULL(cast(rc.actionContent as unsigned), r.sort), IFNULL(cast(ac.actionContent as unsigned), a.sort)";
-    return DB.query(sql, [churchId, churchId, churchId, churchId, venueId]) as Promise<Action[]>;
+  public async loadPlaylistActions(venueId: string, churchId: string): Promise<Action[]> {
+    const result = await sql<any>`
+      SELECT a.*, s.id as sectionId
+      FROM sections s
+      INNER JOIN roles r ON r.sectionId=s.id
+      INNER JOIN actions a ON a.roleId=r.id AND a.actionType IN ('Play', 'Add-on')
+      LEFT JOIN customizations c ON c.churchId=${churchId} AND c.venueId=s.venueId AND c.action='remove' AND c.contentId IN (s.id, r.id, a.id)
+      LEFT JOIN customizations ac ON ac.churchId=${churchId} AND ac.venueId=s.venueId AND ac.action='sort' AND ac.contentId=a.id
+      LEFT JOIN customizations rc ON rc.churchId=${churchId} AND rc.venueId=s.venueId AND rc.action='sort' AND rc.contentId=r.id
+      LEFT JOIN customizations sc ON sc.churchId=${churchId} AND sc.venueId=s.venueId AND sc.action='sort' AND sc.contentId=s.id
+      WHERE s.venueId=${venueId} AND c.id IS NULL
+      ORDER BY IFNULL(CAST(sc.actionContent AS UNSIGNED), s.sort), IFNULL(CAST(rc.actionContent AS UNSIGNED), r.sort), IFNULL(CAST(ac.actionContent AS UNSIGNED), a.sort)
+    `.execute(getDb());
+    return result.rows as Action[];
   }
 
-  public loadByLessonId(lessonId: string): Promise<Action[]> {
-    return DB.query("SELECT * FROM actions WHERE lessonId=? ORDER BY sort", [lessonId]) as Promise<Action[]>;
+  public async loadByLessonId(lessonId: string): Promise<Action[]> {
+    return await getDb().selectFrom("actions").selectAll().where("lessonId", "=", lessonId).orderBy("sort").execute() as Action[];
   }
 
-  public loadPublicAll(): Promise<Action[]> {
-    return DB.query("SELECT * FROM actions ORDER BY sort", []) as Promise<Action[]>;
+  public async loadPublicAll(): Promise<Action[]> {
+    return await getDb().selectFrom("actions").selectAll().orderBy("sort").execute() as Action[];
   }
 
-  public load(id: string): Promise<Action> {
-    return DB.queryOne("SELECT * FROM actions WHERE id=?", [id]) as Promise<Action>;
+  public async load(id: string): Promise<Action> {
+    return await getDb().selectFrom("actions").selectAll().where("id", "=", id).executeTakeFirst() as Action;
   }
 
-  public delete(churchId: string, id: string): Promise<any> {
-    return DB.query("DELETE FROM actions WHERE id=? AND churchId=?", [id, churchId]) as Promise<any>;
+  public async delete(churchId: string, id: string): Promise<any> {
+    return await getDb().deleteFrom("actions").where("id", "=", id).where("churchId", "=", churchId).execute();
   }
 }

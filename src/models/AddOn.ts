@@ -1,14 +1,14 @@
 import { File } from "./File";
 
-export class AddOn {
-  public id?: string;
-  public churchId?: string;
-  public providerId?: string;
-  public category?: string;
-  public name?: string;
-  public image?: string;
-  public addOnType?: string;
-  public fileId?: string;
+export interface AddOn {
+  id?: string;
+  churchId?: string;
+  providerId?: string;
+  category?: string;
+  name?: string;
+  image?: string;
+  addOnType?: string;
+  fileId?: string;
 
-  public file?: File;
+  file?: File;
 }

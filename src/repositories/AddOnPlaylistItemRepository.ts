@@ -1,4 +1,4 @@
-import { DB } from "@churchapps/apihelper";
+import { getDb } from "../db";
 import { AddOnPlaylistItem } from "../models";
 import { UniqueIdHelper } from "../helpers";
 
@@ -10,24 +10,26 @@ export class AddOnPlaylistItemRepository {
 
   public async create(addOnPlaylistItem: AddOnPlaylistItem) {
     addOnPlaylistItem.id = UniqueIdHelper.shortId();
-    const sql = "INSERT INTO addOnPlaylistItems (id, churchId, playlistId, addOnId, sort) VALUES (?, ?, ?, ?, ?);";
-    const params = [addOnPlaylistItem.id, addOnPlaylistItem.churchId, addOnPlaylistItem.playlistId, addOnPlaylistItem.addOnId, addOnPlaylistItem.sort];
-    await DB.query(sql, params);
+    await getDb().insertInto("addOnPlaylistItems").values({
+      id: addOnPlaylistItem.id,
+      churchId: addOnPlaylistItem.churchId,
+      playlistId: addOnPlaylistItem.playlistId,
+      addOnId: addOnPlaylistItem.addOnId,
+      sort: addOnPlaylistItem.sort
+    }).execute();
     return addOnPlaylistItem;
   }
 
   public async update(addOnPlaylistItem: AddOnPlaylistItem) {
-    const sql = "UPDATE addOnPlaylistItems SET playlistId=?, addOnId=?, sort=? WHERE id=? AND churchId=?";
-    const params = [addOnPlaylistItem.playlistId, addOnPlaylistItem.addOnId, addOnPlaylistItem.sort, addOnPlaylistItem.id, addOnPlaylistItem.churchId];
-    await DB.query(sql, params);
+    await getDb().updateTable("addOnPlaylistItems").set({ playlistId: addOnPlaylistItem.playlistId, addOnId: addOnPlaylistItem.addOnId, sort: addOnPlaylistItem.sort }).where("id", "=", addOnPlaylistItem.id).where("churchId", "=", addOnPlaylistItem.churchId).execute();
     return addOnPlaylistItem;
   }
 
-  public load(id: string): Promise<AddOnPlaylistItem> {
-    return DB.queryOne("SELECT * FROM addOnPlaylistItems WHERE id=?", [id]) as Promise<AddOnPlaylistItem>;
+  public async load(id: string): Promise<AddOnPlaylistItem> {
+    return await getDb().selectFrom("addOnPlaylistItems").selectAll().where("id", "=", id).executeTakeFirst() as AddOnPlaylistItem;
   }
 
-  public delete(churchId: string, id: string): Promise<any> {
-    return DB.query("DELETE FROM addOnPlaylistItems WHERE id=? AND churchId=?", [id, churchId]) as Promise<any>;
+  public async delete(churchId: string, id: string): Promise<any> {
+    return await getDb().deleteFrom("addOnPlaylistItems").where("id", "=", id).where("churchId", "=", churchId).execute();
   }
 }

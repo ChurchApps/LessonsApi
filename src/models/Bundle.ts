@@ -1,14 +1,14 @@
 import { File } from "./File";
 
-export class Bundle {
-  public id?: string;
-  public churchId?: string;
-  public contentType?: string;
-  public contentId?: string;
-  public name?: string;
-  public fileId?: string;
-  public pendingUpdate?: boolean;
-  public dateModified?: Date;
+export interface Bundle {
+  id?: string;
+  churchId?: string;
+  contentType?: string;
+  contentId?: string;
+  name?: string;
+  fileId?: string;
+  pendingUpdate?: boolean;
+  dateModified?: Date;
 
-  public file?: File;
+  file?: File;
 }

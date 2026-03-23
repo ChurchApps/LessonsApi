@@ -1,15 +1,15 @@
-export class Program {
-  public id?: string;
-  public churchId?: string;
-  public providerId?: string;
-  public name?: string;
-  public slug?: string;
-  public image?: string;
-  public shortDescription?: string;
-  public description?: string;
-  public videoEmbedUrl?: string;
-  public live?: boolean;
-  public aboutSection?: string;
-  public age?: string;
-  public sort?: number;
+export interface Program {
+  id?: string;
+  churchId?: string;
+  providerId?: string;
+  name?: string;
+  slug?: string;
+  image?: string;
+  shortDescription?: string;
+  description?: string;
+  videoEmbedUrl?: string;
+  live?: boolean;
+  aboutSection?: string;
+  age?: string;
+  sort?: number;
 }

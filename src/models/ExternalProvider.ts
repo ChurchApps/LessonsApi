@@ -1,6 +1,6 @@
-export class ExternalProvider {
-  public id?: string;
-  public churchId?: string;
-  public name?: string;
-  public apiUrl?: string;
+export interface ExternalProvider {
+  id?: string;
+  churchId?: string;
+  name?: string;
+  apiUrl?: string;
 }

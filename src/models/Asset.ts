@@ -1,12 +1,12 @@
 import { File } from "./File";
 
-export class Asset {
-  public id?: string;
-  public churchId?: string;
-  public resourceId?: string;
-  public fileId?: string;
-  public name?: string;
-  public sort?: number;
+export interface Asset {
+  id?: string;
+  churchId?: string;
+  resourceId?: string;
+  fileId?: string;
+  name?: string;
+  sort?: number;
 
-  public file?: File;
+  file?: File;
 }
