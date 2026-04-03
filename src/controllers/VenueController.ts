@@ -117,6 +117,14 @@ export class VenueController extends LessonsBaseController {
     });
   }
 
+  @httpGet("/public/images")
+  public async getPublicImages(req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
+    return this.actionWrapperAnon(req, res, async () => {
+      const ids = req.query.ids ? req.query.ids.toString().split(",") : [];
+      return await this.repositories.venue.loadPublicImages(ids);
+    });
+  }
+
   @httpGet("/public/:id")
   public async getPublic(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
     return this.actionWrapperAnon(req, res, async () => {

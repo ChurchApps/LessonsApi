@@ -18,6 +18,16 @@ export class VenueRepository {
     return result.rows;
   }
 
+  public async loadPublicImages(venueIds: string[]) {
+    if (venueIds.length === 0) return [];
+    return await getDb()
+      .selectFrom("venues as v")
+      .innerJoin("lessons as l", "l.id", "v.lessonId")
+      .select(["v.id as venueId", "l.image as lessonImage"])
+      .where("v.id", "in", venueIds)
+      .execute();
+  }
+
   public save(venue: Venue) {
     if (UniqueIdHelper.isMissing(venue.id)) return this.create(venue);
     else return this.update(venue);
