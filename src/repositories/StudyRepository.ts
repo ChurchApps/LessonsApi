@@ -51,6 +51,7 @@ export class StudyRepository {
   }
 
   public async loadPublicByProgramIds(programIds: string[]): Promise<Study[]> {
+    if (programIds.length === 0) return [];
     return await getDb().selectFrom("studies").selectAll().where("programId", "in", programIds).where("live", "=", true).orderBy("sort").execute() as Study[];
   }
 
@@ -63,6 +64,7 @@ export class StudyRepository {
   }
 
   public async loadPublicByIds(ids: string[]): Promise<Study[]> {
+    if (ids.length === 0) return [];
     return await getDb().selectFrom("studies").selectAll().where("id", "in", ids).where("live", "=", true).execute() as Study[];
   }
 

@@ -25,6 +25,7 @@ export class AssetRepository {
   }
 
   public async loadByResourceIds(churchId: string, resourceIds: string[]): Promise<Asset[]> {
+    if (resourceIds.length === 0) return [];
     return await getDb().selectFrom("assets").selectAll().where("churchId", "=", churchId).where("resourceId", "in", resourceIds).orderBy("sort").execute() as Asset[];
   }
 

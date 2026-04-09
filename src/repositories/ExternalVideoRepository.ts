@@ -60,6 +60,7 @@ export class ExternalVideoRepository {
   }
 
   public async loadByContentTypeIds(contentType: string, contentIds: string[]): Promise<ExternalVideo[]> {
+    if (contentIds.length === 0) return [];
     return await getDb().selectFrom("externalVideos").selectAll()
       .where("contentType", "=", contentType).where("contentId", "in", contentIds)
       .orderBy("name").execute() as ExternalVideo[];
@@ -78,6 +79,7 @@ export class ExternalVideoRepository {
   }
 
   public async loadByIds(ids: string[]): Promise<ExternalVideo[]> {
+    if (ids.length === 0) return [];
     return await getDb().selectFrom("externalVideos").selectAll().where("id", "in", ids).execute() as ExternalVideo[];
   }
 

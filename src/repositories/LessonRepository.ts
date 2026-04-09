@@ -61,6 +61,7 @@ export class LessonRepository {
   }
 
   public async loadPublicByStudyIds(ids: string[]): Promise<Lesson[]> {
+    if (ids.length === 0) return [];
     return await getDb().selectFrom("lessons").selectAll().where("studyId", "in", ids).where("live", "=", true).orderBy("sort").execute() as Lesson[];
   }
 
@@ -69,6 +70,7 @@ export class LessonRepository {
   }
 
   public async loadPublicByIds(ids: string[]): Promise<Lesson[]> {
+    if (ids.length === 0) return [];
     return await getDb().selectFrom("lessons").selectAll().where("id", "in", ids).where("live", "=", true).execute() as Lesson[];
   }
 

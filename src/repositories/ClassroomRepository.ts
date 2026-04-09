@@ -26,6 +26,7 @@ export class ClassroomRepository {
   }
 
   public async loadForPerson(churchId: string, groupIds: string[]): Promise<Classroom[]> {
+    if (groupIds.length === 0) return [];
     return await getDb().selectFrom("classrooms").selectAll()
       .where("churchId", "=", churchId)
       .where((eb) => eb.or([
@@ -37,6 +38,7 @@ export class ClassroomRepository {
   }
 
   public async loadByIds(churchId: string, ids: string[]): Promise<Classroom[]> {
+    if (ids.length === 0) return [];
     return await getDb().selectFrom("classrooms").selectAll().where("churchId", "=", churchId).where("id", "in", ids).execute() as Classroom[];
   }
 

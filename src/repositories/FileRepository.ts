@@ -43,10 +43,12 @@ export class FileRepository {
   }
 
   public async loadPublicByIds(ids: string[]): Promise<File[]> {
+    if (ids.length === 0) return [];
     return await getDb().selectFrom("files").selectAll().where("id", "in", ids).execute() as File[];
   }
 
   public async loadByIds(churchId: string, ids: string[]): Promise<File[]> {
+    if (ids.length === 0) return [];
     return await getDb().selectFrom("files").selectAll().where("churchId", "=", churchId).where("id", "in", ids).execute() as File[];
   }
 

@@ -41,6 +41,7 @@ export class VariantRepository {
   }
 
   public async loadByResourceIds(churchId: string, resourceIds: string[]): Promise<Variant[]> {
+    if (resourceIds.length === 0) return [];
     return await getDb().selectFrom("variants").selectAll().where("churchId", "=", churchId).where("resourceId", "in", resourceIds).orderBy("name").execute() as Variant[];
   }
 
