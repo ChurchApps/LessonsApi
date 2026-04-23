@@ -19,8 +19,9 @@ export class ZipHelper {
       return true;
     } catch (err: any) {
       if (err.name === "NotFound") return false;
-      console.error(`Failed to check file existence for ${key}:`, err.message);
-      throw err;
+      // A single unreadable file shouldn't block the entire bundle zip — log and skip.
+      console.warn(`Skipping file ${key} due to S3 error:`, err.message);
+      return false;
     }
   }
 
@@ -139,10 +140,7 @@ export class ZipHelper {
           stack: (error as any).stack,
           processingTime: Date.now() - bundleStartTime
         });
-
-        // Reset pending flag so it can be retried later
-        bundle.pendingUpdate = false;
-        await Repositories.getCurrent().bundle.save(bundle);
+        // Leave pendingUpdate=true so the next cron run retries.
       }
       processed++;
     }

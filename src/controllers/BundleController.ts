@@ -199,6 +199,15 @@ export class BundleController extends LessonsBaseController {
     });
   }
 
+  @httpPost("/:id/rezip")
+  public async rezip(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
+    return this.actionWrapper(req, res, async au => {
+      if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
+      await ZipHelper.setBundlePending(au.churchId, id);
+      return { id, pendingUpdate: true };
+    });
+  }
+
   @httpDelete("/:id")
   public async delete(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
     return this.actionWrapper(req, res, async au => {
