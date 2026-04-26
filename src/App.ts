@@ -7,6 +7,11 @@ import express from "express";
 import { CustomAuthProvider } from "@churchapps/apihelper";
 import cors from "cors";
 
+// Kysely's mysql2 driver returns BigInt for ResultSetHeader fields
+// (affectedRows, insertId, etc). Without this, controllers that return repo
+// delete/update results fail with "Do not know how to serialize a BigInt".
+(BigInt.prototype as any).toJSON = function () { return this.toString(); };
+
 export const init = async () => {
   dotenv.config();
   const container = new Container();

@@ -3,6 +3,15 @@ import { getDb } from "../db";
 import { Schedule } from "../models";
 import { UniqueIdHelper } from "../helpers";
 
+// MySQL `date` columns reject full ISO timestamps. Coerce whatever the caller
+// sends (Date, ISO string, or YYYY-MM-DD string) to YYYY-MM-DD.
+function toMysqlDate(value: Date | string | null | undefined): string | null {
+  if (value === null || value === undefined) return null;
+  const d = value instanceof Date ? value : new Date(value);
+  if (isNaN(d.getTime())) return null;
+  return d.toISOString().slice(0, 10);
+}
+
 export class ScheduleRepository {
   public save(schedule: Schedule) {
     if (UniqueIdHelper.isMissing(schedule.id)) return this.create(schedule);
@@ -15,7 +24,7 @@ export class ScheduleRepository {
       id: schedule.id,
       churchId: schedule.churchId,
       classroomId: schedule.classroomId,
-      scheduledDate: schedule.scheduledDate,
+      scheduledDate: toMysqlDate(schedule.scheduledDate),
       externalProviderId: schedule.externalProviderId,
       programId: schedule.programId,
       studyId: schedule.studyId,
@@ -29,7 +38,7 @@ export class ScheduleRepository {
   public async update(schedule: Schedule) {
     await getDb().updateTable("schedules").set({
       classroomId: schedule.classroomId,
-      scheduledDate: schedule.scheduledDate,
+      scheduledDate: toMysqlDate(schedule.scheduledDate),
       externalProviderId: schedule.externalProviderId,
       programId: schedule.programId,
       studyId: schedule.studyId,
