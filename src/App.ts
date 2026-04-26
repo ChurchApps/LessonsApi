@@ -32,6 +32,13 @@ export const init = async () => {
       res.sendStatus(200);
     });
 
+    // Standard JSON / urlencoded parsing for local dev. In Lambda the body
+    // arrives as a Buffer via serverless-express and the custom handler below
+    // takes over (bodyParser is a no-op in that case because the stream is
+    // already consumed).
+    expApp.use(express.json({ limit: "50mb" }));
+    expApp.use(express.urlencoded({ extended: true, limit: "50mb" }));
+
     // Handle body parsing from @codegenie/serverless-express
     expApp.use((req, res, next) => {
       const contentType = req.headers["content-type"] || "";
