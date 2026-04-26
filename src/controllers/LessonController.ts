@@ -211,7 +211,11 @@ export class LessonController extends LessonsBaseController {
       else {
         const resources = await this.repositories.resource.loadByContentTypeId(au.churchId, "lesson", id);
         if (resources.length > 0) return this.json({}, 401);
-        else return await this.repositories.lesson.delete(au.churchId, id);
+        else {
+          await this.repositories.lesson.delete(au.churchId, id);
+          await FileStorageHelper.remove("/lessons/" + id + ".png").catch(() => { });
+          return { id };
+        }
       }
     });
   }

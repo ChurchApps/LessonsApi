@@ -71,8 +71,18 @@ export class ProgramController extends LessonsBaseController {
           program.churchId = au.churchId;
           const p = program;
           const saveFunction = async () => {
-            if (p.image && p.image.startsWith("data:image/")) await this.saveImage(p);
-            return await this.repositories.program.save(p);
+            // Save the program first so it has an id, then upload the image
+            // keyed on that id. (Previously the image was uploaded before the
+            // id existed, so every upload landed at programs/undefined.png.)
+            const dataUrlPending = p.image && p.image.startsWith("data:image/") ? p.image : null;
+            if (dataUrlPending) p.image = "";
+            const saved = await this.repositories.program.save(p);
+            if (dataUrlPending) {
+              saved.image = dataUrlPending;
+              await this.saveImage(saved);
+              await this.repositories.program.save(saved);
+            }
+            return saved;
           };
           promises.push(saveFunction());
         });
@@ -91,7 +101,12 @@ export class ProgramController extends LessonsBaseController {
         const resources = await this.repositories.resource.loadByContentTypeId(au.churchId, "program", id);
         const studies = await this.repositories.study.loadByProgramId(au.churchId, id);
         if (resources.length > 0 || studies.length > 0) return this.json({}, 401);
-        else return await this.repositories.program.delete(au.churchId, id);
+        else {
+          await this.repositories.program.delete(au.churchId, id);
+          // Clean up the uploaded image file (if any) so disk doesn't leak.
+          await FileStorageHelper.remove("/programs/" + id + ".png").catch(() => { });
+          return { id };
+        }
       }
     });
   }

@@ -115,7 +115,11 @@ export class StudyController extends LessonsBaseController {
         const resources = await this.repositories.resource.loadByContentTypeId(au.churchId, "study", id);
         const lessons = await this.repositories.lesson.loadByStudyId(au.churchId, id);
         if (resources.length > 0 || lessons.length > 0) return this.json({}, 401);
-        else return await this.repositories.study.delete(au.churchId, id);
+        else {
+          await this.repositories.study.delete(au.churchId, id);
+          await FileStorageHelper.remove("/studies/" + id + ".png").catch(() => { });
+          return { id };
+        }
       }
     });
   }
