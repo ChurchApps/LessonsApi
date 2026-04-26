@@ -15,7 +15,7 @@ export class FilesHelper {
 
   static async updateSize(file: File) {
     const resp = await Axios.head(file.contentPath);
-    file.size = parseInt(resp.headers["content-length"], 0);
+    file.size = parseInt(String(resp.headers["content-length"]), 10);
     await Repositories.getCurrent().file.save(file);
   }
 
