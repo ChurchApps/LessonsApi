@@ -7,6 +7,11 @@ import express from "express";
 import { CustomAuthProvider } from "@churchapps/apihelper";
 import cors from "cors";
 
+// Kysely's mysql2 driver returns BigInt for ResultSetHeader fields
+// (affectedRows, insertId, etc). Without this, controllers that return repo
+// delete/update results fail with "Do not know how to serialize a BigInt".
+(BigInt.prototype as any).toJSON = function () { return this.toString(); };
+
 export const init = async () => {
   dotenv.config();
   const container = new Container();
@@ -31,6 +36,13 @@ export const init = async () => {
       res.header("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With, Accept, Origin");
       res.sendStatus(200);
     });
+
+    // Standard JSON / urlencoded parsing for local dev. In Lambda the body
+    // arrives as a Buffer via serverless-express and the custom handler below
+    // takes over (bodyParser is a no-op in that case because the stream is
+    // already consumed).
+    expApp.use(express.json({ limit: "50mb" }));
+    expApp.use(express.urlencoded({ extended: true, limit: "50mb" }));
 
     // Handle body parsing from @codegenie/serverless-express
     expApp.use((req, res, next) => {

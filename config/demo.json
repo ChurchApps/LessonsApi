@@ -1,0 +1,10 @@
+{
+  "appEnv": "demo",
+  "appName": "LessonsApi",
+  "contentRoot": "http://localhost:3501/content",
+  "fileStore": "disk",
+  "mailSystem": "",
+  "s3Bucket": "",
+  "transcodePipeline": "",
+  "transcodePreset": ""
+}
