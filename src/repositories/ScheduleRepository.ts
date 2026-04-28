@@ -4,12 +4,13 @@ import { Schedule } from "../models";
 import { UniqueIdHelper } from "../helpers";
 
 // MySQL `date` columns reject full ISO timestamps. Coerce whatever the caller
-// sends (Date, ISO string, or YYYY-MM-DD string) to YYYY-MM-DD.
-function toMysqlDate(value: Date | string | null | undefined): string | null {
-  if (value === null || value === undefined) return null;
+// sends (Date, ISO string, or YYYY-MM-DD string) to a YYYY-MM-DD literal.
+// Wrapped in `sql` so Kysely accepts it for a `Date`-typed column.
+function toMysqlDate(value: Date | string | null | undefined) {
+  if (value === null || value === undefined) return sql<Date>`NULL`;
   const d = value instanceof Date ? value : new Date(value);
-  if (isNaN(d.getTime())) return null;
-  return d.toISOString().slice(0, 10);
+  if (isNaN(d.getTime())) return sql<Date>`NULL`;
+  return sql<Date>`${d.toISOString().slice(0, 10)}`;
 }
 
 export class ScheduleRepository {
