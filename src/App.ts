@@ -37,16 +37,14 @@ export const init = async () => {
       res.sendStatus(200);
     });
 
-    // Standard JSON / urlencoded parsing for local dev. In Lambda the body
-    // arrives as a Buffer via serverless-express and the custom handler below
-    // takes over (bodyParser is a no-op in that case because the stream is
-    // already consumed).
-    expApp.use(express.json({ limit: "50mb" }));
-    expApp.use(express.urlencoded({ extended: true, limit: "50mb" }));
-
-    // Handle body parsing from @codegenie/serverless-express
+    // Custom handler must run BEFORE express.json/urlencoded. In Lambda,
+    // @codegenie/serverless-express stages the body on req.body directly and
+    // leaves the underlying stream unreadable; if body-parser runs first it
+    // throws "stream is not readable" via raw-body. Setting req._body = true
+    // after we've handled the body tells body-parser to skip.
     expApp.use((req, res, next) => {
       const contentType = req.headers["content-type"] || "";
+      let handled = false;
 
       // Handle Buffer instances (most common case with serverless-express)
       if (Buffer.isBuffer(req.body)) {
@@ -60,6 +58,7 @@ export const init = async () => {
         } catch {
           req.body = {};
         }
+        handled = true;
       } else if (req.body && req.body.type === "Buffer" && Array.isArray(req.body.data)) {
       // Handle Buffer-like objects
         try {
@@ -72,6 +71,7 @@ export const init = async () => {
         } catch {
           req.body = {};
         }
+        handled = true;
       } else if (typeof req.body === "string" && req.body.length > 0) {
       // Handle string JSON bodies
         try {
@@ -81,13 +81,17 @@ export const init = async () => {
         } catch {
           // Silently ignore JSON parse errors
         }
+        handled = true;
       }
 
+      if (handled) (req as any)._body = true;
       next();
     });
 
-    // Note: No standard body-parser middleware needed
-    // Custom buffer handling above replaces the need for body-parser
+    // Standard JSON / urlencoded parsing for local dev. In Lambda these are
+    // skipped because the custom handler above sets req._body = true.
+    expApp.use(express.json({ limit: "50mb" }));
+    expApp.use(express.urlencoded({ extended: true, limit: "50mb" }));
   };
 
   const server = app.setConfig(configFunction).build();
