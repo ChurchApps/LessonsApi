@@ -1,12 +1,12 @@
 import { init } from "./App";
 import { Environment } from "./helpers/Environment";
 
-const port = process.env.SERVER_PORT;
+const port = Number(process.env.PORT || process.env.SERVER_PORT || 8090);
 
 Environment.init(process.env.APP_ENV || "dev").then(() => {
   init().then(app => {
-    app.listen(port, () => {
-      console.log(`Server running at http://localhost:${port}/`);
+    app.listen(port, "0.0.0.0", () => {
+      console.log(`Server running on port ${port}`);
     });
   });
 });

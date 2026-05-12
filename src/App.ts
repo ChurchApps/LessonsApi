@@ -4,7 +4,8 @@ import { Container } from "inversify";
 import { InversifyExpressServer } from "inversify-express-utils";
 import { bindings } from "./inversify.config";
 import express from "express";
-import { CustomAuthProvider } from "@churchapps/apihelper";
+import path from "path";
+import { CustomAuthProvider, EnvironmentBase } from "@churchapps/apihelper";
 import cors from "cors";
 
 // Kysely's mysql2 driver returns BigInt for ResultSetHeader fields
@@ -92,6 +93,12 @@ export const init = async () => {
     // skipped because the custom handler above sets req._body = true.
     expApp.use(express.json({ limit: "50mb" }));
     expApp.use(express.urlencoded({ extended: true, limit: "50mb" }));
+
+    // Serve uploaded files from disk when running in self-hosted / disk mode.
+    // S3 deployments expose content via a separate CDN and skip this.
+    if (EnvironmentBase.fileStore !== "S3") {
+      expApp.use("/content", express.static(path.resolve("./content")));
+    }
   };
 
   const server = app.setConfig(configFunction).build();
