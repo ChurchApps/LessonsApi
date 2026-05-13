@@ -1,4 +1,3 @@
-// import Hubspot from "@hubspot/api-client";
 import { Environment } from ".";
 
 
@@ -6,29 +5,21 @@ export class HubspotHelper {
   static contactId: string = "";
   static companyId: string = "";
 
-  private static getClient = () => {
-    const hubspot = require("@hubspot/api-client");
+  private static getClient = async () => {
+    const hubspot = await import("@hubspot/api-client");
     const client = new hubspot.Client({ accessToken: Environment.hubspotKey });
     return client;
   };
 
-  /*
-  static lookupCompany = async (query: string) => {
-    const client = this.getClient();
-    const req: PublicObjectSearchRequest = { query, limit: 1, after: "", sorts: [], properties: [], filterGroups: [] }
-    const response = await client.crm.companies.searchApi.doSearch(req);
-    return response.results[0];
-  }*/
-
   static lookupCompanByChurchId = async (churchId: string) => {
-    const client = this.getClient();
+    const client = await this.getClient();
     const req: any = { filterGroups: [{ filters: [{ propertyName: "church_id", operator: "EQ", value: churchId }] }], limit: 1 };
     const response = await client.crm.companies.searchApi.doSearch(req);
     return response.results[0];
   };
 
   static setProperties = async (companyId: string, properties: any) => {
-    const client = this.getClient();
+    const client = await this.getClient();
     try {
       const response = await client.crm.companies.basicApi.update(companyId, { properties });
       return response;
