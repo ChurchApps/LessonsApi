@@ -11,6 +11,9 @@ export class Environment extends EnvironmentBase {
   static ipGeoKey: string;
   static vimeoToken: string;
   static hubspotKey: string;
+  static mauticUrl: string;
+  static mauticUser: string;
+  static mauticPassword: string;
 
   static async init(environment: string) {
     let file = "dev.json";
@@ -38,10 +41,16 @@ export class Environment extends EnvironmentBase {
       this.hubspotKey = process.env.HUBSPOT_KEY || "";
       this.ipGeoKey = process.env.IP_GEO_KEY || "";
       this.vimeoToken = process.env.VIMEO_TOKEN || "";
+      this.mauticUrl = process.env.MAUTIC_URL || "";
+      this.mauticUser = process.env.MAUTIC_USER || "";
+      this.mauticPassword = process.env.MAUTIC_PASSWORD || "";
     } else {
       this.hubspotKey = process.env.HUBSPOT_KEY || (await AwsHelper.readParameter(`/${environment}/hubspotKey`));
       this.ipGeoKey = process.env.IP_GEO_KEY || (await AwsHelper.readParameter(`/${environment}/ipGeoKey`));
       this.vimeoToken = process.env.VIMEO_TOKEN || (await AwsHelper.readParameter(`/${environment}/vimeoToken`));
+      this.mauticUrl = process.env.MAUTIC_URL || (await AwsHelper.readParameter(`/${environment}/mauticUrl`));
+      this.mauticUser = process.env.MAUTIC_USER || (await AwsHelper.readParameter(`/${environment}/mauticUser`));
+      this.mauticPassword = process.env.MAUTIC_PASSWORD || (await AwsHelper.readParameter(`/${environment}/mauticPassword`));
     }
   }
 }
