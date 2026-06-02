@@ -5,6 +5,7 @@
   "type": "module",
   "main": "dist/index.js",
   "scripts": {
+    "preinstall": "node -e \"if(!(process.env.npm_config_user_agent||'').startsWith('yarn')){console.error('\\n[LessonsApi] This project uses Yarn (Berry). Run \\'yarn install\\' instead of npm/pnpm.\\n');process.exit(1)}\"",
     "clean": "rimraf dist",
     "copy-assets": "ts-node tools/copyAssets",
     "exec-deploy-staging": "serverless deploy --stage Staging",
@@ -28,7 +29,7 @@
     "dev:ts": "tsx src/index.ts",
     "dev": "nodemon --watch src -e ts,ejs --exec \"tsx src/index.ts\"",
     "dev:start": "npm-run-all build start",
-    "dev:old": "nodemon --watch src -e ts,ejs --exec npm run dev:start",
+    "dev:old": "nodemon --watch src -e ts,ejs --exec \"yarn dev:start\"",
     "start": "node .",
     "test": "echo \"Error: no test specified\" && exit 1",
     "serverless-local": "serverless invoke local -f api"
@@ -75,5 +76,11 @@
   },
   "engines": {
     "node": ">=22.0.0"
+  },
+  "packageManager": "yarn@4.15.0",
+  "dependenciesMeta": {
+    "esbuild": {
+      "built": true
+    }
   }
 }

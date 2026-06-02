@@ -32,7 +32,7 @@ export class HealthCheckController {
       status: loaded.length === 1 ? "healthy" : "degraded",
       environment,
       modules: { loaded },
-      timestamp: new Date().toISOString(),
+      timestamp: new Date().toISOString()
     });
   }
 }
