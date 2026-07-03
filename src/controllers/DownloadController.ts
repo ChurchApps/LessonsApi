@@ -59,7 +59,6 @@ export class DownloadController extends LessonsBaseController {
     }
   }
 
-  // Pushes the church's lesson download activity onto its Mautic company record.
   private async updateMautic(churchId: string) {
     if (!Environment.mauticUrl || !Environment.mauticUser || !Environment.mauticPassword) return;
     try {

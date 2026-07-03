@@ -173,7 +173,6 @@ export class VenueController extends LessonsBaseController {
     });
   }
 
-  /*Unused?*/
   @httpGet("/public/lesson/:lessonId")
   public async getPublicForLesson(@requestParam("lessonId") lessonId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
     return this.actionWrapperAnon(req, res, async () => {
@@ -246,7 +245,6 @@ export class VenueController extends LessonsBaseController {
       const actions = await this.repositories.action.loadByLessonId(venue.lessonId);
       const durationData = await DurationHelper.loadDurationData(actions, venue.churchId, this.repositories);
 
-      // Create a single header for the lesson with lesson sections as child items
       const lessonHeader: any = {
         id: venue.id,
         churchId: venue.churchId,
@@ -261,7 +259,6 @@ export class VenueController extends LessonsBaseController {
         children: []
       };
 
-      // Add each lesson section as a child item with totaled duration
       sections.forEach(section => {
         const sectionRoles = roles.filter(r => r.sectionId === section.id);
         const sectionActions: Action[] = [];

@@ -20,12 +20,11 @@ function resolveImport(fromFile, importPath) {
   if (fs.existsSync(resolved) && fs.statSync(resolved).isDirectory()) {
     return importPath + "/index.js";
   }
-  // Otherwise just add .js
   return importPath + ".js";
 }
 
 function fixFile(filePath) {
-  let content = fs.readFileSync(filePath, "utf8");
+  const content = fs.readFileSync(filePath, "utf8");
   const updated = content
     .replace(/(from\s+["'])(\.\.?(?:\/[^"']*)?)(["'])/g, (match, prefix, importPath, suffix) => {
       if (importPath.endsWith(".js") || importPath.endsWith(".json")) return match;

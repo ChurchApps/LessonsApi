@@ -73,7 +73,7 @@ async function runMigrations() {
         }
       }
       return migrations;
-    },
+    }
   };
 
   const migrator = new Migrator({ db, provider });
@@ -124,8 +124,7 @@ async function loadDemoData() {
   }
 }
 
-// Splits a SQL script into statements, treating CREATE PROCEDURE / CREATE FUNCTION
-// blocks (delimited with $$) as a single statement.
+// Handles CREATE PROCEDURE/FUNCTION blocks delimited by $$
 function splitSqlStatements(sqlText: string): string[] {
   const statements: string[] = [];
   const lines = sqlText.split("\n");

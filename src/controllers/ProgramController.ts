@@ -71,9 +71,7 @@ export class ProgramController extends LessonsBaseController {
           program.churchId = au.churchId;
           const p = program;
           const saveFunction = async () => {
-            // Save the program first so it has an id, then upload the image
-            // keyed on that id. (Previously the image was uploaded before the
-            // id existed, so every upload landed at programs/undefined.png.)
+            // Image upload must happen after save so we have an id
             const dataUrlPending = p.image && p.image.startsWith("data:image/") ? p.image : null;
             if (dataUrlPending) p.image = "";
             const saved = await this.repositories.program.save(p);
@@ -103,7 +101,6 @@ export class ProgramController extends LessonsBaseController {
         if (resources.length > 0 || studies.length > 0) return this.json({}, 401);
         else {
           await this.repositories.program.delete(au.churchId, id);
-          // Clean up the uploaded image file (if any) so disk doesn't leak.
           await FileStorageHelper.remove("/programs/" + id + ".png").catch(() => { });
           return { id };
         }

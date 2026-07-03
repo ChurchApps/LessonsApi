@@ -39,7 +39,7 @@ export class BundleController extends LessonsBaseController {
     return this.actionWrapper(req, res, async au => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
 
-      const pendingBundles = await this.repositories.bundle.loadPendingUpdate(50); // Check more for health status
+      const pendingBundles = await this.repositories.bundle.loadPendingUpdate(50);
       const totalBundles = await this.repositories.bundle.loadAll(au.churchId);
 
       // Check for bundles that have been pending for too long (>1 hour)
@@ -100,7 +100,6 @@ export class BundleController extends LessonsBaseController {
       const lookup = promisify(dns.lookup);
 
       try {
-        // Get environment info
         const envInfo = { APP_ENV: process.env.APP_ENV, NODE_ENV: process.env.NODE_ENV, AWS_REGION: process.env.AWS_REGION, AWS_LAMBDA_FUNCTION_NAME: process.env.AWS_LAMBDA_FUNCTION_NAME };
 
         // Get connection string (safely - don't expose password)
@@ -117,7 +116,6 @@ export class BundleController extends LessonsBaseController {
           }
         }
 
-        // DNS lookup for the database hostname
         let dnsResults = {};
         try {
           const result = await lookup(hostname);
@@ -126,7 +124,6 @@ export class BundleController extends LessonsBaseController {
           dnsResults = { hostname: hostname, error: (dnsError as any).message };
         }
 
-        // Get local network info
         const os = require("os");
         const networkInterfaces = os.networkInterfaces();
         const localIPs = [];

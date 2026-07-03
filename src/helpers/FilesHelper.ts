@@ -23,9 +23,7 @@ export class FilesHelper {
     const resource = await Repositories.getCurrent().resource.load(churchId, resourceId);
     const bundle = await Repositories.getCurrent().bundle.load(churchId, resource.bundleId);
     const oldKey = "files/" + bundle.contentType + "/" + bundle.contentId + "/" + resource.id;
-    // FileStorageHelper.removeLocalFolder uses fs.rmdirSync which throws ENOENT
-    // if the folder doesn't exist yet (e.g. resource has no files). That's not
-    // an error worth surfacing — swallow it.
+    // fs.rmdirSync throws ENOENT if folder doesn't exist
     try { await FileStorageHelper.removeFolder(oldKey); } catch { /* folder absent */ }
   }
 

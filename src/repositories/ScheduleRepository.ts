@@ -3,9 +3,7 @@ import { getDb } from "../db";
 import { Schedule } from "../models";
 import { UniqueIdHelper } from "../helpers";
 
-// MySQL `date` columns reject full ISO timestamps. Coerce whatever the caller
-// sends (Date, ISO string, or YYYY-MM-DD string) to a YYYY-MM-DD literal.
-// Wrapped in `sql` so Kysely accepts it for a `Date`-typed column.
+// MySQL date columns reject ISO timestamps; coerce to YYYY-MM-DD via sql<Date>
 function toMysqlDate(value: Date | string | null | undefined) {
   if (value === null || value === undefined) return sql<Date>`NULL`;
   const d = value instanceof Date ? value : new Date(value);

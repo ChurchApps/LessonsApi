@@ -8,9 +8,7 @@ import path from "path";
 import { CustomAuthProvider, EnvironmentBase } from "@churchapps/apihelper";
 import cors from "cors";
 
-// Kysely's mysql2 driver returns BigInt for ResultSetHeader fields
-// (affectedRows, insertId, etc). Without this, controllers that return repo
-// delete/update results fail with "Do not know how to serialize a BigInt".
+// Kysely mysql2 driver returns BigInt for ResultSetHeader fields; serialize to string
 (BigInt.prototype as any).toJSON = function () { return this.toString(); };
 
 export const init = async () => {
@@ -20,7 +18,6 @@ export const init = async () => {
   const app = new InversifyExpressServer(container, null, null, null, CustomAuthProvider);
 
   const configFunction = (expApp: express.Application) => {
-    // Configure CORS first
     expApp.use(
       cors({
         origin: true,
@@ -30,7 +27,6 @@ export const init = async () => {
       })
     );
 
-    // Handle preflight requests early
     expApp.options("*", (req, res) => {
       res.header("Access-Control-Allow-Origin", "*");
       res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, PATCH, OPTIONS");
@@ -38,16 +34,11 @@ export const init = async () => {
       res.sendStatus(200);
     });
 
-    // Custom handler must run BEFORE express.json/urlencoded. In Lambda,
-    // @codegenie/serverless-express stages the body on req.body directly and
-    // leaves the underlying stream unreadable; if body-parser runs first it
-    // throws "stream is not readable" via raw-body. Setting req._body = true
-    // after we've handled the body tells body-parser to skip.
+    // In Lambda, @codegenie/serverless-express stages body directly; run custom handler before body-parser to avoid "stream is not readable" error
     expApp.use((req, res, next) => {
       const contentType = req.headers["content-type"] || "";
       let handled = false;
 
-      // Handle Buffer instances (most common case with serverless-express)
       if (Buffer.isBuffer(req.body)) {
         try {
           const bodyString = req.body.toString("utf8");
@@ -61,7 +52,6 @@ export const init = async () => {
         }
         handled = true;
       } else if (req.body && req.body.type === "Buffer" && Array.isArray(req.body.data)) {
-      // Handle Buffer-like objects
         try {
           const bodyString = Buffer.from(req.body.data).toString("utf8");
           if (contentType.includes("application/json")) {
@@ -74,13 +64,12 @@ export const init = async () => {
         }
         handled = true;
       } else if (typeof req.body === "string" && req.body.length > 0) {
-      // Handle string JSON bodies
         try {
           if (contentType.includes("application/json")) {
             req.body = JSON.parse(req.body);
           }
         } catch {
-          // Silently ignore JSON parse errors
+          // Intentionally swallow parse errors and keep raw body
         }
         handled = true;
       }
@@ -89,13 +78,11 @@ export const init = async () => {
       next();
     });
 
-    // Standard JSON / urlencoded parsing for local dev. In Lambda these are
-    // skipped because the custom handler above sets req._body = true.
+    // Skipped in Lambda (req._body set above), used in local dev
     expApp.use(express.json({ limit: "50mb" }));
     expApp.use(express.urlencoded({ extended: true, limit: "50mb" }));
 
-    // Serve uploaded files from disk when running in self-hosted / disk mode.
-    // S3 deployments expose content via a separate CDN and skip this.
+    // Disk mode only; S3 deployments use separate CDN
     if (EnvironmentBase.fileStore !== "S3") {
       expApp.use("/content", express.static(path.resolve("./content")));
     }
