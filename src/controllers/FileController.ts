@@ -10,8 +10,9 @@ import { Environment } from "../helpers";
 export class FileController extends LessonsBaseController {
   @httpGet("/cleanup")
   public async getCleanup(req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
-    return this.actionWrapperAnon(req, res, async () => {
-      this.repositories.file.cleanUp();
+    return this.actionWrapper(req, res, async au => {
+      if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
+      await this.repositories.file.cleanUp();
       const paths = await this.getOrphanedFiles();
       for (const p of paths) await FileStorageHelper.remove(p);
       return { paths };
@@ -21,7 +22,7 @@ export class FileController extends LessonsBaseController {
   private async getOrphanedFiles() {
     const paths = await FileStorageHelper.list("files/");
     const files: File[] = await this.repositories.file.loadAll();
-    for (let i = paths.length; i >= 0; i--) {
+    for (let i = paths.length - 1; i >= 0; i--) {
       let match = false;
       files.forEach(f => {
         if (f.contentPath?.indexOf(paths[i]) > -1) match = true;
@@ -40,8 +41,8 @@ export class FileController extends LessonsBaseController {
 
   @httpGet("/")
   public async getAll(req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
-    return this.actionWrapperAnon(req, res, async () => {
-      return await this.repositories.file.loadAll();
+    return this.actionWrapper(req, res, async au => {
+      return await this.repositories.file.loadForChurch(au.churchId);
     });
   }
 

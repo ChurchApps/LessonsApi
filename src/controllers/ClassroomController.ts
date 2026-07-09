@@ -104,9 +104,6 @@ export class ClassroomController extends LessonsBaseController {
       const availableVideos = await PlaylistHelper.loadPlaylistVideos(actions);
       await this.logDownload(venue.lessonId, venue.name, currentSchedule.churchId, ipAddress);
       return LibraryHelper.getPlaylist(venue, lesson, sections, actions, availableFiles, availableVideos, false, resolution);
-
-      // if (currentSchedule.externalProviderId) return this.loadPlaylistExternal(currentSchedule);
-      // else return this.loadPlaylistInternal(currentSchedule, ipAddress, resolution);
     });
   }
 
@@ -125,7 +122,7 @@ export class ClassroomController extends LessonsBaseController {
   }
 
   @httpGet("/")
-  public async getAll(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
+  public async getAll(req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
     return this.actionWrapper(req, res, async au => {
       return await this.repositories.classroom.loadByChurchId(au.churchId);
     });

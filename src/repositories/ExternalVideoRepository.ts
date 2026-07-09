@@ -91,10 +91,6 @@ export class ExternalVideoRepository {
     return await getDb().selectFrom("externalVideos").selectAll().where("id", "=", id).executeTakeFirst() as ExternalVideo;
   }
 
-  public async tempLoadNeedingUpdate(): Promise<ExternalVideo[]> {
-    return await getDb().selectFrom("externalVideos").selectAll().where("downloadsExpire", "is", null).execute() as ExternalVideo[];
-  }
-
   public async delete(churchId: string, id: string): Promise<any> {
     return await getDb().deleteFrom("externalVideos").where("id", "=", id).where("churchId", "=", churchId).execute();
   }

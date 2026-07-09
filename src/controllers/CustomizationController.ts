@@ -27,7 +27,7 @@ export class CustomizationController extends LessonsBaseController {
 
   @httpGet("/public/venue/:venueId/:churchId")
   public async getPublicForVenue(@requestParam("venueId") venueId: string, @requestParam("churchId") churchId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
-    return this.actionWrapper(req, res, async _au => {
+    return this.actionWrapperAnon(req, res, async () => {
       const customizations = await this.repositories.customization.loadByVenueId(churchId, venueId);
       if (req.query.classroomId) {
         const appliedToAll = ArrayHelper.getAll(customizations, "classroomId", null);

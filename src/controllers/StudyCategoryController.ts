@@ -46,12 +46,17 @@ export class StudyCategoryController extends LessonsBaseController {
     return this.actionWrapper(req, res, async au => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
       else {
+        const programIds = Array.from(new Set(req.body.map(sc => sc.programId)));
+        for (const programId of programIds) {
+          const program = await this.repositories.program.load(au.churchId, programId);
+          if (!program) return this.json({}, 404);
+        }
         const promises: Promise<StudyCategory>[] = [];
         req.body.forEach(studyCategory => {
           promises.push(this.repositories.studyCategory.save(studyCategory));
         });
         const result = await Promise.all(promises);
-        this.resort(req.body[0].programId, req.body[0].categoryName);
+        await this.resort(req.body[0].programId, req.body[0].categoryName);
         return result;
       }
     });

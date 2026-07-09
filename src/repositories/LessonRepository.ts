@@ -41,17 +41,6 @@ export class LessonRepository {
     return lesson;
   }
 
-  public async tempLessonsNeedingVideoFiles(): Promise<Lesson[]> {
-    return await getDb().selectFrom("lessons as l")
-      .leftJoin("externalVideos as ev", (join) =>
-        join.onRef("ev.contentId", "=", "l.id").on("ev.contentType", "=", "lesson"))
-      .selectAll("l")
-      .where("l.churchId", "=", "L8fupS4MSOo")
-      .where("l.videoEmbedUrl", "is not", null)
-      .where("ev.id", "is", null)
-      .execute() as Lesson[];
-  }
-
   public async loadByStudyId(churchId: string, studyId: string): Promise<Lesson[]> {
     return await getDb().selectFrom("lessons").selectAll().where("churchId", "=", churchId).where("studyId", "=", studyId).orderBy("sort").execute() as Lesson[];
   }

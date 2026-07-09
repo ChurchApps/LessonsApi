@@ -244,9 +244,9 @@ INSERT INTO classrooms (id, churchId, name, recentGroupId, upcomingGroupId) VALU
 -- Schedules: dates are kept far enough in the future that they remain "upcoming"
 -- across long-running test branches. Adjust if running far past mid-2026.
 INSERT INTO schedules (id, churchId, classroomId, scheduledDate, externalProviderId, programId, studyId, lessonId, venueId, displayName) VALUES
-('SCH00000001', 'CHU00000001', 'CLS00000001', '2026-06-07', NULL, 'PGM00000002', 'STU00000003', 'LSN00000005', 'VEN00000006', 'Mary''s Visit (Preschool)'),
-('SCH00000002', 'CHU00000001', 'CLS00000002', '2026-06-07', NULL, 'PGM00000001', 'STU00000001', 'LSN00000001', 'VEN00000002', 'Creation (Elementary)'),
-('SCH00000003', 'CHU00000001', 'CLS00000002', '2026-06-14', NULL, 'PGM00000001', 'STU00000001', 'LSN00000002', 'VEN00000003', 'Noah''s Ark (Elementary)');
+('SCH00000001', 'CHU00000001', 'CLS00000001', '2026-12-06', NULL, 'PGM00000002', 'STU00000003', 'LSN00000005', 'VEN00000006', 'Mary''s Visit (Preschool)'),
+('SCH00000002', 'CHU00000001', 'CLS00000002', '2026-12-06', NULL, 'PGM00000001', 'STU00000001', 'LSN00000001', 'VEN00000002', 'Creation (Elementary)'),
+('SCH00000003', 'CHU00000001', 'CLS00000002', '2026-12-13', NULL, 'PGM00000001', 'STU00000001', 'LSN00000002', 'VEN00000003', 'Noah''s Ark (Elementary)');
 
 END $$
 DELIMITER ;

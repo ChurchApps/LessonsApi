@@ -1,7 +1,7 @@
 {
   "appEnv": "dev",
   "appName": "LessonsApi",
-  "contentRoot": "http://localhost:3402",
+  "contentRoot": "http://localhost:8090/content",
   "fileStore": "disk",
   "mailSystem": "",
   "s3Bucket": "",

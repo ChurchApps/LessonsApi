@@ -3,32 +3,16 @@ import express from "express";
 import { LessonsBaseController } from "./LessonsBaseController";
 import { Bundle, Resource } from "../models";
 import { Permissions } from "../helpers/Permissions";
-import { FilesHelper, Environment } from "../helpers";
+import { FilesHelper } from "../helpers";
 
 import { ZipHelper } from "../helpers/ZipHelper";
 
 @controller("/bundles")
 export class BundleController extends LessonsBaseController {
-  /*
-    @httpGet("/public/lesson/:lessonId")
-    public async getPublicForLesson(@requestParam("lessonId") lessonId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
-      return this.actionWrapperAnon(req, res, async () => {
-        const bundles: Bundle[] = await this.repositories.bundle.loadPublicForLesson(lessonId);
-        if (bundles.length === 0) return bundles;
-        const fileIds = ArrayHelper.getIds(bundles, "fileId");
-        for (let i = fileIds.length; i >= 0; i--) if (!fileIds[i]) fileIds.splice(i, 1);
-        if (fileIds.length > 0) {
-          const files = await this.repositories.file.loadByIds(bundles[0].churchId, fileIds);
-          bundles.forEach(b => { b.file = ArrayHelper.getOne(files, "id", b.fileId) });
-        }
-        return bundles;
-      });
-    }
-  */
-
   @httpGet("/zip")
-  public async zipAll(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
-    return this.actionWrapper(req, res, async _au => {
+  public async zipAll(req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
+    return this.actionWrapper(req, res, async au => {
+      if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
       await ZipHelper.zipPendingBundles();
       return [];
     });
@@ -89,64 +73,6 @@ export class BundleController extends LessonsBaseController {
       }
 
       return { clearedCount: stuckBundles.length, clearedBundleIds: stuckBundles.map(b => b.id), timestamp: new Date().toISOString() };
-    });
-  }
-
-  @httpGet("/debug/connection")
-  public async getConnectionDebug(req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
-    return this.actionWrapper(req, res, async au => {
-      const dns = require("dns");
-      const { promisify } = require("util");
-      const lookup = promisify(dns.lookup);
-
-      try {
-        const envInfo = { APP_ENV: process.env.APP_ENV, NODE_ENV: process.env.NODE_ENV, AWS_REGION: process.env.AWS_REGION, AWS_LAMBDA_FUNCTION_NAME: process.env.AWS_LAMBDA_FUNCTION_NAME };
-
-        // Get connection string (safely - don't expose password)
-        const connectionString = Environment.connectionString;
-        let parsedConnection = {};
-        let hostname = "unknown";
-
-        if (connectionString) {
-          // Parse MySQL connection string format: mysql://user:password@host:port/database
-          const match = connectionString.match(/mysql:\/\/([^:]+):([^@]+)@([^:\/]+):?(\d+)?\/(.+)/);
-          if (match) {
-            parsedConnection = { user: match[1], password: "***HIDDEN***", host: match[3], port: match[4] || "3306", database: match[5] };
-            hostname = match[3];
-          }
-        }
-
-        let dnsResults = {};
-        try {
-          const result = await lookup(hostname);
-          dnsResults = { hostname: hostname, resolvedIP: result.address, family: result.family };
-        } catch (dnsError) {
-          dnsResults = { hostname: hostname, error: (dnsError as any).message };
-        }
-
-        const os = require("os");
-        const networkInterfaces = os.networkInterfaces();
-        const localIPs = [];
-
-        for (const interfaceName in networkInterfaces) {
-          for (const iface of networkInterfaces[interfaceName]) {
-            if (iface.family === "IPv4" && !iface.internal) {
-              localIPs.push({ interface: interfaceName, address: iface.address, netmask: iface.netmask });
-            }
-          }
-        }
-
-        return {
-          timestamp: new Date().toISOString(),
-          environment: envInfo,
-          connectionConfig: parsedConnection,
-          dnsResolution: dnsResults,
-          localNetworkInfo: localIPs,
-          rawConnectionString: connectionString ? connectionString.replace(/:[^:@]*@/, ":***@") : "NOT_SET"
-        };
-      } catch (error) {
-        return { error: "Failed to get connection debug info", message: (error as any).message, timestamp: new Date().toISOString() };
-      }
     });
   }
 
@@ -223,17 +149,17 @@ export class BundleController extends LessonsBaseController {
     const promises: Promise<any>[] = [];
     promises.push(
       this.repositories.asset.loadByResourceId(churchId, resourceId).then(assets =>
-        assets.forEach(async a => {
+        Promise.all(assets.map(async a => {
           await FilesHelper.deleteFile(churchId, a.fileId, a.resourceId);
           await this.repositories.asset.delete(churchId, a.id);
-        }))
+        })))
     );
     promises.push(
       this.repositories.variant.loadByResourceId(churchId, resourceId).then(variants =>
-        variants.forEach(async v => {
+        Promise.all(variants.map(async v => {
           await FilesHelper.deleteFile(churchId, v.fileId, v.resourceId);
           await this.repositories.variant.delete(churchId, v.id);
-        }))
+        })))
     );
 
     await Promise.all(promises);

@@ -64,20 +64,14 @@ export class SectionController extends LessonsBaseController {
     });
   }
 
-  @httpGet("/:id")
-  public async get(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
-    return this.actionWrapperAnon(req, res, async () => {
-      return await this.repositories.section.load(id);
-    });
-  }
-
   @httpGet("/copy/:sourceSectionId/:destVenueId")
   public async copy(@requestParam("sourceSectionId") sourceSectionId: string, @requestParam("destVenueId") destVenueId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
     return this.actionWrapper(req, res, async au => {
+      if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
       const sourceSection: Section = await this.repositories.section.load(sourceSectionId);
       const destVenue: Venue = await this.repositories.venue.load(au.churchId, destVenueId);
 
-      if (destVenue.churchId !== au.churchId) return this.denyAccess(["Access denied"]);
+      if (!sourceSection || sourceSection.churchId !== au.churchId || !destVenue || destVenue.churchId !== au.churchId) return this.denyAccess(["Access denied"]);
       else {
         let newSection = { ...sourceSection };
         newSection.venueId = destVenueId;

@@ -13,9 +13,7 @@ export class Environment extends EnvironmentBase {
   static async init(environment: string) {
     const data = await this.initBase(environment, { appName: "lessonsApi", fileMap: { selfhost: "selfhost.json" } });
 
-    if (environment === "selfhost") {
-      this.contentRoot = process.env.CONTENT_ROOT || this.contentRoot;
-    }
+    this.contentRoot = process.env.CONTENT_ROOT || this.contentRoot;
 
     this.transcodePipeline = data.transcodePipeline;
     this.transcodePreset = data.transcodePreset;

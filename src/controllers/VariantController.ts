@@ -10,7 +10,8 @@ import { TranscodeHelper } from "../helpers/TranscodeHelper";
 export class VariantController extends LessonsBaseController {
   @httpGet("/createWebms")
   public async createWebms(req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
-    return this.actionWrapperAnon(req, res, async () => {
+    return this.actionWrapper(req, res, async au => {
+      if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
       const items = await this.repositories.resource.loadNeedingWebm();
       for (const item of items) {
         try {
@@ -19,24 +20,9 @@ export class VariantController extends LessonsBaseController {
           console.log(ex);
         }
       }
+      return this.json({});
     });
   }
-
-  /*
-  @httpGet("/createWebms")
-  public async createWebms(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
-    return this.actionWrapperAnon(req, res, async () => {
-      const items = await this.repositories.resource.loadNeedingWebm();
-      if (items.length > 0) {
-        const item = items[0];
-        await TranscodeHelper.tmpProcessItem(item.churchId, item.id, item.name, item.contentPath);
-      }
-      for (const item of items) {
-        await TranscodeHelper.tmpProcessItem(item.churchId, item.id, item.name, item.contentPath);
-      }
-    });
-  }
-  */
 
   @httpGet("/:id")
   public async get(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
@@ -78,10 +64,7 @@ export class VariantController extends LessonsBaseController {
           );
         });
         const result = await Promise.all(promises);
-        req.body.forEach(async variant => {
-          await TranscodeHelper.createWebms(variant.resourceId);
-        });
-
+        await Promise.all(req.body.map(variant => TranscodeHelper.createWebms(variant.resourceId)));
         return result;
       }
     });

@@ -73,7 +73,6 @@ export class AddOnController extends LessonsBaseController {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
       else {
         const promises: Promise<AddOn>[] = [];
-        // req.body.forEach(program => { program.churchId = au.churchId; promises.push(this.repositories.program.save(program)); });
         req.body.forEach(addOn => {
           addOn.churchId = au.churchId;
           const a = addOn;

@@ -66,7 +66,6 @@ export class ProgramController extends LessonsBaseController {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
       else {
         const promises: Promise<Program>[] = [];
-        // req.body.forEach(program => { program.churchId = au.churchId; promises.push(this.repositories.program.save(program)); });
         req.body.forEach(program => {
           program.churchId = au.churchId;
           const p = program;

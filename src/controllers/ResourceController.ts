@@ -8,25 +8,6 @@ import { ArrayHelper, FileStorageHelper } from "@churchapps/apihelper";
 
 @controller("/resources")
 export class ResourceController extends LessonsBaseController {
-  /*
-  @httpGet("/public/lesson/:lessonId")
-  public async getPublicForLesson(@requestParam("lessonId") lessonId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
-    return this.actionWrapperAnon(req, res, async () => {
-      const resources: Resource[] = await this.repositories.resource.loadPublicForLesson(lessonId);
-      if (resources.length === 0) return resources;
-
-      const resourceIds = ArrayHelper.getIds(resources, "id");
-      const variants = await this.repositories.variant.loadByResourceIds(resources[0].churchId, resourceIds);
-      const assets = await this.repositories.asset.loadByResourceIds(resources[0].churchId, resourceIds);
-
-      const fileIds = ArrayHelper.getIds(variants, "fileId").concat(ArrayHelper.getIds(assets, "fileId"));
-      const files = await this.repositories.file.loadByIds(resources[0].churchId, fileIds);
-
-      resources.forEach(r => this.appendVariantsAssets(r, variants, assets, files));
-      return resources;
-    });
-  }*/
-
   @httpGet("/:id")
   public async get(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
     return this.actionWrapper(req, res, async au => {
@@ -74,17 +55,17 @@ export class ResourceController extends LessonsBaseController {
         const promises: Promise<any>[] = [];
         promises.push(
           this.repositories.asset.loadByResourceId(au.churchId, id).then(assets =>
-            assets.forEach(async a => {
+            Promise.all(assets.map(async a => {
               await FilesHelper.deleteFile(au.churchId, a.fileId, a.resourceId);
               await this.repositories.asset.delete(au.churchId, a.id);
-            }))
+            })))
         );
         promises.push(
           this.repositories.variant.loadByResourceId(au.churchId, id).then(variants =>
-            variants.forEach(async v => {
+            Promise.all(variants.map(async v => {
               await FilesHelper.deleteFile(au.churchId, v.fileId, v.resourceId);
               await this.repositories.variant.delete(au.churchId, v.id);
-            }))
+            })))
         );
 
         await Promise.all(promises);
@@ -97,16 +78,6 @@ export class ResourceController extends LessonsBaseController {
       }
     });
   }
-
-  /*
-  private async appendVariantsAssets(resource: Resource, allVariants: Variant[], allAssets: Asset[], allFiles: File[]) {
-    resource.variants = ArrayHelper.getAll(allVariants, "resourceId", resource.id);
-    resource.assets = ArrayHelper.getAll(allAssets, "resourceId", resource.id);
-
-    resource.variants.forEach(v => v.file = ArrayHelper.getOne(allFiles, "id", v.fileId));
-    resource.assets.forEach(a => a.file = ArrayHelper.getOne(allFiles, "id", a.fileId));
-
-  }*/
 
   private async checkMoveFiles(resource: Resource) {
     const existingResource = await this.repositories.resource.load(resource.churchId, resource.id);

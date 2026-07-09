@@ -7,68 +7,6 @@ import { VimeoHelper } from "../helpers/VimeoHelper";
 
 @controller("/externalVideos")
 export class ExternalVideoController extends LessonsBaseController {
-  /*
-    @httpGet("/public/lesson/:lessonId")
-    public async getPublicForLesson(@requestParam("lessonId") lessonId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
-      return this.actionWrapperAnon(req, res, async () => {
-        const externalVideos: ExternalVideo[] = await this.repositories.externalVideo.loadPublicForLesson(lessonId);
-        return externalVideos;
-      });
-    }
-  */
-
-  @httpGet("/test2")
-  public async test2(req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
-    return this.actionWrapperAnon(req, res, async () => {
-      const videos = await this.repositories.externalVideo.tempLoadNeedingUpdate();
-
-      for (const ev of videos) {
-        try {
-          await VimeoHelper.updateVimeoLinks(ev);
-        } catch (e) {
-          console.log(e);
-        }
-      }
-
-      return { status: "success" };
-    });
-  }
-
-  /*
-   @httpGet("/test")
-   public async test(req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
-     return this.actionWrapperAnon(req, res, async () => {
-
-       const lessons = await this.repositories.lesson.tempLessonsNeedingVideoFiles();
-
-       for (const lesson of lessons) {
-         try {
-           const videoId = lesson.videoEmbedUrl.replace("https://player.vimeo.com/video/", "").split("?")[0];
-           const vimeo = await VimeoHelper.getVideoDetails(videoId);
-           const ev: ExternalVideo = {
-             churchId: lesson.churchId,
-             contentId: lesson.id,
-             contentType: "lesson",
-             videoProvider: "vimeo",
-             videoId,
-             download1080: vimeo.download1080p,
-             download4k: vimeo.downlaod4k,
-             download720: vimeo.download720p,
-             name: lesson.name + " Video",
-             seconds: vimeo.duration,
-             loopVideo: false
-           }
-           await this.repositories.externalVideo.save(ev);
-         } catch (e) {
-           console.log(e);
-
-         }
-       }
-
-       return { status: "success" }
-     });
-   }*/
-
   @httpGet("/download/:id")
   public async downloadRedirect(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
     return this.actionWrapperAnon(req, res, async () => {
@@ -127,8 +65,7 @@ export class ExternalVideoController extends LessonsBaseController {
                 externalVideo.play1080 = vimeo.play1080p;
                 externalVideo.play4k = vimeo.play4k;
                 externalVideo.thumbnail = vimeo.thumbnail;
-                this.repositories.externalVideo.save(externalVideo);
-                return externalVideo;
+                return this.repositories.externalVideo.save(externalVideo);
               })
             );
           } else {

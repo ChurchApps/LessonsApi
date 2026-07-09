@@ -7,22 +7,6 @@ import { HubspotHelper } from "../helpers/HubspotHelper";
 
 @controller("/downloads")
 export class DownloadController extends LessonsBaseController {
-  /*
-    @httpGet("/updateHubspot")
-    public async addHubspot(req: express.Request<{}, {}, []>, res: express.Response): Promise<any> {
-      return this.actionWrapperAnon(req, res, async () => {
-        const data = await this.repositories.download.getDownloadCounts();
-        for (const d of data) {
-          const comp = await HubspotHelper.lookupCompanByChurchId(d.churchId);
-          if (comp) {
-            const downloadDate = new Date(d.lastDownload).toISOString().split('T')[0];
-            await HubspotHelper.setProperties(comp.id, { lessons_downloaded: d.downloadCount, last_lesson_downloaded: downloadDate });
-          }
-        }
-      });
-    }
-  */
-
   @httpPost("/")
   public async save(req: express.Request<{}, {}, Download[]>, res: express.Response): Promise<any> {
     return this.actionWrapper(req, res, async () => {

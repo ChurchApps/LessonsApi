@@ -22,8 +22,10 @@ export class ScheduleController extends LessonsBaseController {
 
   @httpGet("/:id")
   public async get(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
-    return this.actionWrapperAnon(req, res, async () => {
-      return await this.repositories.schedule.load(id);
+    return this.actionWrapper(req, res, async au => {
+      const schedule = await this.repositories.schedule.load(id);
+      if (!schedule || schedule.churchId !== au.churchId) return this.json({}, 404);
+      return schedule;
     });
   }
 
