@@ -1,5 +1,6 @@
 import { controller, httpPost, httpGet, requestParam, httpDelete } from "inversify-express-utils";
 import express from "express";
+import path from "path";
 import { LessonsBaseController } from "./LessonsBaseController";
 import { File } from "../models";
 import { Permissions } from "../helpers/Permissions";
@@ -73,7 +74,7 @@ export class FileController extends LessonsBaseController {
     return this.actionWrapper(req, res, async au => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
       else {
-        const key = "/files/" + contentType + "/" + contentId + "/" + req.body.fileName;
+        const key = "/files/" + FileController.sanitizeKeyPart(contentType) + "/" + FileController.sanitizeKeyPart(contentId) + "/" + FileController.sanitizeKeyPart(req.body.fileName);
         const result = Environment.fileStore === "S3" ? await AwsHelper.S3PresignedUrl(key) : {};
         return result;
       }
@@ -87,7 +88,7 @@ export class FileController extends LessonsBaseController {
       else {
         const resource = await this.repositories.resource.load(au.churchId, req.body.resourceId);
         const bundle = await this.repositories.bundle.load(au.churchId, resource.bundleId);
-        const key = "/files/" + bundle.contentType + "/" + bundle.contentId + "/" + resource.id + "/" + req.body.fileName;
+        const key = "/files/" + bundle.contentType + "/" + bundle.contentId + "/" + resource.id + "/" + FileController.sanitizeKeyPart(req.body.fileName);
         const result = Environment.fileStore === "S3" ? await AwsHelper.S3PresignedUrl(key) : {};
         return result;
       }
@@ -105,17 +106,23 @@ export class FileController extends LessonsBaseController {
     });
   }
 
+  // strip path separators and parent refs so request-supplied values can't escape the content directory
+  private static sanitizeKeyPart(value: string) {
+    return path.basename(value || "").replace(/\.\.+/g, ".");
+  }
+
   private async saveFile(file: File) {
-    let path = "";
+    file.fileName = FileController.sanitizeKeyPart(file.fileName);
+    let folder = "";
 
     if (file.resourceId) {
       const resource = await this.repositories.resource.load(file.churchId, file.resourceId);
       const bundle = await this.repositories.bundle.load(file.churchId, resource.bundleId);
-      path = "/files/" + bundle.contentType + "/" + bundle.contentId + "/" + resource.id + "/";
+      folder = "/files/" + bundle.contentType + "/" + bundle.contentId + "/" + resource.id + "/";
     } else {
-      path = "/files/" + file.contentType + "/" + file.contentId + "/";
+      folder = "/files/" + FileController.sanitizeKeyPart(file.contentType) + "/" + FileController.sanitizeKeyPart(file.contentId) + "/";
     }
-    const key = path + file.fileName;
+    const key = folder + file.fileName;
 
     if (file.id) {
       // delete existing uploadFile

@@ -65,8 +65,10 @@ export class ActionController extends LessonsBaseController {
 
   @httpGet("/:id")
   public async get(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
-    return this.actionWrapperAnon(req, res, async () => {
-      return await this.repositories.action.load(id);
+    return this.actionWrapper(req, res, async au => {
+      const action = await this.repositories.action.load(id);
+      if (!action || action.churchId !== au.churchId) return this.json({}, 404);
+      return action;
     });
   }
 

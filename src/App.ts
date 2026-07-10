@@ -88,6 +88,19 @@ export const init = async () => {
     }
   };
 
+  app.setErrorConfig((expApp) => {
+    expApp.use((error: any, req: express.Request, res: express.Response, _next: express.NextFunction) => {
+      console.error("Global error handler:", error);
+      const statusCode = error.statusCode || error.status || 500;
+      const message = error.message || "Internal Server Error";
+      res.status(statusCode).json({ error: { message, status: statusCode, timestamp: new Date().toISOString(), path: req.path } });
+    });
+
+    expApp.use((req: express.Request, res: express.Response) => {
+      res.status(404).json({ error: { message: "Endpoint not found", status: 404, timestamp: new Date().toISOString(), path: req.path } });
+    });
+  });
+
   const server = app.setConfig(configFunction).build();
   return server;
 };
