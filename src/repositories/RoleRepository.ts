@@ -23,6 +23,10 @@ export class RoleRepository {
     return await getDb().selectFrom("roles").selectAll().where("lessonId", "=", lessonId).orderBy("sort").execute() as Role[];
   }
 
+  public async loadBySectionId(churchId: string, sectionId: string): Promise<Role[]> {
+    return await getDb().selectFrom("roles").selectAll().where("churchId", "=", churchId).where("sectionId", "=", sectionId).orderBy("sort").execute() as Role[];
+  }
+
   public async loadPublicAll(): Promise<Role[]> {
     return await getDb().selectFrom("roles").selectAll().orderBy("sort").execute() as Role[];
   }

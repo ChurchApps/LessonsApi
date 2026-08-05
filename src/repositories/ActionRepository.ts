@@ -62,6 +62,10 @@ export class ActionRepository {
     return await getDb().selectFrom("actions").selectAll().where("lessonId", "=", lessonId).orderBy("sort").execute() as Action[];
   }
 
+  public async loadByRoleId(churchId: string, roleId: string): Promise<Action[]> {
+    return await getDb().selectFrom("actions").selectAll().where("churchId", "=", churchId).where("roleId", "=", roleId).orderBy("sort").execute() as Action[];
+  }
+
   public async loadPublicAll(): Promise<Action[]> {
     return await getDb().selectFrom("actions").selectAll().orderBy("sort").execute() as Action[];
   }

@@ -15,6 +15,14 @@ export class ActionController extends LessonsBaseController {
     });
   }
 
+  @httpGet("/role/:roleId")
+  public async getForRole(@requestParam("roleId") roleId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
+    return this.actionWrapper(req, res, async au => {
+      if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
+      else return await this.repositories.action.loadByRoleId(au.churchId, roleId);
+    });
+  }
+
   @httpGet("/public/feed/:id")
   public async getPublicFeed(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
     return this.actionWrapperAnon(req, res, async () => {
