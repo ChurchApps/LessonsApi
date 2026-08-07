@@ -4,7 +4,7 @@ import { LessonsBaseController } from "./LessonsBaseController";
 import { Action, Classroom, Download, ExternalVideo, Lesson, Schedule, Venue } from "../models";
 import { Permissions } from "../helpers/Permissions";
 import { PlaylistHelper } from "../helpers/PlaylistHelper";
-import { Environment } from "../helpers";
+import { Environment, MauticHelper } from "../helpers";
 import { ArrayHelper } from "@churchapps/apihelper";
 import { ExternalProviderHelper } from "../helpers/ExternalProviderHelper";
 import { LibraryHelper } from "../helpers/LibraryHelper";
@@ -195,6 +195,9 @@ export class ClassroomController extends LessonsBaseController {
   public async logDownload(lessonId: string, venueName: string, churchId: string, ipAddress: string) {
     const download: Download = { lessonId, churchId, ipAddress, downloadDate: new Date(), fileName: "Playlist: " + venueName };
     const existing = await this.repositories.download.loadExisting(download);
-    if (!existing) await this.repositories.download.save(download);
+    if (!existing) {
+      await this.repositories.download.save(download);
+      MauticHelper.logLessonDownload(churchId, lessonId).catch(() => {}); // fire and forget — anonymous device download, logs at company level
+    }
   }
 }
