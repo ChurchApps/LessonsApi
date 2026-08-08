@@ -7,13 +7,14 @@ export class VimeoHelper {
   public static async updateVimeoLinks(ev: ExternalVideo) {
     if (!Environment.vimeoToken) return ev;
     const vimeo = await VimeoHelper.getVideoDetails(ev.videoId);
-    ev.download1080 = vimeo.download1080p;
-    ev.download4k = vimeo.download4k;
-    ev.download720 = vimeo.download720p;
-    ev.play1080 = vimeo.play1080p;
-    ev.play4k = vimeo.play4k;
-    ev.play720 = vimeo.play720p;
-    ev.thumbnail = vimeo.thumbnail;
+    // Vimeo omits file entries mid-transcode; keep the old link rather than blanking a working one.
+    ev.download1080 = vimeo.download1080p || ev.download1080;
+    ev.download4k = vimeo.download4k || ev.download4k;
+    ev.download720 = vimeo.download720p || ev.download720;
+    ev.play1080 = vimeo.play1080p || ev.play1080;
+    ev.play4k = vimeo.play4k || ev.play4k;
+    ev.play720 = vimeo.play720p || ev.play720;
+    ev.thumbnail = vimeo.thumbnail || ev.thumbnail;
     ev.downloadsExpire = vimeo.downloadsExpire;
     await Repositories.getCurrent().externalVideo.save(ev);
     return ev;

@@ -1,4 +1,5 @@
 jest.mock("../../repositories", () => ({ Repositories: { getCurrent: jest.fn() } }));
+jest.mock("../VimeoHelper", () => ({ VimeoHelper: { updateVimeoLinks: jest.fn(async (ev: any) => ev) } }));
 jest.mock("@churchapps/apihelper", () => ({
   __esModule: true,
   ArrayHelper: {
@@ -9,6 +10,7 @@ jest.mock("@churchapps/apihelper", () => ({
 
 import { PlaylistHelper } from "../PlaylistHelper";
 import { Repositories } from "../../repositories";
+import { VimeoHelper } from "../VimeoHelper";
 import { Action } from "../../models";
 
 describe("PlaylistHelper.getBestFiles", () => {
@@ -60,5 +62,44 @@ describe("PlaylistHelper.loadPlaylistVideos", () => {
 
     expect(videos.map((v: any) => v.id)).toEqual(["v1", "v2"]);
     expect(repo.externalVideo.loadByContentTypeIds).toHaveBeenCalledWith("addOn", ["ao1"]);
+  });
+
+  it("refreshes expired Vimeo links and leaves fresh ones alone", async () => {
+    const future = new Date(Date.now() + 3600000);
+    const past = new Date(Date.now() - 3600000);
+    const repo = {
+      externalVideo: {
+        loadByIds: jest.fn(async () => [
+          { id: "expired", videoProvider: "Vimeo", downloadsExpire: past },
+          { id: "fresh", videoProvider: "Vimeo", downloadsExpire: future },
+          { id: "noDate", videoProvider: "Vimeo" },
+          { id: "youtube", videoProvider: "YouTube", downloadsExpire: past }
+        ]),
+        loadByContentTypeIds: jest.fn(async () => [])
+      }
+    };
+    (Repositories.getCurrent as jest.Mock).mockReturnValue(repo);
+    (VimeoHelper.updateVimeoLinks as jest.Mock).mockClear();
+
+    const actions: Action[] = [{ externalVideoId: "any" }];
+    await PlaylistHelper.loadPlaylistVideos(actions);
+
+    const refreshed = (VimeoHelper.updateVimeoLinks as jest.Mock).mock.calls.map(c => c[0].id).sort();
+    expect(refreshed).toEqual(["expired", "noDate"]);
+  });
+
+  it("serves stale links when a Vimeo refresh fails", async () => {
+    const past = new Date(Date.now() - 3600000);
+    const repo = {
+      externalVideo: {
+        loadByIds: jest.fn(async () => [{ id: "expired", videoProvider: "vimeo", downloadsExpire: past, play720: "stale" }]),
+        loadByContentTypeIds: jest.fn(async () => [])
+      }
+    };
+    (Repositories.getCurrent as jest.Mock).mockReturnValue(repo);
+    (VimeoHelper.updateVimeoLinks as jest.Mock).mockRejectedValueOnce(new Error("vimeo down"));
+
+    const videos = await PlaylistHelper.loadPlaylistVideos([{ externalVideoId: "any" }]);
+    expect(videos[0].play720).toBe("stale");
   });
 });

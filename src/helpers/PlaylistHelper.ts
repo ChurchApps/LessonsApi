@@ -1,6 +1,7 @@
 import { Repositories } from "../repositories";
 import { ArrayHelper } from "@churchapps/apihelper";
-import { Action } from "../models";
+import { Action, ExternalVideo } from "../models";
+import { VimeoHelper } from "./VimeoHelper";
 
 export class PlaylistHelper {
   public static async loadPlaylistVideos(actions: Action[]) {
@@ -12,7 +13,18 @@ export class PlaylistHelper {
     const addOnVideos = addOnIds.length === 0 ? [] : await repo.externalVideo.loadByContentTypeIds("addOn", addOnIds);
     videos.push(...addOnVideos);
 
+    await this.refreshExpiredLinks(videos);
     return videos;
+  }
+
+  // Playlists serve stored play720/play1080 Vimeo links, which are signed and expire;
+  // refresh stale ones here or players get dead URLs. On Vimeo failure keep stale links.
+  private static async refreshExpiredLinks(videos: ExternalVideo[]) {
+    const now = new Date();
+    const expired = videos.filter(v => v.videoProvider?.toLowerCase() === "vimeo" && (!v.downloadsExpire || new Date(v.downloadsExpire) < now));
+    await Promise.all(expired.map(async v => {
+      try { await VimeoHelper.updateVimeoLinks(v); } catch (e) { console.error("Failed to refresh Vimeo links for video " + v.id, e); }
+    }));
   }
 
   public static async loadPlaylistFiles(actions: Action[]) {
