@@ -38,6 +38,14 @@ export class MauticHelper {
     }
   }
 
+  // Mautic's lead_fields.alias is varchar(25) and over-length writes are silently dropped
+  // ponytail: plain truncation — two programs sharing the first 11 chars would collide;
+  // add a mauticLastDownloadField column on programs if that ever happens.
+  public static fieldAlias(slug: string) {
+    const suffix = "_last_download";
+    return slug.replace(/-/g, "_").slice(0, 25 - suffix.length) + suffix;
+  }
+
   private static async loadSlugs(lessonId: string) {
     // Curriculum belongs to the provider's church, so use the church-agnostic public loaders
     const repositories = Repositories.getCurrent();
@@ -47,7 +55,7 @@ export class MauticHelper {
     if (!program?.slug) return null;
     return {
       tag: program.slug,
-      field: program.slug.replace(/-/g, "_") + "_last_download",
+      field: this.fieldAlias(program.slug),
       path: `/${program.slug}/${study.slug}/${lesson.slug}`
     };
   }
