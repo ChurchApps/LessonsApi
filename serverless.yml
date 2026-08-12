@@ -35,6 +35,9 @@ functions:
           path: /
           method: ANY
     vpc: ${self:custom.vpcSettings.current}
+  mauticSync:
+    handler: lambda.mauticSync
+    vpc: ${self:custom.vpcSettings.current}
   videoPingback:
     handler: lambda.videoPingback
     vpc: ${self:custom.vpcSettings.current}

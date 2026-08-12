@@ -197,7 +197,7 @@ export class ClassroomController extends LessonsBaseController {
     const existing = await this.repositories.download.loadExisting(download);
     if (!existing) {
       await this.repositories.download.save(download);
-      MauticHelper.logLessonDownload(churchId, lessonId).catch(() => {}); // fire and forget — anonymous device download, logs at company level
+      await MauticHelper.queueLessonDownload(churchId, lessonId); // anonymous device download, logs at company level
     }
   }
 }

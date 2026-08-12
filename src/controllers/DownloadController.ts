@@ -25,7 +25,8 @@ export class DownloadController extends LessonsBaseController {
       // Only update HubSpot/Mautic if there's a valid churchId
       if (req.body[0].churchId && req.body[0].churchId.trim() !== "") {
         await this.updateHubspot(req.body[0].churchId);
-        MauticHelper.logLessonDownload(req.body[0].churchId, req.body[0].lessonId, au).catch(() => {}); // fire and forget — never block a download
+        // Awaits only the async-invoke enqueue (~50ms); the Mautic chain runs in the mauticSync Lambda
+        await MauticHelper.queueLessonDownload(req.body[0].churchId, req.body[0].lessonId, au);
       }
       return result;
     });

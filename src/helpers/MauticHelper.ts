@@ -1,8 +1,33 @@
+import { InvokeCommand, LambdaClient } from "@aws-sdk/client-lambda";
 import { AuthenticatedUser } from "@churchapps/apihelper";
 import { Environment } from "./Environment";
 import { Repositories } from "../repositories";
 
 export class MauticHelper {
+  private static lambdaClient: LambdaClient;
+
+  // On Lambda, async-invoke the mauticSync function so the download response returns immediately
+  // (a detached promise would freeze with the container). Elsewhere (dev/self-host) the process
+  // stays alive, so plain fire-and-forget is safe.
+  public static async queueLessonDownload(churchId: string, lessonId?: string, au?: AuthenticatedUser) {
+    const fnName = process.env.AWS_LAMBDA_FUNCTION_NAME;
+    if (!fnName) {
+      this.logLessonDownload(churchId, lessonId, au).catch(() => {});
+      return;
+    }
+    try {
+      if (!this.lambdaClient) this.lambdaClient = new LambdaClient({});
+      const payload = { churchId, lessonId, au: au ? { email: au.email, firstName: au.firstName, lastName: au.lastName } : undefined };
+      await this.lambdaClient.send(new InvokeCommand({
+        FunctionName: fnName.replace(/-api$/, "-mauticSync"),
+        InvocationType: "Event",
+        Payload: JSON.stringify(payload)
+      }));
+    } catch {
+      // Never block a download because the enqueue failed
+    }
+  }
+
   // Logs a lesson download to Mautic. With an authenticated user, data lands on the person's contact;
   // anonymous device downloads (FreePlay/classroom players) land on the church's company record instead.
   public static async logLessonDownload(churchId: string, lessonId?: string, au?: AuthenticatedUser) {
@@ -24,15 +49,10 @@ export class MauticHelper {
       // Per-program stamps only stick if marketing has created the field in Mautic; unknown aliases are silently ignored
       if (slugs) companyFields[slugs.field] = new Date().toISOString();
       await this.request(`/api/companies/${companyId}/edit`, "PATCH", companyFields);
-      if (!slugs) return;
-      if (au?.email) {
-        const contact = await this.upsertContact(au, slugs);
-        if (!contact?.id) return;
-        await this.request(`/api/companies/${companyId}/contact/${contact.id}/add`, "POST");
-        await this.upsertLessonDownloadItem("contact", contact.id, slugs.path);
-      } else {
-        await this.upsertLessonDownloadItem("company", companyId, slugs.path);
-      }
+      if (!slugs || !au?.email) return;
+      const contact = await this.upsertContact(au, slugs);
+      if (!contact?.id) return;
+      await this.request(`/api/companies/${companyId}/contact/${contact.id}/add`, "POST");
     } catch {
       // Never block a download because Mautic is unavailable
     }
@@ -53,11 +73,7 @@ export class MauticHelper {
     const study = lesson?.studyId ? await repositories.study.loadPublic(lesson.studyId) : null;
     const program = study?.programId ? await repositories.program.loadPublic(study.programId) : null;
     if (!program?.slug) return null;
-    return {
-      tag: program.slug,
-      field: this.fieldAlias(program.slug),
-      path: `/${program.slug}/${study.slug}/${lesson.slug}`
-    };
+    return { tag: program.slug, field: this.fieldAlias(program.slug) };
   }
 
   private static async upsertContact(au: AuthenticatedUser, slugs: { tag: string; field: string }) {
@@ -73,27 +89,11 @@ export class MauticHelper {
     return json?.contact;
   }
 
-  // Per-lesson last-download log via the Mautic Custom Objects plugin ("lesson_download" object, "last_download" date field).
-  // The plugin isn't installed yet — these calls 404 harmlessly until it is; verify routes against the live instance then.
-  private static async upsertLessonDownloadItem(entityType: "contact" | "company", entityId: string, path: string) {
-    const base = "/api/custom/objects/lesson_download/items";
-    const today = new Date().toISOString().split("T")[0];
-    const search = await this.request(`${base}?search=${encodeURIComponent(path)}&filterEntityType=${entityType}&filterEntityId=${entityId}`);
-    const items = Object.values(search?.data || {}) as any[];
-    const existing = items.find(i => i.name === path);
-    if (existing) {
-      await this.request(`${base}/${existing.id}/edit`, "PATCH", { fields: { last_download: today } });
-    } else {
-      const json = await this.request(`${base}/new`, "POST", { name: path, fields: { last_download: today } });
-      const itemId = json?.data?.id || json?.item?.id || json?.id;
-      if (itemId) await this.request(`${base}/${itemId}/link/${entityType}/${entityId}`, "POST");
-    }
-  }
-
   private static async request(path: string, method = "GET", body?: any): Promise<any> {
     const headers: any = { Authorization: "Basic " + Buffer.from(`${Environment.mauticUser}:${Environment.mauticPassword}`).toString("base64") };
     if (body) headers["Content-Type"] = "application/json";
-    const resp = await fetch(Environment.mauticUrl + path, { method, headers, body: body ? JSON.stringify(body) : undefined });
+    // Off the request path now, but still bound each call so a hung Mautic can't pin the sync Lambda
+    const resp = await fetch(Environment.mauticUrl + path, { method, headers, body: body ? JSON.stringify(body) : undefined, signal: AbortSignal.timeout(4000) });
     return resp.json().catch(() => null);
   }
 }

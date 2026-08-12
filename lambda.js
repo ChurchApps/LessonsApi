@@ -45,6 +45,12 @@ export const universal = async (event, context) => {
   }
 };
 
+export const mauticSync = async (event, _context) => {
+  await checkInit();
+  const { MauticHelper } = await import("./dist/helpers/MauticHelper.js");
+  await MauticHelper.logLessonDownload(event.churchId, event.lessonId, event.au);
+};
+
 export const videoPingback = async (event, _context) => {
   await checkInit();
   await TranscodeHelper.handlePingback(event);
