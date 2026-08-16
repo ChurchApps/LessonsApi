@@ -3,6 +3,10 @@ jest.mock("../ProviderUrlHelper", () => ({
   fetchProviderJson: jest.fn(),
   providerHostname: (url: string) => new URL(url).hostname
 }));
+jest.mock("@churchapps/apihelper", () => ({
+  __esModule: true,
+  ArrayHelper: { getOne: (items: any[], key: string, value: any) => (items || []).find((i: any) => i[key] === value) }
+}));
 
 import { ExternalProviderHelper } from "../ExternalProviderHelper";
 import { Repositories } from "../../repositories";
@@ -11,24 +15,28 @@ import { fetchProviderJson } from "../ProviderUrlHelper";
 const fetchJson = fetchProviderJson as jest.Mock;
 
 const tree = {
-  programs: [{
-    id: "p1",
-    studies: [{
-      id: "s1",
-      lessons: [{
-        id: "l1",
-        venues: [{ id: "v1", name: "Kids", apiUrl: "https://api.lessons.church/venues/public/feed/v1" }]
-      }]
-    }]
-  }]
+  programs: [
+    {
+      id: "p1",
+      studies: [
+        {
+          id: "s1",
+          lessons: [
+            {
+              id: "l1",
+              venues: [{ id: "v1", name: "Kids", apiUrl: "https://api.lessons.church/venues/public/feed/v1" }]
+            }
+          ]
+        }
+      ]
+    }
+  ]
 };
 
 describe("ExternalProviderHelper.loadExternalData", () => {
   beforeEach(() => {
     fetchJson.mockReset();
-    (Repositories.getCurrent as jest.Mock).mockReturnValue({
-      externalProvider: { loadPublic: jest.fn(async () => ({ id: "ep1", apiUrl: "https://api.lessons.church/lessons/public/tree" })) }
-    });
+    (Repositories.getCurrent as jest.Mock).mockReturnValue({ externalProvider: { loadPublic: jest.fn(async () => ({ id: "ep1", apiUrl: "https://api.lessons.church/lessons/public/tree" })) } });
   });
 
   it("loads the tree then the venue feed on the provider host", async () => {

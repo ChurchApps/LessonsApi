@@ -1,5 +1,5 @@
 import { Repositories } from "../repositories";
-import { ArrayHelper } from ".";
+import { ArrayHelper } from "@churchapps/apihelper";
 import { fetchProviderJson, providerHostname } from "./ProviderUrlHelper";
 
 export class ExternalProviderHelper {

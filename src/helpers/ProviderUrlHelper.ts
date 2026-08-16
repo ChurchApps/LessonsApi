@@ -4,7 +4,9 @@ import { BlockList, isIP } from "net";
 
 const TRUSTED_HOST_SUFFIXES = ["lessons.church"];
 const BLOCKED_HOSTS = new Set(["localhost", "localhost.localdomain", "metadata", "metadata.google.internal", "metadata.google.com"]);
-const BLOCKED_HOST_SUFFIXES = [".localhost", ".local", ".internal", ".lan", ".home", ".corp", ".private", ".localdomain", ".invalid"];
+const BLOCKED_HOST_SUFFIXES = [
+  ".localhost", ".local", ".internal", ".lan", ".home", ".corp", ".private", ".localdomain", ".invalid"
+];
 
 const blocked = new BlockList();
 blocked.addSubnet("0.0.0.0", 8, "ipv4");
@@ -52,11 +54,11 @@ export async function assertSafeProviderUrl(rawUrl: string, extraAllowedHosts?: 
   try { parsed = new URL(rawUrl); } catch { throw new Error("Invalid provider URL"); }
   if (parsed.protocol !== "https:") throw new Error("Provider URL must be https");
   if (parsed.username || parsed.password) throw new Error("Invalid provider URL");
-  const hostname = normalizeHost(parsed.hostname);
+  const hostname = normalizeHost(parsed.hostname.replace(/^\[|\]$/g, ""));
   if (!hostname || isIP(hostname) || isBlockedHostname(hostname)) throw new Error("Provider URL host is not allowed");
   if (extraAllowedHosts && !isTrustedHost(hostname) && !extraAllowedHosts.map(normalizeHost).includes(hostname)) throw new Error("Provider URL host is not allowed");
-  const addresses = await dns.lookup(hostname, { all: true });
-  if (!addresses.length || addresses.some(a => isBlockedAddress(a.address))) throw new Error("Provider URL host is not allowed");
+  const addresses = await dns.lookup(hostname, { all: true }).catch(() => []);
+  if (!addresses?.length || addresses.some(a => isBlockedAddress(a.address))) throw new Error("Provider URL host is not allowed");
 }
 
 export async function fetchProviderJson(rawUrl: string, extraAllowedHosts?: string[]) {
