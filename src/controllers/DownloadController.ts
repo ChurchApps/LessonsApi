@@ -12,21 +12,18 @@ export class DownloadController extends LessonsBaseController {
     return this.actionWrapper(req, res, async au => {
       const promises: Promise<Download>[] = [];
       req.body.forEach(download => {
+        download.churchId = au.churchId;
+        download.userId = au.id;
         if (!download.id) {
           download.ipAddress = (req.headers["x-forwarded-for"] || req.socket.remoteAddress).toString().split(",")[0];
           download.downloadDate = new Date();
         }
-        // Sanitize empty strings to undefined so they are stored as NULL
-        if (download.userId === "") download.userId = undefined;
-        if (download.churchId === "") download.churchId = undefined;
         promises.push(this.repositories.download.save(download));
       });
       const result = await Promise.all(promises);
-      // Only update HubSpot/Mautic if there's a valid churchId
-      if (req.body[0].churchId && req.body[0].churchId.trim() !== "") {
-        await this.updateHubspot(req.body[0].churchId);
-        // Awaits only the async-invoke enqueue (~50ms); the Mautic chain runs in the mauticSync Lambda
-        await MauticHelper.queueLessonDownload(req.body[0].churchId, req.body[0].lessonId, au);
+      if (au.churchId && au.churchId.trim() !== "") {
+        await this.updateHubspot(au.churchId);
+        await MauticHelper.queueLessonDownload(au.churchId, req.body[0].lessonId, au);
       }
       return result;
     });

@@ -48,11 +48,10 @@ export class DownloadRepository {
       lessonId: download.lessonId,
       fileId: download.fileId,
       userId: download.userId,
-      churchId: download.churchId,
       ipAddress: download.ipAddress,
       downloadDate: download.downloadDate,
       fileName: download.fileName
-    }).where("id", "=", download.id).execute();
+    }).where("id", "=", download.id).where("churchId", "=", download.churchId).execute();
     return download;
   }
 
