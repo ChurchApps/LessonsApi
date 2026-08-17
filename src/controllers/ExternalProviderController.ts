@@ -4,7 +4,7 @@ import { LessonsBaseController } from "./LessonsBaseController";
 import { Provider } from "../models";
 import { Permissions } from "../helpers/Permissions";
 import { ExternalProviderHelper } from "../helpers/ExternalProviderHelper";
-import axios from "axios";
+import { fetchProviderJson } from "../helpers/ProviderUrlHelper";
 
 @controller("/externalProviders")
 export class ExternalProviderController extends LessonsBaseController {
@@ -20,8 +20,7 @@ export class ExternalProviderController extends LessonsBaseController {
   public async getPublicLessons(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
     return this.actionWrapperAnon(req, res, async () => {
       const ep = await this.repositories.externalProvider.loadPublic(id);
-      const data = (await axios.get(ep.apiUrl)).data;
-      return data;
+      return await fetchProviderJson(ep.apiUrl);
     });
   }
 

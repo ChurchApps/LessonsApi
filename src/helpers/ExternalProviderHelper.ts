@@ -1,6 +1,6 @@
 import { Repositories } from "../repositories";
-import axios from "axios";
-import { ArrayHelper } from ".";
+import { ArrayHelper } from "@churchapps/apihelper";
+import { fetchProviderJson, providerHostname } from "./ProviderUrlHelper";
 
 export class ExternalProviderHelper {
   // Converts external venue data to planItems format matching /venues/public/planItems/:id response
@@ -75,7 +75,7 @@ export class ExternalProviderHelper {
   // Loads external venue data and returns both the data and venue name
   public static async loadExternalDataWithVenueName(externalProviderId: string, venueId: string) {
     const ep = await Repositories.getCurrent().externalProvider.loadPublic(externalProviderId);
-    const data = (await axios.get(ep.apiUrl)).data;
+    const data = await fetchProviderJson(ep.apiUrl);
 
     let venue = null;
     data.programs.forEach((program: any) => {
@@ -90,7 +90,7 @@ export class ExternalProviderHelper {
 
     if (!venue) throw new Error("Could not load venue: " + venueId);
     else {
-      const result = (await axios.get(venue.apiUrl)).data;
+      const result = await fetchProviderJson(venue.apiUrl, [providerHostname(ep.apiUrl)]);
       return { data: result, venueName: venue.name };
     }
   }
@@ -117,7 +117,7 @@ export class ExternalProviderHelper {
 
   public static async loadExternalData(externalProviderId: string, programId: string, studyId: string, lessonId: string, venueId: string) {
     const ep = await Repositories.getCurrent().externalProvider.loadPublic(externalProviderId);
-    const data = (await axios.get(ep.apiUrl)).data;
+    const data = await fetchProviderJson(ep.apiUrl);
     let venue = null;
 
     const program = ArrayHelper.getOne(data.programs, "id", programId);
@@ -133,14 +133,13 @@ export class ExternalProviderHelper {
 
     if (!venue) throw new Error("Could not load venue: " + venueId);
     else {
-      const result = (await axios.get(venue.apiUrl)).data;
-      return result;
+      return await fetchProviderJson(venue.apiUrl, [providerHostname(ep.apiUrl)]);
     }
   }
 
   public static async loadExternalDataById(externalProviderId: string, venueId: string) {
     const ep = await Repositories.getCurrent().externalProvider.loadPublic(externalProviderId);
-    const data = (await axios.get(ep.apiUrl)).data;
+    const data = await fetchProviderJson(ep.apiUrl);
 
     let venue = null;
     data.programs.forEach((program: any) => {
@@ -155,8 +154,7 @@ export class ExternalProviderHelper {
 
     if (!venue) throw new Error("Could not load venue: " + venueId);
     else {
-      const result = (await axios.get(venue.apiUrl)).data;
-      return result;
+      return await fetchProviderJson(venue.apiUrl, [providerHostname(ep.apiUrl)]);
     }
   }
 }
