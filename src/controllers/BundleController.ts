@@ -13,7 +13,7 @@ export class BundleController extends LessonsBaseController {
   public async zipAll(req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
     return this.actionWrapper(req, res, async au => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
-      await ZipHelper.zipPendingBundles();
+      await ZipHelper.zipPendingBundles(au.churchId);
       return [];
     });
   }
@@ -23,7 +23,7 @@ export class BundleController extends LessonsBaseController {
     return this.actionWrapper(req, res, async au => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
 
-      const pendingBundles = await this.repositories.bundle.loadPendingUpdate(50);
+      const pendingBundles = await this.repositories.bundle.loadPendingUpdate(50, au.churchId);
       const totalBundles = await this.repositories.bundle.loadAll(au.churchId);
 
       // Check for bundles that have been pending for too long (>1 hour)
@@ -57,7 +57,7 @@ export class BundleController extends LessonsBaseController {
     return this.actionWrapper(req, res, async au => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
 
-      const pendingBundles = await this.repositories.bundle.loadPendingUpdate(100);
+      const pendingBundles = await this.repositories.bundle.loadPendingUpdate(100, au.churchId);
       const stuckBundles = pendingBundles.filter(b => {
         const lastUpdate = new Date(b.dateModified || 0);
         const hourAgo = new Date(Date.now() - 60 * 60 * 1000);

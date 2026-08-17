@@ -13,16 +13,34 @@ export class FileController extends LessonsBaseController {
   public async getCleanup(req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
     return this.actionWrapper(req, res, async au => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
-      await this.repositories.file.cleanUp();
-      const paths = await this.getOrphanedFiles();
+      const existing = await this.repositories.file.loadForChurch(au.churchId);
+      await this.repositories.file.cleanUp(au.churchId);
+      const paths = await this.getOrphanedFiles(au.churchId, existing);
       for (const p of paths) await FileStorageHelper.remove(p);
       return { paths };
     });
   }
 
-  private async getOrphanedFiles() {
-    const paths = await FileStorageHelper.list("files/");
-    const files: File[] = await this.repositories.file.loadAll();
+  private static storageKey(contentPath?: string) {
+    if (!contentPath) return "";
+    const key = contentPath.split("?")[0];
+    const i = key.indexOf("files/");
+    return i >= 0 ? key.substring(i) : "";
+  }
+
+  private async getOrphanedFiles(churchId: string, existing: File[]) {
+    const files: File[] = await this.repositories.file.loadForChurch(churchId);
+    const prefixes = new Set<string>();
+    for (const f of existing) {
+      const key = FileController.storageKey(f.contentPath);
+      const slash = key.lastIndexOf("/");
+      if (slash > 0) prefixes.add(key.substring(0, slash + 1));
+    }
+    const paths: string[] = [];
+    for (const prefix of prefixes) {
+      const listed = await FileStorageHelper.list(prefix);
+      paths.push(...listed);
+    }
     for (let i = paths.length - 1; i >= 0; i--) {
       let match = false;
       files.forEach(f => {

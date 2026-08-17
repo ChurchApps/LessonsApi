@@ -39,8 +39,10 @@ export class BundleRepository {
       .orderBy("name").execute() as Bundle[];
   }
 
-  public async loadPendingUpdate(limit: number): Promise<Bundle[]> {
-    return await getDb().selectFrom("bundles").selectAll().where("pendingUpdate", "=", true).limit(limit).execute() as Bundle[];
+  public async loadPendingUpdate(limit: number, churchId?: string): Promise<Bundle[]> {
+    let query = getDb().selectFrom("bundles").selectAll().where("pendingUpdate", "=", true);
+    if (churchId) query = query.where("churchId", "=", churchId);
+    return await query.limit(limit).execute() as Bundle[];
   }
 
   public async loadAll(churchId: string): Promise<Bundle[]> {

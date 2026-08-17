@@ -12,6 +12,7 @@ jest.mock("@churchapps/apihelper", () => ({
 }));
 jest.mock("../../helpers", () => ({ __esModule: true, Environment: { fileStore: "disk", contentRoot: "" } }));
 
+import { FileStorageHelper } from "@churchapps/apihelper";
 import { FileController } from "../FileController";
 
 function makeController(au: any) {
@@ -21,25 +22,60 @@ function makeController(au: any) {
 }
 
 describe("FileController.getCleanup", () => {
+  beforeEach(() => {
+    (FileStorageHelper.list as jest.Mock).mockReset().mockResolvedValue([]);
+    (FileStorageHelper.remove as jest.Mock).mockReset();
+  });
+
   it("rejects users without lessons-edit permission", async () => {
     const controller = makeController({ churchId: "c1", checkAccess: () => false });
-    (controller as any).repositories = { file: { cleanUp: jest.fn() } };
+    (controller as any).repositories = { file: { cleanUp: jest.fn(), loadForChurch: jest.fn() } };
 
     const res = await (controller as any).getCleanup({}, {});
 
     expect(res.status).toBe(401);
     expect((controller as any).repositories.file.cleanUp).not.toHaveBeenCalled();
+    expect((controller as any).repositories.file.loadForChurch).not.toHaveBeenCalled();
   });
 
   it("awaits cleanUp and removes orphans for permitted users", async () => {
     const controller = makeController({ churchId: "c1", checkAccess: () => true });
     const cleanUp = jest.fn(async () => {});
-    (controller as any).repositories = { file: { cleanUp, loadAll: jest.fn(async () => []) } };
+    const loadForChurch = jest.fn(async () => []);
+    (controller as any).repositories = { file: { cleanUp, loadForChurch } };
 
     const res = await (controller as any).getCleanup({}, {});
 
-    expect(cleanUp).toHaveBeenCalled();
+    expect(cleanUp).toHaveBeenCalledWith("c1");
     expect(res.paths).toEqual([]);
+  });
+
+  it("does not clean another church's files or storage objects", async () => {
+    (FileStorageHelper.list as jest.Mock).mockImplementation(async (prefix: string) => {
+      if (prefix === "files/") return ["files/other/secret.pdf", "files/lesson/abc/keep.pdf", "files/lesson/abc/orphan.pdf"];
+      if (prefix === "files/lesson/abc/") return ["files/lesson/abc/keep.pdf", "files/lesson/abc/orphan.pdf"];
+      return [];
+    });
+
+    const controller = makeController({ churchId: "c1", checkAccess: () => true });
+    const cleanUp = jest.fn(async () => {});
+    const loadAll = jest.fn(async () => { throw new Error("must not load all churches"); });
+    const ownFiles = [{ id: "f1", churchId: "c1", contentPath: "https://cdn/content/files/lesson/abc/keep.pdf" }];
+    const loadForChurch = jest.fn(async (churchId: string) => {
+      expect(churchId).toBe("c1");
+      return ownFiles;
+    });
+    (controller as any).repositories = { file: { cleanUp, loadForChurch, loadAll } };
+
+    const res = await (controller as any).getCleanup({}, {});
+
+    expect(cleanUp).toHaveBeenCalledWith("c1");
+    expect(cleanUp).toHaveBeenCalledTimes(1);
+    expect(loadAll).not.toHaveBeenCalled();
+    expect(FileStorageHelper.list).not.toHaveBeenCalledWith("files/");
+    expect(FileStorageHelper.remove).not.toHaveBeenCalledWith("files/other/secret.pdf");
+    expect(FileStorageHelper.remove).toHaveBeenCalledWith("files/lesson/abc/orphan.pdf");
+    expect(res.paths).toEqual(["files/lesson/abc/orphan.pdf"]);
   });
 });
 
