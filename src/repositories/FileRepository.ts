@@ -64,15 +64,10 @@ export class FileRepository {
     return await getDb().deleteFrom("files").where("id", "=", id).where("churchId", "=", churchId).execute();
   }
 
-  public async cleanUp(): Promise<any> {
-    return await sql`
-      DELETE FROM files WHERE id NOT IN (
-        SELECT fileId FROM bundles WHERE fileId IS NOT NULL
-        UNION ALL
-        SELECT fileId FROM assets WHERE fileId IS NOT NULL
-        UNION ALL
-        SELECT fileId FROM variants WHERE fileId IS NOT NULL
-      )
-    `.execute(getDb());
+  public async cleanUp(churchId: string): Promise<any> {
+    const referenced = getDb().selectFrom("bundles").select("fileId").where("fileId", "is not", null)
+      .unionAll(getDb().selectFrom("assets").select("fileId").where("fileId", "is not", null))
+      .unionAll(getDb().selectFrom("variants").select("fileId").where("fileId", "is not", null));
+    return await getDb().deleteFrom("files").where("churchId", "=", churchId).where("id", "not in", referenced).execute();
   }
 }

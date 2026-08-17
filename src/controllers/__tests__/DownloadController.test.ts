@@ -11,9 +11,7 @@ jest.mock("../../helpers", () => ({
   Environment: { hubspotKey: "" },
   MauticHelper: { queueLessonDownload: (...args: any[]) => queueLessonDownload(...args) }
 }));
-jest.mock("../../helpers/HubspotHelper", () => ({
-  HubspotHelper: { lookupCompanByChurchId: jest.fn(), setProperties: jest.fn() }
-}));
+jest.mock("../../helpers/HubspotHelper", () => ({ HubspotHelper: { lookupCompanByChurchId: jest.fn(), setProperties: jest.fn() } }));
 
 import { DownloadController } from "../DownloadController";
 

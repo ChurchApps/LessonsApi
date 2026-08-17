@@ -112,11 +112,11 @@ export class ZipHelper {
     await Repositories.getCurrent().bundle.save(bundle);
   }
 
-  static async zipPendingBundles() {
+  static async zipPendingBundles(churchId?: string) {
     const startTime = Date.now();
     console.log("Starting zipPendingBundles process");
 
-    const bundles = await Repositories.getCurrent().bundle.loadPendingUpdate(5);
+    const bundles = await Repositories.getCurrent().bundle.loadPendingUpdate(5, churchId);
     console.log(`Found ${bundles.length} bundles pending zip update`);
 
     let processed = 0;
