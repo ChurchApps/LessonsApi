@@ -2,7 +2,7 @@ import type {
   Action, AddOn, AddOnPlaylist, AddOnPlaylistItem, Asset, Bundle,
   Classroom, Customization, Download, ExternalProvider, ExternalVideo,
   File, IpDetail, Lesson, Program, Provider, Resource, Role,
-  Schedule, Section, Study, StudyCategory, Variant, Venue
+  Schedule, Section, Study, StudyCategory, Variant, Venue, YearPlan, YearPlanWeek
 } from "../models";
 
 // Database view — no corresponding model
@@ -34,6 +34,8 @@ export interface Database {
   providers: Provider;
   schedules: Schedule;
   studyCategories: StudyCategory;
+  yearPlans: Omit<YearPlan, "weeks">;
+  yearPlanWeeks: YearPlanWeek;
 
   // Models with navigation properties stripped
   addOns: Omit<AddOn, "file">;

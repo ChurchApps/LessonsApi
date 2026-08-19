@@ -25,5 +25,6 @@ export { StudyController } from "./StudyController";
 export { StudyCategoryController } from "./StudyCategoryController";
 export { VariantController } from "./VariantController";
 export { VenueController } from "./VenueController";
+export { YearPlanController } from "./YearPlanController";
 
 export { TempController } from "./TempController";

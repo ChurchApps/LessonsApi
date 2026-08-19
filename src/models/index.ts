@@ -22,3 +22,5 @@ export type { Study } from "./Study";
 export type { StudyCategory } from "./StudyCategory";
 export type { Variant } from "./Variant";
 export type { Venue } from "./Venue";
+export type { YearPlan } from "./YearPlan";
+export type { YearPlanWeek } from "./YearPlanWeek";

@@ -64,6 +64,11 @@ export class VenueRepository {
     return await getDb().selectFrom("venues").selectAll().where("lessonId", "=", lessonId).orderBy("sort").execute() as Venue[];
   }
 
+  public async loadPublicByLessonIds(lessonIds: string[]): Promise<Venue[]> {
+    if (lessonIds.length === 0) return [];
+    return await getDb().selectFrom("venues").selectAll().where("lessonId", "in", lessonIds).orderBy("sort").execute() as Venue[];
+  }
+
   public async loadPublic(id: string): Promise<Venue> {
     return await getDb().selectFrom("venues").selectAll().where("id", "=", id).executeTakeFirst() as Venue;
   }

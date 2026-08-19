@@ -1,4 +1,4 @@
-import { FileRepository, LessonRepository, ProviderRepository, SectionRepository, StudyRepository, StudyCategoryRepository, ProgramRepository, VenueRepository, RoleRepository, ActionRepository, ResourceRepository, VariantRepository, AssetRepository, ClassroomRepository, ScheduleRepository, BundleRepository, CustomizationRepository, DownloadRepository, IpDetailRepository, ExternalVideoRepository, ExternalProviderRepository, AddOnRepository, AddOnPlaylistRepository, AddOnPlaylistItemRepository } from ".";
+import { FileRepository, LessonRepository, ProviderRepository, SectionRepository, StudyRepository, StudyCategoryRepository, ProgramRepository, VenueRepository, RoleRepository, ActionRepository, ResourceRepository, VariantRepository, AssetRepository, ClassroomRepository, ScheduleRepository, BundleRepository, CustomizationRepository, DownloadRepository, IpDetailRepository, ExternalVideoRepository, ExternalProviderRepository, AddOnRepository, AddOnPlaylistRepository, AddOnPlaylistItemRepository, YearPlanRepository, YearPlanWeekRepository } from ".";
 
 export class Repositories {
   public addOn: AddOnRepository;
@@ -25,6 +25,8 @@ export class Repositories {
   public studyCategory: StudyCategoryRepository;
   public variant: VariantRepository;
   public venue: VenueRepository;
+  public yearPlan: YearPlanRepository;
+  public yearPlanWeek: YearPlanWeekRepository;
 
   private static _current: Repositories | null = null;
   public static getCurrent = () => {
@@ -57,5 +59,7 @@ export class Repositories {
     this.studyCategory = new StudyCategoryRepository();
     this.variant = new VariantRepository();
     this.venue = new VenueRepository();
+    this.yearPlan = new YearPlanRepository();
+    this.yearPlanWeek = new YearPlanWeekRepository();
   }
 }

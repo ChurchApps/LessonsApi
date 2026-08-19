@@ -22,4 +22,6 @@ export { StudyRepository } from "./StudyRepository";
 export { StudyCategoryRepository } from "./StudyCategoryRepository";
 export { VariantRepository } from "./VariantRepository";
 export { VenueRepository } from "./VenueRepository";
+export { YearPlanRepository } from "./YearPlanRepository";
+export { YearPlanWeekRepository } from "./YearPlanWeekRepository";
 export { Repositories } from "./Repositories";

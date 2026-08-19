@@ -68,6 +68,11 @@ export class StudyRepository {
     return await getDb().selectFrom("studies").selectAll().where("id", "in", ids).where("live", "=", true).execute() as Study[];
   }
 
+  public async loadByIds(ids: string[]): Promise<Study[]> {
+    if (ids.length === 0) return [];
+    return await getDb().selectFrom("studies").selectAll().where("id", "in", ids).execute() as Study[];
+  }
+
   public async loadPublicAll(): Promise<Study[]> {
     return await getDb().selectFrom("studies").selectAll().where("live", "=", true).execute() as Study[];
   }

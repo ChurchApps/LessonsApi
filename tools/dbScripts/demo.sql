@@ -28,6 +28,8 @@ BEGIN
     TRUNCATE TABLE bundles;
     TRUNCATE TABLE files;
     TRUNCATE TABLE ipDetails;
+    TRUNCATE TABLE yearPlanWeeks;
+    TRUNCATE TABLE yearPlans;
     SET FOREIGN_KEY_CHECKS = 1;
 
 -- ========================================
@@ -247,6 +249,21 @@ INSERT INTO schedules (id, churchId, classroomId, scheduledDate, externalProvide
 ('SCH00000001', 'CHU00000001', 'CLS00000001', '2026-12-06', NULL, 'PGM00000002', 'STU00000003', 'LSN00000005', 'VEN00000006', 'Mary''s Visit (Preschool)'),
 ('SCH00000002', 'CHU00000001', 'CLS00000002', '2026-12-06', NULL, 'PGM00000001', 'STU00000001', 'LSN00000001', 'VEN00000002', 'Creation (Elementary)'),
 ('SCH00000003', 'CHU00000001', 'CLS00000002', '2026-12-13', NULL, 'PGM00000001', 'STU00000001', 'LSN00000002', 'VEN00000003', 'Noah''s Ark (Elementary)');
+
+-- ========================================
+-- Year plans (ordered lesson sequences for Plan a Year)
+-- ========================================
+INSERT INTO yearPlans (id, churchId, name, slug, programId, venuePreference, sort, live) VALUES
+('YPL00000001', 'CHU00000099', 'Elementary Year', 'elementary-year', 'PGM00000001', 'Elementary', 1, 1),
+('YPL00000002', 'CHU00000099', 'Preschool Year', 'preschool-year', 'PGM00000002', 'Preschool', 2, 1);
+
+INSERT INTO yearPlanWeeks (id, churchId, yearPlanId, week, lessonId) VALUES
+('YPW00000001', 'CHU00000099', 'YPL00000001', 1, 'LSN00000001'),
+('YPW00000002', 'CHU00000099', 'YPL00000001', 2, 'LSN00000002'),
+('YPW00000003', 'CHU00000099', 'YPL00000001', 3, 'LSN00000003'),
+('YPW00000004', 'CHU00000099', 'YPL00000001', 4, 'LSN00000004'),
+('YPW00000005', 'CHU00000099', 'YPL00000002', 1, 'LSN00000005'),
+('YPW00000006', 'CHU00000099', 'YPL00000002', 2, 'LSN00000006');
 
 END $$
 DELIMITER ;

@@ -63,6 +63,11 @@ export class LessonRepository {
     return await getDb().selectFrom("lessons").selectAll().where("id", "in", ids).where("live", "=", true).execute() as Lesson[];
   }
 
+  public async loadByIds(ids: string[]): Promise<Lesson[]> {
+    if (ids.length === 0) return [];
+    return await getDb().selectFrom("lessons").selectAll().where("id", "in", ids).execute() as Lesson[];
+  }
+
   public async loadPublic(id: string): Promise<Lesson> {
     return await getDb().selectFrom("lessons").selectAll().where("id", "=", id).where("live", "=", true).executeTakeFirst() as Lesson;
   }
