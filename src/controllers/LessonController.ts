@@ -27,7 +27,7 @@ export class LessonController extends LessonsBaseController {
         ArrayHelper.getAll(studies, "programId", program.id).forEach(study => {
           const s = { id: study.id, name: study.name, description: study.shortDescription || study.description || "", image: study.image, lessons: [] };
           ArrayHelper.getAll(lessons, "studyId", study.id).forEach(lesson => {
-            const l = { id: lesson.id, name: lesson.name + ": " + lesson.title, description: lesson.description, image: lesson.image, venues: [] };
+            const l = { id: lesson.id, name: lesson.name + ": " + lesson.title, description: lesson.description, image: lesson.image, bottomLine: lesson.bottomLine, verse: lesson.verse, parentQuestion: lesson.parentQuestion, parentNote: lesson.parentNote, venues: [] };
             ArrayHelper.getAll(venues, "lessonId", lesson.id).forEach(venue => {
               l.venues.push({ id: venue.id, name: venue.name, apiUrl: "https://api.lessons.church/venues/public/feed/" + venue.id });
             });

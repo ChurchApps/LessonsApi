@@ -7,6 +7,10 @@ export class FeedVenue {
   public lessonName?: string;
   public lessonImage?: string;
   public lessonDescription?: string;
+  public bottomLine?: string;
+  public verse?: string;
+  public parentQuestion?: string;
+  public parentNote?: string;
   public studyName?: string;
   public studySlug?: string;
   public programName?: string;

@@ -21,7 +21,11 @@ export class LessonRepository {
       image: lesson.image,
       live: lesson.live,
       description: lesson.description,
-      videoEmbedUrl: lesson.videoEmbedUrl
+      videoEmbedUrl: lesson.videoEmbedUrl,
+      bottomLine: lesson.bottomLine,
+      verse: lesson.verse,
+      parentQuestion: lesson.parentQuestion,
+      parentNote: lesson.parentNote
     }).execute();
     return lesson;
   }
@@ -36,7 +40,11 @@ export class LessonRepository {
       image: lesson.image,
       live: lesson.live,
       description: lesson.description,
-      videoEmbedUrl: lesson.videoEmbedUrl
+      videoEmbedUrl: lesson.videoEmbedUrl,
+      bottomLine: lesson.bottomLine,
+      verse: lesson.verse,
+      parentQuestion: lesson.parentQuestion,
+      parentNote: lesson.parentNote
     }).where("id", "=", lesson.id).where("churchId", "=", lesson.churchId).execute();
     return lesson;
   }

@@ -10,4 +10,8 @@ export interface Lesson {
   live?: boolean;
   description?: string;
   videoEmbedUrl?: string;
+  bottomLine?: string;
+  verse?: string;
+  parentQuestion?: string;
+  parentNote?: string;
 }

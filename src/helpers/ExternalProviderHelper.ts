@@ -3,6 +3,17 @@ import { ArrayHelper } from "@churchapps/apihelper";
 import { fetchProviderJson, providerHostname } from "./ProviderUrlHelper";
 
 export class ExternalProviderHelper {
+  static mergeTakeHome(feed: any, lesson?: any) {
+    const pick = (source: any, key: string) => (source && source[key] ? source[key] : undefined);
+    return {
+      ...feed,
+      bottomLine: pick(feed, "bottomLine") ?? pick(lesson, "bottomLine"),
+      verse: pick(feed, "verse") ?? pick(lesson, "verse"),
+      parentQuestion: pick(feed, "parentQuestion") ?? pick(lesson, "parentQuestion"),
+      parentNote: pick(feed, "parentNote") ?? pick(lesson, "parentNote")
+    };
+  }
+
   // Converts external venue data to planItems format matching /venues/public/planItems/:id response
   static convertToPlanItems = (externalData: any, venueName: string) => {
     const lessonHeader: any = {
@@ -78,11 +89,15 @@ export class ExternalProviderHelper {
     const data = await fetchProviderJson(ep.apiUrl);
 
     let venue = null;
+    let lesson: any = null;
     data.programs.forEach((program: any) => {
       program.studies.forEach((study: any) => {
-        study.lessons.forEach((lesson: any) => {
-          lesson.venues.forEach((v: any) => {
-            if (v.id === venueId) venue = v;
+        study.lessons.forEach((l: any) => {
+          l.venues.forEach((v: any) => {
+            if (v.id === venueId) {
+              venue = v;
+              lesson = l;
+            }
           });
         });
       });
@@ -91,12 +106,12 @@ export class ExternalProviderHelper {
     if (!venue) throw new Error("Could not load venue: " + venueId);
     else {
       const result = await fetchProviderJson(venue.apiUrl, [providerHostname(ep.apiUrl)]);
-      return { data: result, venueName: venue.name };
+      return { data: ExternalProviderHelper.mergeTakeHome(result, lesson), venueName: venue.name };
     }
   }
 
   static convertToMessages = (actionData: any) => {
-    const result = { lessonName: actionData.lessonName, lessonTitle: actionData.lessonTitle, lessonImage: actionData.lessonImage, lessonDescription: actionData.lessonDescription, venueName: "", messages: [] };
+    const result = { lessonName: actionData.lessonName, lessonTitle: actionData.lessonTitle, lessonImage: actionData.lessonImage, lessonDescription: actionData.lessonDescription, bottomLine: actionData.bottomLine, verse: actionData.verse, parentQuestion: actionData.parentQuestion, parentNote: actionData.parentNote, venueName: "", messages: [] };
 
     actionData.sections.forEach((section: any) => {
       const actions = ArrayHelper.getAll(section.actions, "actionType", "play");
@@ -119,12 +134,13 @@ export class ExternalProviderHelper {
     const ep = await Repositories.getCurrent().externalProvider.loadPublic(externalProviderId);
     const data = await fetchProviderJson(ep.apiUrl);
     let venue = null;
+    let lesson: any = null;
 
     const program = ArrayHelper.getOne(data.programs, "id", programId);
     if (program) {
       const study = ArrayHelper.getOne(program.studies, "id", studyId);
       if (study) {
-        const lesson = ArrayHelper.getOne(study.lessons, "id", lessonId);
+        lesson = ArrayHelper.getOne(study.lessons, "id", lessonId);
         if (lesson) {
           venue = ArrayHelper.getOne(lesson.venues, "id", venueId);
         }
@@ -132,9 +148,8 @@ export class ExternalProviderHelper {
     }
 
     if (!venue) throw new Error("Could not load venue: " + venueId);
-    else {
-      return await fetchProviderJson(venue.apiUrl, [providerHostname(ep.apiUrl)]);
-    }
+    const feed = await fetchProviderJson(venue.apiUrl, [providerHostname(ep.apiUrl)]);
+    return ExternalProviderHelper.mergeTakeHome(feed, lesson);
   }
 
   public static async loadExternalDataById(externalProviderId: string, venueId: string) {
@@ -142,19 +157,22 @@ export class ExternalProviderHelper {
     const data = await fetchProviderJson(ep.apiUrl);
 
     let venue = null;
+    let lesson: any = null;
     data.programs.forEach((program: any) => {
       program.studies.forEach((study: any) => {
-        study.lessons.forEach((lesson: any) => {
-          lesson.venues.forEach((v: any) => {
-            if (v.id === venueId) venue = v;
+        study.lessons.forEach((l: any) => {
+          l.venues.forEach((v: any) => {
+            if (v.id === venueId) {
+              venue = v;
+              lesson = l;
+            }
           });
         });
       });
     });
 
     if (!venue) throw new Error("Could not load venue: " + venueId);
-    else {
-      return await fetchProviderJson(venue.apiUrl, [providerHostname(ep.apiUrl)]);
-    }
+    const feed = await fetchProviderJson(venue.apiUrl, [providerHostname(ep.apiUrl)]);
+    return ExternalProviderHelper.mergeTakeHome(feed, lesson);
   }
 }
