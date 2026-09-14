@@ -7,6 +7,7 @@ export interface YearPlan {
   slug?: string;
   programId?: string;
   venuePreference?: string;
+  startMonth?: number;
   sort?: number;
   live?: boolean;
   weeks?: YearPlanWeek[];
