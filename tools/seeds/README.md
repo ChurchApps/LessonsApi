@@ -17,4 +17,6 @@ Run manually against the target `lessons` database after the year-plan tables ex
 
 Venues: Elementary prefers **Large Group Full Program**; Junior prefers **Large Group**. Hydration still applies `venuePreference` if a venue is missing later.
 
+Calendar: Years 1–3 set `startMonth = 1` (week 1 = first Sunday of January). The last week of each Easter study (`Power Up`) is `anchor = easter`; the last week of each Christmas study is `anchor = christmas`. Specials stay unanchored. Requires the `2026-09-13_year_plan_anchors` migration.
+
 `churchId` = `BVLAFRqSzX0` (Ark Kids publisher).

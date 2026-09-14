@@ -22,7 +22,8 @@ export class YearPlanWeekRepository {
       venueId: week.venueId,
       studyName: week.studyName,
       lessonName: week.lessonName,
-      venueName: week.venueName
+      venueName: week.venueName,
+      anchor: week.anchor
     }).execute();
     return week;
   }
@@ -37,7 +38,8 @@ export class YearPlanWeekRepository {
       venueId: week.venueId,
       studyName: week.studyName,
       lessonName: week.lessonName,
-      venueName: week.venueName
+      venueName: week.venueName,
+      anchor: week.anchor
     }).where("id", "=", week.id).where("churchId", "=", week.churchId).execute();
     return week;
   }
@@ -66,7 +68,8 @@ export class YearPlanWeekRepository {
         venueId: week.venueId,
         studyName: week.studyName,
         lessonName: week.lessonName,
-        venueName: week.venueName
+        venueName: week.venueName,
+        anchor: week.anchor
       }));
     }
     return saved;

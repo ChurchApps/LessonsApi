@@ -6,20 +6,23 @@
 -- In Step is one 9-lesson study; PDF lists Part 1 (4) + Part 2 (4). Seed uses weeks 1-4 then 5-9.
 -- Summer to the Max Vol. 1 has 8 catalog lessons (PDF says 9). Guard Your Heart has 3 (PDF says 4).
 -- Specials are stand-alones from the PDF footer, not inserted into the 48-week years.
+-- Week 1 of each year plan is the first Sunday of January (startMonth = 1).
+-- Easter and Christmas studies pin their last week via yearPlanWeeks.anchor.
+-- Specials stay unanchored so churches place them locally.
 
 START TRANSACTION;
 DELETE FROM yearPlanWeeks WHERE yearPlanId IN ('YPLArkElY01', 'YPLArkElY02', 'YPLArkElY03', 'YPLArkElSpc', 'YPLArkJrY01', 'YPLArkJrY02', 'YPLArkJrY03', 'YPLArkJrSpc');
 DELETE FROM yearPlans WHERE id IN ('YPLArkElY01', 'YPLArkElY02', 'YPLArkElY03', 'YPLArkElSpc', 'YPLArkJrY01', 'YPLArkJrY02', 'YPLArkJrY03', 'YPLArkJrSpc');
 
-INSERT INTO yearPlans (id, churchId, name, slug, programId, venuePreference, sort, live) VALUES
-('YPLArkElY01', 'BVLAFRqSzX0', 'Ark Kids Elementary Year 1', 'ark-elementary-year-1', 'BVLAFRqSzX0', 'Large Group Full Program, Large Group Full, Large Group', 1, 1),
-('YPLArkElY02', 'BVLAFRqSzX0', 'Ark Kids Elementary Year 2', 'ark-elementary-year-2', 'BVLAFRqSzX0', 'Large Group Full Program, Large Group Full, Large Group', 2, 1),
-('YPLArkElY03', 'BVLAFRqSzX0', 'Ark Kids Elementary Year 3', 'ark-elementary-year-3', 'BVLAFRqSzX0', 'Large Group Full Program, Large Group Full, Large Group', 3, 1),
-('YPLArkElSpc', 'BVLAFRqSzX0', 'Ark Kids Elementary Specials', 'ark-elementary-specials', 'BVLAFRqSzX0', 'Large Group Full Program, Large Group Full, Large Group', 4, 1),
-('YPLArkJrY01', 'BVLAFRqSzX0', 'Ark Kids Junior Year 1', 'ark-junior-year-1', 'BVLAFRqSzX1', 'Large Group, Classroom', 5, 1),
-('YPLArkJrY02', 'BVLAFRqSzX0', 'Ark Kids Junior Year 2', 'ark-junior-year-2', 'BVLAFRqSzX1', 'Large Group, Classroom', 6, 1),
-('YPLArkJrY03', 'BVLAFRqSzX0', 'Ark Kids Junior Year 3', 'ark-junior-year-3', 'BVLAFRqSzX1', 'Large Group, Classroom', 7, 1),
-('YPLArkJrSpc', 'BVLAFRqSzX0', 'Ark Kids Junior Specials', 'ark-junior-specials', 'BVLAFRqSzX1', 'Large Group, Classroom', 8, 1);
+INSERT INTO yearPlans (id, churchId, name, slug, programId, venuePreference, sort, live, startMonth) VALUES
+('YPLArkElY01', 'BVLAFRqSzX0', 'Ark Kids Elementary Year 1', 'ark-elementary-year-1', 'BVLAFRqSzX0', 'Large Group Full Program, Large Group Full, Large Group', 1, 1, 1),
+('YPLArkElY02', 'BVLAFRqSzX0', 'Ark Kids Elementary Year 2', 'ark-elementary-year-2', 'BVLAFRqSzX0', 'Large Group Full Program, Large Group Full, Large Group', 2, 1, 1),
+('YPLArkElY03', 'BVLAFRqSzX0', 'Ark Kids Elementary Year 3', 'ark-elementary-year-3', 'BVLAFRqSzX0', 'Large Group Full Program, Large Group Full, Large Group', 3, 1, 1),
+('YPLArkElSpc', 'BVLAFRqSzX0', 'Ark Kids Elementary Specials', 'ark-elementary-specials', 'BVLAFRqSzX0', 'Large Group Full Program, Large Group Full, Large Group', 4, 1, NULL),
+('YPLArkJrY01', 'BVLAFRqSzX0', 'Ark Kids Junior Year 1', 'ark-junior-year-1', 'BVLAFRqSzX1', 'Large Group, Classroom', 5, 1, 1),
+('YPLArkJrY02', 'BVLAFRqSzX0', 'Ark Kids Junior Year 2', 'ark-junior-year-2', 'BVLAFRqSzX1', 'Large Group, Classroom', 6, 1, 1),
+('YPLArkJrY03', 'BVLAFRqSzX0', 'Ark Kids Junior Year 3', 'ark-junior-year-3', 'BVLAFRqSzX1', 'Large Group, Classroom', 7, 1, 1),
+('YPLArkJrSpc', 'BVLAFRqSzX0', 'Ark Kids Junior Specials', 'ark-junior-specials', 'BVLAFRqSzX1', 'Large Group, Classroom', 8, 1, NULL);
 
 INSERT INTO yearPlanWeeks (id, churchId, yearPlanId, week, lessonId, programId, studyId, venueId, studyName, lessonName, venueName) VALUES
 ('YPWE1000001', 'BVLAFRqSzX0', 'YPLArkElY01', 1, 'j82PgGV93h6', 'BVLAFRqSzX0', 'dXL2VJFn9u6', 'Lt7pLedDHEg', 'The Helper', 'The Helper Week 1: The Holy Spirit Is Our Helper', 'Large Group Full Program'),
@@ -300,6 +303,9 @@ INSERT INTO yearPlanWeeks (id, churchId, yearPlanId, week, lessonId, programId, 
 ('YPWJS000002', 'BVLAFRqSzX0', 'YPLArkJrSpc', 2, 'IEI6DvSl8kV', 'BVLAFRqSzX1', 'r0KnXuuom5A', 'pQ-DeQleLJd', 'Super Bowl Sunday', 'Super Bowl Sunday Week 1: I’m Part of God’s Team!', 'Classroom'),
 ('YPWJS000003', 'BVLAFRqSzX0', 'YPLArkJrSpc', 3, 'ihecNHvU7VW', 'BVLAFRqSzX1', 'Nl1ZTpDZVrP', 'wCF9JEuEnC6', 'Back To School Bash', 'Back To School Bash : I''m Loved, So I Can Love!', 'Large Group'),
 ('YPWJS000004', 'BVLAFRqSzX0', 'YPLArkJrSpc', 4, 'BzjnO7iT2V-', 'BVLAFRqSzX1', 'Cye5j9LOs-u', 'HBu8zc5w8nO', 'Easter', 'Easter stand alone lesson: Easter Is Good News!', 'Large Group');
+
+UPDATE yearPlanWeeks SET anchor = 'easter' WHERE id IN ('YPWE2000015', 'YPWJ2000015');
+UPDATE yearPlanWeeks SET anchor = 'christmas' WHERE id IN ('YPWE1000048', 'YPWE2000047', 'YPWE3000040', 'YPWJ1000048', 'YPWJ2000047', 'YPWJ3000040');
 
 COMMIT;
 

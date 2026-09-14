@@ -17,6 +17,7 @@ export class YearPlanRepository {
       slug: plan.slug,
       programId: plan.programId,
       venuePreference: plan.venuePreference,
+      startMonth: plan.startMonth,
       sort: plan.sort,
       live: plan.live
     }).execute();
@@ -29,6 +30,7 @@ export class YearPlanRepository {
       slug: plan.slug,
       programId: plan.programId,
       venuePreference: plan.venuePreference,
+      startMonth: plan.startMonth,
       sort: plan.sort,
       live: plan.live
     }).where("id", "=", plan.id).where("churchId", "=", plan.churchId).execute();

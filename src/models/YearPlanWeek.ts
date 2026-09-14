@@ -11,4 +11,5 @@ export interface YearPlanWeek {
   studyName?: string;
   lessonName?: string;
   venueName?: string;
+  anchor?: string;
 }
