@@ -26,7 +26,7 @@ export class StudyController extends LessonsBaseController {
   @httpGet("/public/slug/:programId/:slug")
   public async getPublicBySlug(@requestParam("programId") programId: string, @requestParam("slug") slug: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
     return this.actionWrapperAnon(req, res, async () => {
-      return await this.repositories.study.loadPublicBySlug(programId, slug);
+      return (await this.repositories.study.loadPublicBySlug(programId, slug)) ?? {};
     });
   }
   @httpGet("/public/ids")
