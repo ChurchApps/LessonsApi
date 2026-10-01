@@ -79,6 +79,10 @@ export class StudyController extends LessonsBaseController {
     return this.actionWrapper(req, res, async au => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
       else {
+        // An image is stored by id before the church-scoped update runs, so check the id belongs to this church first.
+        for (const study of req.body) {
+          if (study.id && study.image?.startsWith("data:image/") && !(await this.repositories.study.load(au.churchId, study.id))) return this.json({}, 404);
+        }
         const promises: Promise<Study>[] = [];
         req.body.forEach(study => {
           study.churchId = au.churchId;
@@ -111,6 +115,7 @@ export class StudyController extends LessonsBaseController {
   public async delete(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
     return this.actionWrapper(req, res, async au => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
+      else if (!(await this.repositories.study.load(au.churchId, id))) return this.json({}, 404);
       else {
         const resources = await this.repositories.resource.loadByContentTypeId(au.churchId, "study", id);
         const lessons = await this.repositories.lesson.loadByStudyId(au.churchId, id);
