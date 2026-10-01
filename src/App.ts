@@ -7,6 +7,7 @@ import express from "express";
 import path from "path";
 import { CustomAuthProvider, EnvironmentBase } from "@churchapps/apihelper";
 import cors from "cors";
+import { slowRequestLogger } from "./helpers/SlowRequestLogger";
 
 // Kysely mysql2 driver returns BigInt for ResultSetHeader fields; serialize to string
 (BigInt.prototype as any).toJSON = function () { return this.toString(); };
@@ -18,6 +19,7 @@ export const init = async () => {
   const app = new InversifyExpressServer(container, null, null, null, CustomAuthProvider);
 
   const configFunction = (expApp: express.Application) => {
+    expApp.use(slowRequestLogger);
     expApp.use(
       cors({
         origin: true,
