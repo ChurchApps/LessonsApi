@@ -115,8 +115,9 @@ export class LessonController extends LessonsBaseController {
   public async getPublicBySlugAlt(@requestParam("programSlug") programSlug: string, @requestParam("studySlug") studySlug: string, @requestParam("slug") slug: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
     return this.actionWrapperAnon(req, res, async () => {
       const program = await this.repositories.program.loadPublicBySlug(programSlug);
-      const study = await this.repositories.study.loadPublicBySlug(program.id, studySlug);
-      const lesson = await this.repositories.lesson.loadPublicBySlug(study.id, slug);
+      const study = program ? await this.repositories.study.loadPublicBySlug(program.id, studySlug) : undefined;
+      const lesson = study ? await this.repositories.lesson.loadPublicBySlug(study.id, slug) : undefined;
+      if (!lesson) return {};
 
       const data = await LessonFeedHelper.getExpandedLessonData(program, study, lesson);
 
@@ -139,8 +140,9 @@ export class LessonController extends LessonsBaseController {
   public async getPublicBySlug(@requestParam("programSlug") programSlug: string, @requestParam("studySlug") studySlug: string, @requestParam("slug") slug: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
     return this.actionWrapperAnon(req, res, async () => {
       const program = await this.repositories.program.loadPublicBySlug(programSlug);
-      const study = await this.repositories.study.loadPublicBySlug(program.id, studySlug);
-      const lesson = await this.repositories.lesson.loadPublicBySlug(study.id, slug);
+      const study = program ? await this.repositories.study.loadPublicBySlug(program.id, studySlug) : undefined;
+      const lesson = study ? await this.repositories.lesson.loadPublicBySlug(study.id, slug) : undefined;
+      if (!lesson) return {};
 
       return await LessonFeedHelper.getExpandedLessonData(program, study, lesson);
     });

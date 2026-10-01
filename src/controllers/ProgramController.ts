@@ -19,7 +19,7 @@ export class ProgramController extends LessonsBaseController {
   @httpGet("/public/slug/:slug")
   public async getPublicBySlug(@requestParam("slug") slug: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
     return this.actionWrapperAnon(req, res, async () => {
-      return await this.repositories.program.loadPublicBySlug(slug);
+      return (await this.repositories.program.loadPublicBySlug(slug)) ?? {};
     });
   }
 
