@@ -72,6 +72,10 @@ export class AddOnController extends LessonsBaseController {
     return this.actionWrapper(req, res, async au => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
       else {
+        // An image is stored by id before the church-scoped update runs, so check the id belongs to this church first.
+        for (const addOn of req.body) {
+          if (addOn.id && addOn.image?.startsWith("data:image/") && (await this.repositories.addOn.load(addOn.id))?.churchId !== au.churchId) return this.json({}, 404);
+        }
         const promises: Promise<AddOn>[] = [];
         req.body.forEach(addOn => {
           addOn.churchId = au.churchId;

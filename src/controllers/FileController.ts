@@ -28,6 +28,25 @@ export class FileController extends LessonsBaseController {
     return i >= 0 ? key.substring(i) : "";
   }
 
+  // A files/<contentType>/<contentId>/ folder holds every upload for that content (listing is recursive),
+  // so only clean it when the content belongs to this church. Resource folders sit one level deeper and are the church's own.
+  private async canCleanPrefix(churchId: string, prefix: string) {
+    const parts = prefix.split("/");
+    if (parts.length > 4) return true;
+    return await this.ownsContent(churchId, parts[1], parts[2]);
+  }
+
+  private async ownsContent(churchId: string, contentType: string, contentId: string) {
+    if (!contentId) return false;
+    switch (contentType) {
+      case "addOn": return (await this.repositories.addOn.load(contentId))?.churchId === churchId;
+      case "lesson": return !!(await this.repositories.lesson.load(churchId, contentId));
+      case "study": return !!(await this.repositories.study.load(churchId, contentId));
+      case "program": return !!(await this.repositories.program.load(churchId, contentId));
+      default: return false;
+    }
+  }
+
   private async getOrphanedFiles(churchId: string, existing: File[]) {
     const files: File[] = await this.repositories.file.loadForChurch(churchId);
     const prefixes = new Set<string>();
@@ -38,6 +57,7 @@ export class FileController extends LessonsBaseController {
     }
     const paths: string[] = [];
     for (const prefix of prefixes) {
+      if (!(await this.canCleanPrefix(churchId, prefix))) continue;
       const listed = await FileStorageHelper.list(prefix);
       paths.push(...listed);
     }
@@ -71,6 +91,9 @@ export class FileController extends LessonsBaseController {
     return this.actionWrapper(req, res, async au => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
       else {
+        for (const file of req.body) {
+          if (!file.resourceId && file.contentId && !(await this.ownsContent(au.churchId, file.contentType, file.contentId))) return this.json({}, 401);
+        }
         const promises: Promise<File>[] = [];
         req.body.forEach(file => {
           file.churchId = au.churchId;
@@ -91,6 +114,7 @@ export class FileController extends LessonsBaseController {
   public async getUploadUrManual(@requestParam("contentType") contentType: string, @requestParam("contentId") contentId: string, req: express.Request<{}, {}, { fileName: string }>, res: express.Response): Promise<any> {
     return this.actionWrapper(req, res, async au => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
+      else if (contentId && !(await this.ownsContent(au.churchId, contentType, contentId))) return this.json({}, 401);
       else {
         const key = "/files/" + FileController.sanitizeKeyPart(contentType) + "/" + FileController.sanitizeKeyPart(contentId) + "/" + FileController.sanitizeKeyPart(req.body.fileName);
         const result = Environment.fileStore === "S3" ? await AwsHelper.S3PresignedUrl(key) : {};
