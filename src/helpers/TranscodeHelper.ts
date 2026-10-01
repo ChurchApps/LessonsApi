@@ -1,4 +1,3 @@
-// import AWS from "aws-sdk";
 import { ElasticTranscoderClient, CreateJobCommand, CreateJobCommandOutput } from "@aws-sdk/client-elastic-transcoder";
 import { Repositories } from "../repositories/Repositories";
 import { File, Variant, Resource } from "../models";
