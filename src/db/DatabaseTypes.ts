@@ -6,7 +6,7 @@ import type {
 } from "../models";
 
 // Database view — no corresponding model
-export interface LabelledBundlesTable {
+interface LabelledBundlesTable {
   id?: string;
   churchId?: string;
   contentType?: string;

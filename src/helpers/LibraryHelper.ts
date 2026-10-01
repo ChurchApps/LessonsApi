@@ -64,7 +64,6 @@ export class LibraryHelper {
           result.messages = result.messages.concat(this.getFileMessage(a, availableFiles));
         }
       });
-      // result.messages.push({ name: s.name, files: itemFiles });
     });
     return result;
   };
