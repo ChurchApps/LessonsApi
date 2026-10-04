@@ -213,6 +213,10 @@ export class VenueController extends LessonsBaseController {
     return this.actionWrapper(req, res, async au => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
       else {
+        // Parents must belong to the caller's church; public playlists and feeds join children by parent id.
+        for (const venue of req.body) {
+          if (venue.lessonId && !(await this.repositories.lesson.load(au.churchId, venue.lessonId))) return this.json({}, 404);
+        }
         const promises: Promise<Venue>[] = [];
         req.body.forEach(venue => {
           venue.churchId = au.churchId;

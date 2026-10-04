@@ -85,6 +85,14 @@ export class ActionController extends LessonsBaseController {
     return this.actionWrapper(req, res, async au => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
       else {
+        // Parents must belong to the caller's church; public playlists and feeds join children by parent id.
+        for (const action of req.body) {
+          if (action.roleId) {
+            const role = await this.repositories.role.load(action.roleId);
+            if (role?.churchId !== au.churchId) return this.json({}, 404);
+          }
+          if (action.lessonId && !(await this.repositories.lesson.load(au.churchId, action.lessonId))) return this.json({}, 404);
+        }
         const promises: Promise<Action>[] = [];
         req.body.forEach(action => {
           action.churchId = au.churchId;
