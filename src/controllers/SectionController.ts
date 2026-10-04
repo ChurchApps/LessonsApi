@@ -107,6 +107,11 @@ export class SectionController extends LessonsBaseController {
     return this.actionWrapper(req, res, async au => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
       else {
+        // Parents must belong to the caller's church; public playlists and feeds join children by parent id.
+        for (const section of req.body) {
+          if (section.venueId && !(await this.repositories.venue.load(au.churchId, section.venueId))) return this.json({}, 404);
+          if (section.lessonId && !(await this.repositories.lesson.load(au.churchId, section.lessonId))) return this.json({}, 404);
+        }
         const promises: Promise<Section>[] = [];
         req.body.forEach(section => {
           section.churchId = au.churchId;
