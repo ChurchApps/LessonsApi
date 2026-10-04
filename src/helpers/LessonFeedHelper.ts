@@ -178,11 +178,9 @@ export class LessonFeedHelper {
   }
 
   private static convertVideoFile(video: ExternalVideo, download: boolean) {
-    // url: video.download1080 || video.download720,
     const file: FeedFile = { url: "https://api.lessons.church/externalVideos/download/" + video.id, name: video.name, id: video.id, expires: video.downloadsExpire };
     if (video.thumbnail) file.thumbnail = video.thumbnail;
     if (download) {
-      // file.bytes = video.?.file?.size;
       file.fileType = "video/mp4";
     } else {
       file.streamUrl = "https://vimeo.com/" + video.videoId;

@@ -48,8 +48,8 @@ export function createKysely(): Kysely<any> {
           return bytes ? bytes[0] === 1 : null;
         }
         return next();
-      },
-    }),
+      }
+    })
   });
 
   return new Kysely({ dialect });
@@ -63,7 +63,7 @@ export async function ensureDatabaseExists() {
     port: config.port,
     user: config.userName,
     password: config.password,
-    connectionLimit: 1,
+    connectionLimit: 1
   });
 
   try {
