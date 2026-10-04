@@ -25,6 +25,10 @@ export class StudyCategoryRepository {
     return studyCategory;
   }
 
+  public async load(id: string): Promise<StudyCategory> {
+    return await getDb().selectFrom("studyCategories").selectAll().where("id", "=", id).executeTakeFirst() as StudyCategory;
+  }
+
   public async loadByCategoryName(programId: string, categoryName: string): Promise<StudyCategory[]> {
     return await getDb().selectFrom("studyCategories").selectAll().where("programId", "=", programId).where("categoryName", "=", categoryName).orderBy("sort").execute() as StudyCategory[];
   }
@@ -38,6 +42,7 @@ export class StudyCategoryRepository {
   }
 
   public async delete(churchId: string, id: string): Promise<any> {
-    return await getDb().deleteFrom("studyCategories").where("id", "=", id).execute();
+    return await getDb().deleteFrom("studyCategories").where("id", "=", id)
+      .where("programId", "in", getDb().selectFrom("programs").select("id").where("churchId", "=", churchId)).execute();
   }
 }
