@@ -51,6 +51,13 @@ export class StudyCategoryController extends LessonsBaseController {
           const program = await this.repositories.program.load(au.churchId, programId);
           if (!program) return this.json({}, 404);
         }
+        for (const studyCategory of req.body) {
+          if (studyCategory.studyId && !(await this.repositories.study.load(au.churchId, studyCategory.studyId))) return this.json({}, 404);
+          if (studyCategory.id) {
+            const existing = await this.repositories.studyCategory.load(studyCategory.id);
+            if (existing && !(await this.repositories.program.load(au.churchId, existing.programId))) return this.json({}, 404);
+          }
+        }
         const promises: Promise<StudyCategory>[] = [];
         req.body.forEach(studyCategory => {
           promises.push(this.repositories.studyCategory.save(studyCategory));
@@ -82,6 +89,8 @@ export class StudyCategoryController extends LessonsBaseController {
     return this.actionWrapper(req, res, async au => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
       else {
+        const existing = await this.repositories.studyCategory.load(id);
+        if (!existing || !(await this.repositories.program.load(au.churchId, existing.programId))) return this.json({}, 404);
         return await this.repositories.studyCategory.delete(au.churchId, id);
       }
     });
