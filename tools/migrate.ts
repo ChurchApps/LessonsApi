@@ -33,7 +33,7 @@ async function getMigrator() {
   const db = createKysely();
   const migrator = new Migrator({
     db,
-    provider: new FileMigrationProvider({ fs: fs.promises, path, migrationFolder: migrationsPath }),
+    provider: new FileMigrationProvider({ fs: fs.promises, path, migrationFolder: migrationsPath })
   });
 
   return { db, migrator };

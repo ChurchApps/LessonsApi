@@ -74,7 +74,7 @@ async function main() {
     host: parsed.host,
     port: parsed.port,
     user: parsed.userName,
-    password: parsed.password,
+    password: parsed.password
   });
 
   try {
