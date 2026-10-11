@@ -47,6 +47,10 @@ export class AssetController extends LessonsBaseController {
     return this.actionWrapper(req, res, async au => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
       else {
+        // The parent resource must belong to the caller's church; resource readers join assets by resourceId.
+        for (const asset of req.body) {
+          if (asset.resourceId && !(await this.repositories.resource.load(au.churchId, asset.resourceId))) return this.json({}, 404);
+        }
         const promises: Promise<Asset>[] = [];
         req.body.forEach(asset => {
           asset.churchId = au.churchId;

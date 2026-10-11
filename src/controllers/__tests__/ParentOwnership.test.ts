@@ -12,24 +12,42 @@ jest.mock("@churchapps/apihelper", () => ({
   AwsHelper: {},
   FileStorageHelper: { store: jest.fn(async () => {}), remove: jest.fn(async () => {}) }
 }));
-jest.mock("../../helpers", () => ({ __esModule: true, Environment: { contentRoot: "" } }));
+jest.mock("../../helpers", () => ({
+  __esModule: true,
+  Environment: { contentRoot: "" },
+  FilesHelper: {},
+  ZipHelper: { setBundlePendingResource: jest.fn(async () => {}) }
+}));
 jest.mock("../../helpers/LessonFeedHelper", () => ({ LessonFeedHelper: {} }));
 jest.mock("../../helpers/LibraryHelper", () => ({ LibraryHelper: {} }));
 jest.mock("../../helpers/VimeoHelper", () => ({ VimeoHelper: {} }));
-jest.mock("../../helpers/Permissions", () => ({ Permissions: { lessons: { edit: "lessons.edit" } } }));
+jest.mock("../../helpers/TranscodeHelper", () => ({ TranscodeHelper: { createWebms: jest.fn(async () => {}) } }));
+jest.mock("../../helpers/Permissions", () => ({ Permissions: { lessons: { edit: "lessons.edit" }, schedules: { edit: "schedules.edit" } } }));
 
 import { ActionController } from "../ActionController";
+import { AssetController } from "../AssetController";
+import { LessonController } from "../LessonController";
+import { StudyController } from "../StudyController";
 import { RoleController } from "../RoleController";
+import { ScheduleController } from "../ScheduleController";
 import { SectionController } from "../SectionController";
+import { VariantController } from "../VariantController";
 import { VenueController } from "../VenueController";
 
 const au = { churchId: "c1", checkAccess: () => true };
 
-// c1 owns lesson l1, venue v1, section s1, role r1; everything ending in "Other" belongs to c2.
+// c1 owns program p1, study st1, lesson l1, venue v1, section s1, role r1, resource res1, classroom cl1; everything ending in "Other" belongs to c2.
 function makeRepos() {
   const save = jest.fn(async (x: any) => x);
   return {
-    lesson: { load: jest.fn(async (churchId: string, id: string) => (churchId === "c1" && id === "l1" ? { id, churchId } : undefined)) },
+    program: { load: jest.fn(async (churchId: string, id: string) => (churchId === "c1" && id === "p1" ? { id, churchId } : undefined)) },
+    study: { load: jest.fn(async (churchId: string, id: string) => (churchId === "c1" && id === "st1" ? { id, churchId } : undefined)), save },
+    lesson: { load: jest.fn(async (churchId: string, id: string) => (churchId === "c1" && id === "l1" ? { id, churchId } : undefined)), save },
+    resource: { load: jest.fn(async (churchId: string, id: string) => (churchId === "c1" && id === "res1" ? { id, churchId } : undefined)) },
+    asset: { save },
+    variant: { save },
+    classroom: { load: jest.fn(async (id: string) => (id === "cl1" ? { id, churchId: "c1" } : id === "clOther" ? { id, churchId: "c2" } : undefined)) },
+    schedule: { save },
     venue: { load: jest.fn(async (churchId: string, id: string) => (churchId === "c1" && id === "v1" ? { id, churchId } : undefined)), save },
     section: { load: jest.fn(async (id: string) => (id === "s1" ? { id, churchId: "c1" } : id === "sOther" ? { id, churchId: "c2" } : undefined)), save },
     role: { load: jest.fn(async (id: string) => (id === "r1" ? { id, churchId: "c1" } : id === "rOther" ? { id, churchId: "c2" } : undefined)), save },
@@ -51,7 +69,12 @@ const cases: [string, any, string, any, any][] = [
   ["role under another church's lesson", RoleController, "role", { sectionId: "s1", lessonId: "lOther" }, { sectionId: "s1", lessonId: "l1" }],
   ["section under another church's venue", SectionController, "section", { venueId: "vOther", lessonId: "l1" }, { venueId: "v1", lessonId: "l1" }],
   ["section under another church's lesson", SectionController, "section", { venueId: "v1", lessonId: "lOther" }, { venueId: "v1", lessonId: "l1" }],
-  ["venue under another church's lesson", VenueController, "venue", { lessonId: "lOther" }, { lessonId: "l1" }]
+  ["venue under another church's lesson", VenueController, "venue", { lessonId: "lOther" }, { lessonId: "l1" }],
+  ["lesson under another church's study", LessonController, "lesson", { studyId: "stOther" }, { studyId: "st1" }],
+  ["study under another church's program", StudyController, "study", { programId: "pOther" }, { programId: "p1" }],
+  ["asset under another church's resource", AssetController, "asset", { resourceId: "resOther" }, { resourceId: "res1" }],
+  ["variant under another church's resource", VariantController, "variant", { resourceId: "resOther" }, { resourceId: "res1" }],
+  ["schedule for another church's classroom", ScheduleController, "schedule", { classroomId: "clOther", venueId: "vOther" }, { classroomId: "cl1", venueId: "vOther" }]
 ];
 
 describe("lesson children must hang off the caller's own parents", () => {

@@ -53,6 +53,10 @@ export class VariantController extends LessonsBaseController {
     return this.actionWrapper(req, res, async au => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
       else {
+        // The parent resource must belong to the caller's church; playlist readers join variants by resourceId.
+        for (const variant of req.body) {
+          if (variant.resourceId && !(await this.repositories.resource.load(au.churchId, variant.resourceId))) return this.json({}, 404);
+        }
         const promises: Promise<Variant>[] = [];
         req.body.forEach(variant => {
           variant.churchId = au.churchId;

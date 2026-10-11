@@ -34,6 +34,12 @@ export class ScheduleController extends LessonsBaseController {
     return this.actionWrapper(req, res, async au => {
       if (!au.checkAccess(Permissions.schedules.edit)) return this.json({}, 401);
       else {
+        // The classroom must belong to the caller's church; its public playlist is chosen by classroomId alone.
+        // venueId is not checked: classrooms schedule curated lessons owned by other churches.
+        for (const schedule of req.body) {
+          const classroom = await this.repositories.classroom.load(schedule.classroomId);
+          if (classroom?.churchId !== au.churchId) return this.json({}, 404);
+        }
         const promises: Promise<Schedule>[] = [];
         req.body.forEach(schedule => {
           schedule.churchId = au.churchId;
