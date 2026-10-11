@@ -82,6 +82,8 @@ export class StudyController extends LessonsBaseController {
         // An image is stored by id before the church-scoped update runs, so check the id belongs to this church first.
         for (const study of req.body) {
           if (study.id && study.image?.startsWith("data:image/") && !(await this.repositories.study.load(au.churchId, study.id))) return this.json({}, 404);
+          // The parent program must belong to the caller's church; public program readers join studies by programId.
+          if (study.programId && !(await this.repositories.program.load(au.churchId, study.programId))) return this.json({}, 404);
         }
         const promises: Promise<Study>[] = [];
         req.body.forEach(study => {

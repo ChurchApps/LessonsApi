@@ -190,6 +190,8 @@ export class LessonController extends LessonsBaseController {
         // An image is stored by id before the church-scoped update runs, so check the id belongs to this church first.
         for (const lesson of req.body) {
           if (lesson.id && lesson.image?.startsWith("data:image/") && !(await this.repositories.lesson.load(au.churchId, lesson.id))) return this.json({}, 404);
+          // The parent study must belong to the caller's church; public study and lesson readers join by studyId.
+          if (lesson.studyId && !(await this.repositories.study.load(au.churchId, lesson.studyId))) return this.json({}, 404);
         }
         const promises: Promise<Lesson>[] = [];
         req.body.forEach(lesson => {
