@@ -36,7 +36,7 @@ describe("VariantController.createWebms", () => {
 
 describe("VariantController.save", () => {
   it("stamps churchId and awaits transcoding for each variant", async () => {
-    const repos = { variant: { save: jest.fn(async (v: any) => v) } };
+    const repos = { variant: { save: jest.fn(async (v: any) => v) }, resource: { load: jest.fn(async (churchId: string, id: string) => ({ id, churchId })) } };
     const controller = makeController({ churchId: "c1", checkAccess: () => true }, repos);
 
     const body = [{ churchId: "SPOOFED", resourceId: "r1" }];

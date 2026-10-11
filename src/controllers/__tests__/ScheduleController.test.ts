@@ -46,10 +46,13 @@ describe("ScheduleController.get", () => {
 describe("ScheduleController.save", () => {
   it("stamps churchId from the auth context", async () => {
     const saved: any[] = [];
-    const repos = { schedule: { save: jest.fn(async (s: any) => { saved.push(s); return s; }) } };
+    const repos = {
+      schedule: { save: jest.fn(async (s: any) => { saved.push(s); return s; }) },
+      classroom: { load: jest.fn(async (id: string) => ({ id, churchId: "c1" })) }
+    };
     const controller = makeController({ churchId: "c1", checkAccess: () => true }, repos);
 
-    await (controller as any).save({ body: [{ churchId: "SPOOFED", venueId: "v1" }] }, {});
+    await (controller as any).save({ body: [{ churchId: "SPOOFED", classroomId: "cl1", venueId: "v1" }] }, {});
 
     expect(saved[0].churchId).toBe("c1");
   });
