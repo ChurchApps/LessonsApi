@@ -91,9 +91,6 @@ export class TranscodeHelper {
   }
 
   static async encodeWebm(sourcePath: string, destPath: string, destFile: string) {
-    /*
-    const existing = await AwsHelper.S3Read(destPath + destFile);
-    if (existing) await AwsHelper.S3Remove(destPath + destFile);*/
     try {
       await AwsHelper.S3Remove(destPath + destFile);
       await this.deleteThumbs(destPath);
