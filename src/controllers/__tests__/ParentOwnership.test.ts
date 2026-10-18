@@ -16,7 +16,7 @@ jest.mock("../../helpers", () => ({
   __esModule: true,
   Environment: { contentRoot: "" },
   FilesHelper: {},
-  ZipHelper: { setBundlePendingResource: jest.fn(async () => {}) }
+  ZipHelper: { setBundlePendingResource: jest.fn(async () => {}), setBundlePending: jest.fn(async () => {}) }
 }));
 jest.mock("../../helpers/LessonFeedHelper", () => ({ LessonFeedHelper: {} }));
 jest.mock("../../helpers/LibraryHelper", () => ({ LibraryHelper: {} }));
@@ -29,6 +29,7 @@ import { AssetController } from "../AssetController";
 import { LessonController } from "../LessonController";
 import { StudyController } from "../StudyController";
 import { RoleController } from "../RoleController";
+import { ResourceController } from "../ResourceController";
 import { ScheduleController } from "../ScheduleController";
 import { SectionController } from "../SectionController";
 import { VariantController } from "../VariantController";
@@ -36,14 +37,15 @@ import { VenueController } from "../VenueController";
 
 const au = { churchId: "c1", checkAccess: () => true };
 
-// c1 owns program p1, study st1, lesson l1, venue v1, section s1, role r1, resource res1, classroom cl1; everything ending in "Other" belongs to c2.
+// c1 owns program p1, study st1, lesson l1, venue v1, section s1, role r1, resource res1, bundle b1, classroom cl1; everything ending in "Other" belongs to c2.
 function makeRepos() {
   const save = jest.fn(async (x: any) => x);
   return {
     program: { load: jest.fn(async (churchId: string, id: string) => (churchId === "c1" && id === "p1" ? { id, churchId } : undefined)) },
     study: { load: jest.fn(async (churchId: string, id: string) => (churchId === "c1" && id === "st1" ? { id, churchId } : undefined)), save },
     lesson: { load: jest.fn(async (churchId: string, id: string) => (churchId === "c1" && id === "l1" ? { id, churchId } : undefined)), save },
-    resource: { load: jest.fn(async (churchId: string, id: string) => (churchId === "c1" && id === "res1" ? { id, churchId } : undefined)) },
+    resource: { load: jest.fn(async (churchId: string, id: string) => (churchId === "c1" && id === "res1" ? { id, churchId } : undefined)), save },
+    bundle: { load: jest.fn(async (churchId: string, id: string) => (churchId === "c1" && id === "b1" ? { id, churchId } : undefined)) },
     asset: { save },
     variant: { save },
     classroom: { load: jest.fn(async (id: string) => (id === "cl1" ? { id, churchId: "c1" } : id === "clOther" ? { id, churchId: "c2" } : undefined)) },
@@ -73,6 +75,7 @@ const cases: [string, any, string, any, any][] = [
   ["lesson under another church's study", LessonController, "lesson", { studyId: "stOther" }, { studyId: "st1" }],
   ["study under another church's program", StudyController, "study", { programId: "pOther" }, { programId: "p1" }],
   ["asset under another church's resource", AssetController, "asset", { resourceId: "resOther" }, { resourceId: "res1" }],
+  ["resource in another church's bundle", ResourceController, "resource", { bundleId: "bOther" }, { bundleId: "b1" }],
   ["variant under another church's resource", VariantController, "variant", { resourceId: "resOther" }, { resourceId: "res1" }],
   ["schedule for another church's classroom", ScheduleController, "schedule", { classroomId: "clOther", venueId: "vOther" }, { classroomId: "cl1", venueId: "vOther" }]
 ];

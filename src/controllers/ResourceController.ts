@@ -29,6 +29,10 @@ export class ResourceController extends LessonsBaseController {
     return this.actionWrapper(req, res, async au => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
       else {
+        // The bundle must belong to the caller's church; public lesson readers join bundles by resources.bundleId.
+        for (const resource of req.body) {
+          if (resource.bundleId && !(await this.repositories.bundle.load(au.churchId, resource.bundleId))) return this.json({}, 404);
+        }
         const promises: Promise<Resource>[] = [];
         for (const resource of req.body) {
           resource.churchId = au.churchId;
