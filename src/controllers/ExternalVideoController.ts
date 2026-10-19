@@ -4,6 +4,7 @@ import { LessonsBaseController } from "./LessonsBaseController";
 import { ExternalVideo } from "../models";
 import { Permissions } from "../helpers/Permissions";
 import { VimeoHelper } from "../helpers/VimeoHelper";
+import { ownsContent } from "../helpers/ContentOwnership";
 
 @controller("/externalVideos")
 export class ExternalVideoController extends LessonsBaseController {
@@ -51,6 +52,10 @@ export class ExternalVideoController extends LessonsBaseController {
     return this.actionWrapper(req, res, async au => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
       else {
+        // Public playlists load videos by content id alone, so the content must belong to the caller's church.
+        for (const externalVideo of req.body) {
+          if (!(await ownsContent(this.repositories, au.churchId, externalVideo.contentType, externalVideo.contentId))) return this.json({}, 404);
+        }
         const promises: Promise<ExternalVideo>[] = [];
         req.body.forEach(externalVideo => {
           externalVideo.churchId = au.churchId;

@@ -128,7 +128,7 @@ export class SectionController extends LessonsBaseController {
     return this.actionWrapper(req, res, async au => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
       else {
-        await this.repositories.section.delete(au.churchId, id);
+        await this.repositories.section.deleteWithChildren(au.churchId, [id]);
         return this.json({});
       }
     });

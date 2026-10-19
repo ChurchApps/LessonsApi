@@ -238,6 +238,8 @@ export class VenueController extends LessonsBaseController {
     return this.actionWrapper(req, res, async au => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
       else {
+        const sections = await this.repositories.section.loadByVenueId(au.churchId, id);
+        await this.repositories.section.deleteWithChildren(au.churchId, sections.map(s => s.id));
         await this.repositories.venue.delete(au.churchId, id);
         return this.json({});
       }

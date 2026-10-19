@@ -102,7 +102,7 @@ export class ProgramController extends LessonsBaseController {
       else {
         const resources = await this.repositories.resource.loadByContentTypeId(au.churchId, "program", id);
         const studies = await this.repositories.study.loadByProgramId(au.churchId, id);
-        if (resources.length > 0 || studies.length > 0) return this.json({}, 401);
+        if (resources.length > 0 || studies.length > 0) return this.json({ errors: ["Remove the studies and files in this program first."] }, 400);
         else {
           await this.repositories.program.delete(au.churchId, id);
           await FileStorageHelper.remove("/programs/" + id + ".png").catch(() => { });

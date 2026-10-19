@@ -65,4 +65,13 @@ export class SectionRepository {
   public async delete(churchId: string, id: string): Promise<any> {
     return await getDb().deleteFrom("sections").where("id", "=", id).where("churchId", "=", churchId).execute();
   }
+
+  // No FK cascades in this schema, so roles and actions under the sections go explicitly.
+  public async deleteWithChildren(churchId: string, sectionIds: string[]) {
+    if (sectionIds.length === 0) return;
+    const roleIds = getDb().selectFrom("roles").select("id").where("churchId", "=", churchId).where("sectionId", "in", sectionIds);
+    await getDb().deleteFrom("actions").where("churchId", "=", churchId).where("roleId", "in", roleIds).execute();
+    await getDb().deleteFrom("roles").where("churchId", "=", churchId).where("sectionId", "in", sectionIds).execute();
+    await getDb().deleteFrom("sections").where("churchId", "=", churchId).where("id", "in", sectionIds).execute();
+  }
 }

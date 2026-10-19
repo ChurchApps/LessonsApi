@@ -221,7 +221,7 @@ export class LessonController extends LessonsBaseController {
       else if (!(await this.repositories.lesson.load(au.churchId, id))) return this.json({}, 404);
       else {
         const resources = await this.repositories.resource.loadByContentTypeId(au.churchId, "lesson", id);
-        if (resources.length > 0) return this.json({}, 401);
+        if (resources.length > 0) return this.json({ errors: ["Remove the files in this lesson first."] }, 400);
         else {
           await this.repositories.lesson.delete(au.churchId, id);
           await FileStorageHelper.remove("/lessons/" + id + ".png").catch(() => { });
