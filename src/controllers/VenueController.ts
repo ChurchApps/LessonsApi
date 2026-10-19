@@ -104,8 +104,11 @@ export class VenueController extends LessonsBaseController {
   public async getPublicFeed(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
     return this.actionWrapperAnon(req, res, async () => {
       const venue = await this.repositories.venue.loadPublic(id);
+      if (!venue) return this.json({}, 404);
       const lesson = await this.repositories.lesson.loadPublic(venue.lessonId);
+      if (!lesson) return this.json({}, 404);
       const study = await this.repositories.study.loadPublic(lesson.studyId);
+      if (!study) return this.json({}, 404);
       const program = await this.repositories.program.loadPublic(study.programId);
 
       const data = await LessonFeedHelper.getExpandedLessonData(program, study, lesson);
@@ -129,6 +132,7 @@ export class VenueController extends LessonsBaseController {
   public async getPublic(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
     return this.actionWrapperAnon(req, res, async () => {
       const venue = await this.repositories.venue.loadPublic(id);
+      if (!venue) return this.json({}, 404);
       const sections = await this.repositories.section.loadByLessonId(venue.lessonId);
       const roles = await this.repositories.role.loadByLessonId(venue.lessonId);
       const actions = await this.repositories.action.loadByLessonId(venue.lessonId);
@@ -141,6 +145,7 @@ export class VenueController extends LessonsBaseController {
   public async getPublicActions(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
     return this.actionWrapperAnon(req, res, async () => {
       const venue = await this.repositories.venue.loadPublic(id);
+      if (!venue) return this.json({}, 404);
       const sections = await this.repositories.section.loadByVenueIdPublic(id);
       const roles = await this.repositories.role.loadByLessonId(venue.lessonId);
       const actions = await this.repositories.action.loadByLessonId(venue.lessonId);
@@ -243,6 +248,7 @@ export class VenueController extends LessonsBaseController {
   public async getPublicPlanItems(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
     return this.actionWrapperAnon(req, res, async () => {
       const venue = await this.repositories.venue.loadPublic(id);
+      if (!venue) return this.json({}, 404);
       const lesson = await this.repositories.lesson.loadPublic(venue.lessonId);
       const sections = await this.repositories.section.loadByVenueIdPublic(id);
       const roles = await this.repositories.role.loadByLessonId(venue.lessonId);
