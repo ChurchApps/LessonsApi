@@ -4,6 +4,7 @@ import { TranscodeHelper } from "./dist/helpers/TranscodeHelper.js";
 import { Environment } from "./dist/helpers/Environment.js";
 import { ZipHelper } from "./dist/helpers/ZipHelper.js";
 import { GeoHelper } from "./dist/helpers/GeoHelper.js";
+import { MigrationRunner } from "./dist/helpers/MigrationRunner.js";
 
 let serverlessExpress;
 
@@ -114,4 +115,15 @@ export const zipBundles = async (event, context) => {
       })
     };
   }
+};
+
+// Applies pending database migrations. The deploy workflows invoke this after `serverless deploy`;
+// the prod database is VPC-only, so the GitHub runner can't run `yarn migrate` itself.
+export const migrate = async () => {
+  await checkInit();
+  const result = await MigrationRunner.run();
+  if (result.applied.length) console.log(`[migrate] applied ${result.applied.join(", ")}`);
+  else if (result.ok) console.log("[migrate] up to date");
+  if (result.error) console.error(`[migrate] ${result.failed ? `${result.failed} failed - ` : ""}${result.error}`);
+  return result;
 };
