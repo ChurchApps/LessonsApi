@@ -92,7 +92,8 @@ export class ClassroomController extends LessonsBaseController {
       if (req.query.resolution && req.query.resolution === "1080") resolution = "1080";
       const date = req.query.date ? new Date(req.query.date.toString()) : this.getCurrentCentralTime();
       const currentSchedule = await this.repositories.schedule.loadCurrent(classroomId, date);
-      if (!currentSchedule) throw new Error("Could not load schedule");
+      // Nothing scheduled for this classroom today is an ordinary answer for a polling player, not an error.
+      if (!currentSchedule) return this.json({ error: "Could not load schedule" }, 404);
       const ipAddress = (req.headers["x-forwarded-for"] || req.socket.remoteAddress).toString().split(",")[0];
 
       const venue: Venue = await this.repositories.venue.loadPublic(currentSchedule.venueId);
@@ -114,7 +115,8 @@ export class ClassroomController extends LessonsBaseController {
       if (req.query.resolution && req.query.resolution === "1080") resolution = "1080";
       const date = req.query.date ? new Date(req.query.date.toString()) : this.getCurrentCentralTime();
       const currentSchedule = await this.repositories.schedule.loadCurrent(classroomId, date);
-      if (!currentSchedule) throw new Error("Could not load schedule");
+      // Nothing scheduled for this classroom today is an ordinary answer for a polling player, not an error.
+      if (!currentSchedule) return this.json({ error: "Could not load schedule" }, 404);
       const ipAddress = (req.headers["x-forwarded-for"] || req.socket.remoteAddress).toString().split(",")[0];
       if (currentSchedule.externalProviderId) return this.loadPlaylistExternal(currentSchedule);
       else return this.loadPlaylistInternal(currentSchedule, ipAddress, resolution);
