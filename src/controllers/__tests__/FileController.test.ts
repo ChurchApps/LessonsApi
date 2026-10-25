@@ -151,6 +151,27 @@ describe("FileController content ownership", () => {
     expect(res[0].churchId).toBe("c1");
   });
 
+  it("replacing a file only removes the old object from the folder being saved to", async () => {
+    const controller = makeController({ churchId: "c1", checkAccess: () => true });
+    const existing = { id: "f1", churchId: "c1", contentPath: "https://cdn/content/files/addOn/victimAddOn/logo.png?dt=1" };
+    (controller as any).repositories = repos({ file: { save: jest.fn(async (f: any) => f), load: jest.fn(async () => existing) } });
+
+    await (controller as any).save({ body: [{ id: "f1", contentType: "addOn", contentId: "ownAddOn", fileName: "new.png", fileType: "image/png", fileContents: "data:image/png;base64,AAAA" }] }, {});
+
+    expect(FileStorageHelper.remove).not.toHaveBeenCalled();
+    expect(FileStorageHelper.store).toHaveBeenCalledWith("/files/addOn/ownAddOn/new.png", "image/png", expect.any(Buffer));
+  });
+
+  it("replacing a file removes the church's old object in the same folder", async () => {
+    const controller = makeController({ churchId: "c1", checkAccess: () => true });
+    const existing = { id: "f1", churchId: "c1", contentPath: "https://cdn/content/files/addOn/ownAddOn/old.png?dt=1" };
+    (controller as any).repositories = repos({ file: { save: jest.fn(async (f: any) => f), load: jest.fn(async () => existing) } });
+
+    await (controller as any).save({ body: [{ id: "f1", contentType: "addOn", contentId: "ownAddOn", fileName: "new.png", fileType: "image/png", fileContents: "data:image/png;base64,AAAA" }] }, {});
+
+    expect(FileStorageHelper.remove).toHaveBeenCalledWith("/files/addOn/ownAddOn/old.png");
+  });
+
   it("refuses an upload url for another church's add-on folder", async () => {
     const controller = makeController({ churchId: "c1", checkAccess: () => true });
     (controller as any).repositories = repos();

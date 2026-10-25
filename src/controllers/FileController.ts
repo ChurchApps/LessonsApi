@@ -159,7 +159,8 @@ export class FileController extends LessonsBaseController {
     if (file.id) {
       const existingFile = await this.repositories.file.load(file.churchId, file.id);
       const oldKey = "/" + FileController.storageKey(existingFile?.contentPath);
-      if (oldKey !== "/" && oldKey !== key) {
+      // Older rows may hold a path outside this church's folders; only replace within the folder just checked.
+      if (oldKey !== "/" && oldKey !== key && oldKey.startsWith(folder)) {
         try { await FileStorageHelper.remove(oldKey); } catch { /* already gone; the new upload must still save */ }
       }
     }
