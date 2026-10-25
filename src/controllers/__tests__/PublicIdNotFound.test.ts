@@ -76,3 +76,21 @@ describe("classroom playlist with no current schedule", () => {
     expect((await controller.getPlaylistNew("room1", req, {})).status).toBe(404);
   });
 });
+
+// Prod 2026-10-23/24: 135 "reading 'lessonId'" 500s from VenueController's playlist routes when the venue id matched nothing.
+describe("venue playlist with an unknown venue id", () => {
+  it("getPlaylist answers 404", async () => {
+    const controller: any = make(VenueController, { venue: { loadPublic: missing }, lesson: { loadPublic: missing } });
+    expect((await controller.getPlaylist("no-such-venue", req, {})).status).toBe(404);
+  });
+
+  it("getPlaylistNew answers 404", async () => {
+    const controller: any = make(VenueController, { venue: { loadPublic: missing }, lesson: { loadPublic: missing } });
+    expect((await controller.getPlaylistNew("no-such-venue", req, {})).status).toBe(404);
+  });
+
+  it("getPlaylist answers 404 when the venue's lesson is gone", async () => {
+    const controller: any = make(VenueController, { venue: { loadPublic: jest.fn(async () => ({ id: "v1", lessonId: "gone", churchId: "c1" })) }, lesson: { loadPublic: missing } });
+    expect((await controller.getPlaylist("v1", req, {})).status).toBe(404);
+  });
+});
