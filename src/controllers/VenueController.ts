@@ -29,7 +29,9 @@ export class VenueController extends LessonsBaseController {
   public async getPlaylistNew(@requestParam("venueId") venueId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
     return this.actionWrapperAnon(req, res, async () => {
       const venue: Venue = await this.repositories.venue.loadPublic(venueId);
+      if (!venue) return this.json({}, 404);
       const lesson: Lesson = await this.repositories.lesson.loadPublic(venue.lessonId);
+      if (!lesson) return this.json({}, 404);
       const sections = await this.repositories.section.loadForPlaylist(venue.churchId, venue.id, venue.churchId);
       const actions = await this.repositories.action.loadPlaylistActions(venue.id, venue.churchId);
       const availableFiles = await PlaylistHelper.loadPlaylistFiles(actions);
@@ -47,7 +49,9 @@ export class VenueController extends LessonsBaseController {
   public async getPlaylist(@requestParam("venueId") venueId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
     return this.actionWrapperAnon(req, res, async () => {
       const venue: Venue = await this.repositories.venue.loadPublic(venueId);
+      if (!venue) return this.json({}, 404);
       const lesson: Lesson = await this.repositories.lesson.loadPublic(venue.lessonId);
+      if (!lesson) return this.json({}, 404);
       const sections = await this.repositories.section.loadForPlaylist(venue.churchId, venue.id, venue.churchId);
       const actions = await this.repositories.action.loadPlaylistActions(venue.id, venue.churchId);
       const availableFiles = await PlaylistHelper.loadPlaylistFiles(actions);

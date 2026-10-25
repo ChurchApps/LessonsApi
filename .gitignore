@@ -104,7 +104,6 @@ dist
 
 # TernJS port file
 .tern-port
-.env
 
 # Yarn Berry (Corepack-managed, node-modules linker + global cache)
 .yarn/*
@@ -117,3 +116,4 @@ dist
 
 # npm is blocked (see preinstall guard); never commit an npm lockfile
 package-lock.json
+config.bat
