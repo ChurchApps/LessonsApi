@@ -47,6 +47,12 @@ functions:
     timeout: 300
     events:
       - schedule: rate(5 minutes)
+  # Applies pending database migrations. Not wired to any event: the deploy workflows invoke it
+  # with `aws lambda invoke` after `serverless deploy`, since the prod database is VPC-only.
+  migrate:
+    handler: lambda.migrate
+    timeout: 900
+    vpc: ${self:custom.vpcSettings.current}
 
 plugins:
   - serverless-plugin-utils
