@@ -23,6 +23,7 @@ jest.mock("../../helpers/Permissions", () => ({ Permissions: { lessons: { edit: 
 import { VenueController } from "../VenueController";
 import { LessonController } from "../LessonController";
 import { ClassroomController } from "../ClassroomController";
+import { ExternalVideoController } from "../ExternalVideoController";
 
 // Prod 2026-10-15: 164 "Cannot read properties of undefined (reading 'lessonId' | 'studyId')" 500s from
 // /venues/public/* and /lessons/public/:id when the id matched nothing. An unknown id is a 404.
@@ -50,6 +51,17 @@ describe("public id lookups answer 404 when nothing matches", () => {
   it("venue actions by id", async () => {
     const controller: any = make(VenueController, { venue: { loadPublic: missing }, section: { loadByVenueIdPublic: jest.fn(async () => []) } });
     expect((await controller.getPublicActions("no-such-venue", req, {})).status).toBe(404);
+  });
+
+  // Prod 2026-10-29: "reading 'downloadsExpire'" 500 from /externalVideos when the id matched nothing.
+  it("external video by id", async () => {
+    const controller: any = make(ExternalVideoController, { externalVideo: { loadPublic: missing } });
+    expect((await controller.getPublic("no-such-video", req, {})).status).toBe(404);
+  });
+
+  it("external video download by id", async () => {
+    const controller: any = make(ExternalVideoController, { externalVideo: { loadPublic: missing } });
+    expect((await controller.downloadRedirect("no-such-video", req, {})).status).toBe(404);
   });
 
   it("lesson by id", async () => {
