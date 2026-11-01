@@ -16,6 +16,7 @@ export class VimeoHelper {
     ev.play720 = vimeo.play720p || ev.play720;
     ev.thumbnail = vimeo.thumbnail || ev.thumbnail;
     ev.downloadsExpire = vimeo.downloadsExpire;
+    console.log(`VIMEO_REFRESH ${ev.id} ${Math.round((vimeo.downloadsExpire.getTime() - Date.now()) / 60000)}m`);
     await Repositories.getCurrent().externalVideo.save(ev);
     return ev;
   }
@@ -64,11 +65,10 @@ export class VimeoHelper {
     return result;
   }
 
+  // Any download link we keep can serve a request, so a video with no 720p must not look expired.
   private static getDownloadExpiration(resp: any) {
-    let result = new Date();
-    resp.data.download?.forEach((f: any) => {
-      if (f.rendition === "720p") result = new Date(f.expires);
-    });
-    return result;
+    const kept = ["720p", "1080p", "4k"];
+    const expires = (resp.data.download || []).filter((f: any) => kept.includes(f.rendition) && f.expires).map((f: any) => new Date(f.expires).getTime());
+    return new Date(expires.length > 0 ? Math.min(...expires) : Date.now());
   }
 }
