@@ -72,10 +72,11 @@ export class VenueController extends LessonsBaseController {
             let video: ExternalVideo = ArrayHelper.getOne(availableVideos, "id", a.externalVideoId);
             if (!video && a.actionType === "Add-on") video = ArrayHelper.getOne(availableVideos, "contentId", a.addOnId);
             if (video) {
+              const seconds = video.loopVideo ? 3600 : video.seconds;
               if (req.query.mode === "web") {
-                itemFiles.push({ name: video.name, url: video.videoProvider.toLowerCase() + ":" + video.videoId, seconds: video.seconds, loopVideo: video.loopVideo, thumbnail: video.thumbnail });
+                itemFiles.push({ name: video.name, url: video.videoProvider.toLowerCase() + ":" + video.videoId, seconds, loopVideo: video.loopVideo, thumbnail: video.thumbnail });
               } else {
-                itemFiles.push({ name: video.name, url: resolution === "1080" ? video.play1080 : video.play720, seconds: video.seconds, loopVideo: video.loopVideo, thumbnail: video.thumbnail });
+                itemFiles.push({ name: video.name, url: resolution === "1080" ? video.play1080 : video.play720, seconds, loopVideo: video.loopVideo, thumbnail: video.thumbnail });
               }
             }
           } else {
