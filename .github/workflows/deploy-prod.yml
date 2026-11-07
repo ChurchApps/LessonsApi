@@ -49,3 +49,15 @@ jobs:
         run: |
           yarn install --immutable
           yarn deploy-prod
+
+      - name: Run database migrations
+        run: |
+          aws lambda invoke \
+            --function-name lessons-api-Prod-migrate \
+            --cli-read-timeout 910 \
+            migrate-result.json
+          cat migrate-result.json
+          node -e '
+            const r = JSON.parse(require("fs").readFileSync("migrate-result.json", "utf8"));
+            if (!r.ok) { console.error("Database migrations failed"); process.exit(1); }
+          '
