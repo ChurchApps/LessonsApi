@@ -22,6 +22,8 @@ provider:
     role: arn:aws:iam::428019619026:role/ChurchAppsRole
   environment:
     APP_ENV: ${self:custom.env}
+    # Silence dotenv's promotional 'tip' line on every cold start, including calls inside shared packages.
+    DOTENV_CONFIG_QUIET: "true"
 
 functions:
   api:
