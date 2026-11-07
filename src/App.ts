@@ -13,7 +13,7 @@ import { slowRequestLogger } from "./helpers/SlowRequestLogger";
 (BigInt.prototype as any).toJSON = function () { return this.toString(); };
 
 export const init = async () => {
-  dotenv.config();
+  dotenv.config({ quiet: true });
   const container = new Container();
   await container.loadAsync(bindings);
   const app = new InversifyExpressServer(container, null, null, null, CustomAuthProvider);
