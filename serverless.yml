@@ -18,8 +18,6 @@ provider:
   memorySize: 2048
   timeout: 60
   region: us-east-2
-  # Stop retaining Lambda log groups forever. Log levels are set per function under resources.extensions.
-  logRetentionInDays: 30
   iam:
     role: arn:aws:iam::428019619026:role/ChurchAppsRole
   environment:
@@ -28,6 +26,7 @@ provider:
 functions:
   api:
     handler: lambda.universal
+    logRetentionInDays: 30
     timeout: 30
     events:
       - http:
@@ -39,12 +38,15 @@ functions:
     vpc: ${self:custom.vpcSettings.current}
   mauticSync:
     handler: lambda.mauticSync
+    logRetentionInDays: 30
     vpc: ${self:custom.vpcSettings.current}
   videoPingback:
     handler: lambda.videoPingback
+    # No logRetentionInDays: its log group was deleted outside CloudFormation, so updating it fails the deploy.
     vpc: ${self:custom.vpcSettings.current}
   zipBundles:
     handler: lambda.zipBundles
+    logRetentionInDays: 30
     vpc: ${self:custom.vpcSettings.current}
     timeout: 300
     events:
