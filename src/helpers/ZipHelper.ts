@@ -36,7 +36,7 @@ export class ZipHelper {
         // Fetch all streams first with timeout
         for (const f of verifiedFiles) {
           const params = { Bucket: Environment.s3Bucket, Key: f.key };
-          console.log(`Fetching file: ${f.key}`);
+          console.debug(`Fetching file: ${f.key}`);
           try {
             const response = await Promise.race([this.S3().send(new GetObjectCommand(params)), new Promise((_, reject) => setTimeout(() => reject(new Error("S3 GetObject timeout")), 30000))]);
             f.stream = (response as any).Body;
@@ -60,7 +60,7 @@ export class ZipHelper {
           }
         });
 
-        console.log(`Starting upload for: ${zipKey}`);
+        console.debug(`Starting upload for: ${zipKey}`);
         const uploadTimeout = setTimeout(() => {
           reject(new Error(`Upload timeout for ${zipKey} after 5 minutes`));
         }, 300000); // 5 minutes
@@ -69,7 +69,7 @@ export class ZipHelper {
           .done()
           .then(() => {
             clearTimeout(uploadTimeout);
-            console.log(`Upload completed for: ${zipKey}`);
+            console.debug(`Upload completed for: ${zipKey}`);
             resolve(null);
           })
           .catch(error => {
@@ -78,7 +78,7 @@ export class ZipHelper {
             reject(error);
           });
 
-        console.log(zipKey);
+        console.debug(zipKey);
 
         const archive = Archiver("zip", { zlib: { level: 0 } });
         archive.on("error", error => {
@@ -87,12 +87,12 @@ export class ZipHelper {
         });
 
         archive.pipe(streamPassThrough);
-        console.log(`Adding ${verifiedFiles.length} files to archive`);
+        console.debug(`Adding ${verifiedFiles.length} files to archive`);
         verifiedFiles.forEach(f => {
-          console.log(`Adding file to archive: ${f.name}`);
+          console.debug(`Adding file to archive: ${f.name}`);
           archive.append(f.stream, { name: f.name });
         });
-        console.log(`Finalizing archive for: ${zipKey}`);
+        console.debug(`Finalizing archive for: ${zipKey}`);
         archive.finalize();
       } catch (ex) {
         console.error(`zipFiles error for ${zipKey}:`, ex);
@@ -114,10 +114,10 @@ export class ZipHelper {
 
   static async zipPendingBundles(churchId?: string) {
     const startTime = Date.now();
-    console.log("Starting zipPendingBundles process");
+    console.debug("Starting zipPendingBundles process");
 
     const bundles = await Repositories.getCurrent().bundle.loadPendingUpdate(5, churchId);
-    console.log(`Found ${bundles.length} bundles pending zip update`);
+    console.debug(`Found ${bundles.length} bundles pending zip update`);
 
     let processed = 0;
     let successful = 0;
@@ -146,7 +146,7 @@ export class ZipHelper {
     }
 
     const totalTime = Date.now() - startTime;
-    console.log(`Completed zipPendingBundles process: ${processed} processed, ${successful} successful, ${failed} failed in ${totalTime}ms`);
+    (processed > 0 ? console.info : console.debug)(`Completed zipPendingBundles process: ${processed} processed, ${successful} successful, ${failed} failed in ${totalTime}ms`);
 
     // Log metrics for monitoring
     if (failed > 0) {

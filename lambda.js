@@ -58,7 +58,7 @@ export const videoPingback = async (event, _context) => {
 
 export const zipBundles = async (event, context) => {
   const startTime = Date.now();
-  console.log("Lambda zipBundles invoked", {
+  console.debug("Lambda zipBundles invoked", {
     requestId: context.awsRequestId,
     timestamp: new Date().toISOString()
   });
@@ -68,7 +68,7 @@ export const zipBundles = async (event, context) => {
 
     const { Repositories } = await import("./dist/repositories/Repositories.js");
     const initialPending = await Repositories.getCurrent().bundle.loadPendingUpdate(50);
-    console.log(`Initial queue depth: ${initialPending.length}`);
+    console.debug(`Initial queue depth: ${initialPending.length}`);
 
     await ZipHelper.zipPendingBundles();
     await GeoHelper.lookupMissing();
@@ -85,7 +85,7 @@ export const zipBundles = async (event, context) => {
       timestamp: new Date().toISOString()
     };
 
-    console.log("Lambda zipBundles completed successfully", metrics);
+    (metrics.initialQueueDepth > 0 ? console.info : console.debug)("Lambda zipBundles completed successfully", metrics);
 
     return {
       statusCode: 200,
