@@ -12,6 +12,7 @@ export class ExternalVideoController extends LessonsBaseController {
   public async downloadRedirect(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
     return this.actionWrapperAnon(req, res, async () => {
       let result = await this.repositories.externalVideo.loadPublic(id);
+      if (!result) return this.json({}, 404);
       if (result.downloadsExpire < new Date()) result = await VimeoHelper.updateVimeoLinks(result);
       if (result.download1080) return res.redirect(result.download1080);
       else if (result.download720) return res.redirect(result.download720);
@@ -23,6 +24,7 @@ export class ExternalVideoController extends LessonsBaseController {
   public async getPublic(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
     return this.actionWrapperAnon(req, res, async () => {
       let result = await this.repositories.externalVideo.loadPublic(id);
+      if (!result) return this.json({}, 404);
       if (result.downloadsExpire < new Date()) result = await VimeoHelper.updateVimeoLinks(result);
       return result;
     });
