@@ -92,6 +92,10 @@ export class ActionController extends LessonsBaseController {
             if (role?.churchId !== au.churchId) return this.json({}, 404);
           }
           if (action.lessonId && !(await this.repositories.lesson.load(au.churchId, action.lessonId))) return this.json({}, 404);
+          // Playlists resolve these ids without a church filter, so they must be this church's content. Add-ons are a shared catalog.
+          if (action.resourceId && !(await this.repositories.resource.load(au.churchId, action.resourceId))) return this.json({}, 404);
+          if (action.assetId && !(await this.repositories.asset.load(au.churchId, action.assetId))) return this.json({}, 404);
+          if (action.externalVideoId && !(await this.repositories.externalVideo.load(au.churchId, action.externalVideoId))) return this.json({}, 404);
         }
         const promises: Promise<Action>[] = [];
         req.body.forEach(action => {
