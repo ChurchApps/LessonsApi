@@ -6,12 +6,12 @@ import { getDb } from "../db";
 @controller("")
 export class HealthController {
   @httpGet("/")
-  public async root(req: express.Request, res: express.Response): Promise<void> {
+  public async root(_req: express.Request, res: express.Response): Promise<void> {
     res.status(200).json({ name: "LessonsApi", version: "1.0.0", status: "running", timestamp: new Date().toISOString() });
   }
 
   @httpGet("/favicon.ico")
-  public async favicon(req: express.Request, res: express.Response): Promise<void> {
+  public async favicon(_req: express.Request, res: express.Response): Promise<void> {
     res.status(204).end();
   }
 }
@@ -19,7 +19,7 @@ export class HealthController {
 @controller("/health")
 export class HealthCheckController {
   @httpGet("/")
-  public async health(req: express.Request, res: express.Response): Promise<void> {
+  public async health(_req: express.Request, res: express.Response): Promise<void> {
     const environment = process.env.APP_ENV || "unknown";
     const loaded: string[] = [];
     try {

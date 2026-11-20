@@ -157,7 +157,7 @@ export class LessonFeedHelper {
     return result;
   }
 
-  private static convertFiles(action: Action, bundles: Bundle[], resources: Resource[], externalVideos: ExternalVideo[], addOns: AddOn[], download: boolean) {
+  private static convertFiles(action: Action, _bundles: Bundle[], resources: Resource[], externalVideos: ExternalVideo[], addOns: AddOn[], download: boolean) {
     const result: FeedFile[] = [];
     const externalVideoId = action.externalVideoId;
 

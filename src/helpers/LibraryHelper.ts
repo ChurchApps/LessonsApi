@@ -51,7 +51,7 @@ export class LibraryHelper {
     });
   };
 
-  static getPlaylist = async (venue: Venue, lesson: Lesson, sections: Section[], actions: Action[], availableFiles: File[], availableVideos: ExternalVideo[], stream: boolean, resolution: string) => {
+  static getPlaylist = async (venue: Venue, _lesson: Lesson, sections: Section[], actions: Action[], availableFiles: File[], availableVideos: ExternalVideo[], stream: boolean, resolution: string) => {
     const result = { id: venue.id, name: venue.name, prefetch: false, playOrder: "sequential", messages: [] };
 
     sections.forEach(s => {

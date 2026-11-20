@@ -34,7 +34,6 @@ export class SearchController extends LessonsBaseController {
 
       // Create maps for lookups
       const programMap = new Map(programs.map((p: any) => [p.id, p]));
-      const studyMap = new Map(studies.map((s: any) => [s.id, s]));
 
       // Load study categories for each program
       const studyCategoryMap = new Map<string, string[]>();
@@ -47,7 +46,7 @@ export class SearchController extends LessonsBaseController {
             }
             studyCategoryMap.get(cat.studyId)!.push(cat.categoryName);
           }
-        } catch (e) {
+        } catch {
           // Some programs may not have categories
         }
       }
@@ -120,7 +119,7 @@ export class SearchController extends LessonsBaseController {
               lessonCount: 0
             });
           }
-        } catch (e) {
+        } catch {
           // Some studies may not have lessons
         }
       }
