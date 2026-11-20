@@ -1,8 +1,8 @@
 import "reflect-metadata";
 jest.mock("../LessonsBaseController", () => ({
   LessonsBaseController: class {
-    repositories: any;
-    json(obj: any, status?: number) { return { obj, status: status ?? 200 }; }
+    repositories: unknown;
+    json(obj: unknown, status?: number) { return { obj, status: status ?? 200 }; }
   }
 }));
 jest.mock("../../helpers", () => ({
@@ -14,11 +14,13 @@ jest.mock("../../helpers/ZipHelper", () => ({ ZipHelper: { zipPendingBundles: je
 
 import { BundleController } from "../BundleController";
 import { ZipHelper } from "../../helpers/ZipHelper";
+import { Bundle } from "../../models";
+import { asRepositories, asRequest, JsonResult, noResponse, RepoMocks, setActionWrapper, TestUser } from "./controllerTestUtils";
 
-function makeController(au: any, repos: any) {
+function makeController(au: TestUser, repos: RepoMocks) {
   const controller = new BundleController();
-  (controller as any).actionWrapper = (_req: any, _res: any, action: any) => action(au);
-  (controller as any).repositories = repos;
+  setActionWrapper(controller, au);
+  controller.repositories = asRepositories(repos);
   return controller;
 }
 
@@ -26,7 +28,7 @@ describe("BundleController.zipAll", () => {
   it("rejects users without lessons-edit permission", async () => {
     const controller = makeController({ churchId: "c1", checkAccess: () => false }, {});
 
-    const res = await (controller as any).zipAll({}, {});
+    const res = await controller.zipAll(asRequest(), noResponse) as JsonResult;
 
     expect(res.status).toBe(401);
     expect(ZipHelper.zipPendingBundles).not.toHaveBeenCalled();
@@ -35,7 +37,7 @@ describe("BundleController.zipAll", () => {
   it("zips only the caller's church pending bundles", async () => {
     const controller = makeController({ churchId: "c1", checkAccess: () => true }, {});
 
-    await (controller as any).zipAll({}, {});
+    await controller.zipAll(asRequest(), noResponse);
 
     expect(ZipHelper.zipPendingBundles).toHaveBeenCalledWith("c1");
   });
@@ -45,11 +47,11 @@ describe("BundleController.clearStuckBundles", () => {
   it("clears only the caller's church stuck bundles", async () => {
     const hourAgo = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString();
     const ownStuck = { id: "b1", churchId: "c1", pendingUpdate: true, dateModified: hourAgo };
-    const save = jest.fn(async (b: any) => b);
+    const save = jest.fn(async (b: Bundle) => b);
     const loadPendingUpdate = jest.fn(async () => [ownStuck]);
     const controller = makeController({ churchId: "c1", checkAccess: () => true }, { bundle: { loadPendingUpdate, save } });
 
-    const res = await (controller as any).clearStuckBundles({}, {});
+    const res = await controller.clearStuckBundles(asRequest(), noResponse) as { clearedBundleIds: string[] };
 
     expect(loadPendingUpdate).toHaveBeenCalledWith(100, "c1");
     expect(save).toHaveBeenCalledWith(expect.objectContaining({ id: "b1", churchId: "c1", pendingUpdate: false }));
@@ -64,7 +66,7 @@ describe("BundleController.clearStuckBundles", () => {
     const save = jest.fn();
     const controller = makeController({ churchId: "c1", checkAccess: () => true }, { bundle: { loadPendingUpdate, save } });
 
-    const res = await (controller as any).clearStuckBundles({}, {});
+    const res = await controller.clearStuckBundles(asRequest(), noResponse) as { clearedCount: number };
 
     expect(loadPendingUpdate).toHaveBeenCalledWith(100, "c1");
     expect(save).not.toHaveBeenCalled();

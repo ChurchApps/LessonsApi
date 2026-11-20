@@ -10,6 +10,17 @@ import { Study } from "../../models";
 
 const mockedGetDb = getDb as jest.Mock;
 
+// The slice of Kysely's query builder these mocks stand in for.
+interface QueryChain {
+  where?: (...args: unknown[]) => QueryChain;
+  selectAll?: () => QueryChain;
+  select?: () => QueryChain;
+  orderBy?: () => QueryChain;
+  limit?: () => QueryChain;
+  unionAll?: () => QueryChain;
+  execute?: () => Promise<unknown>;
+}
+
 describe("StudyRepository.save", () => {
   afterEach(() => jest.restoreAllMocks());
 
@@ -24,8 +35,8 @@ describe("StudyRepository.save", () => {
   });
 
   it("updates scoped to id and churchId", async () => {
-    const wheres: any[] = [];
-    const chain: any = { where: (...args: any[]) => { wheres.push(args); return chain; }, execute: () => Promise.resolve() };
+    const wheres: unknown[][] = [];
+    const chain: QueryChain = { where: (...args: unknown[]) => { wheres.push(args); return chain; }, execute: () => Promise.resolve() };
     const set = jest.fn().mockReturnValue(chain);
     mockedGetDb.mockReturnValue({ updateTable: () => ({ set }) });
 
@@ -39,8 +50,8 @@ describe("StudyRepository.save", () => {
 
 describe("StudyRepository.delete", () => {
   it("deletes scoped to id and churchId", async () => {
-    const wheres: any[] = [];
-    const chain: any = { where: (...args: any[]) => { wheres.push(args); return chain; }, execute: () => Promise.resolve([]) };
+    const wheres: unknown[][] = [];
+    const chain: QueryChain = { where: (...args: unknown[]) => { wheres.push(args); return chain; }, execute: () => Promise.resolve([]) };
     mockedGetDb.mockReturnValue({ deleteFrom: () => chain });
 
     await new StudyRepository().delete("c1", "s1");

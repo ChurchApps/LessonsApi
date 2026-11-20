@@ -3,6 +3,13 @@ import { ArrayHelper } from "@churchapps/apihelper";
 import { Action, ExternalVideo } from "../models";
 import { VimeoHelper } from "./VimeoHelper";
 
+// The fields getBestFiles reads; playlist rows and File records both fit.
+export interface PlaylistBestFileCandidate {
+  resourceId?: string;
+  assetId?: string;
+  fileType?: string;
+}
+
 export class PlaylistHelper {
   public static async loadPlaylistVideos(actions: Action[]) {
     const repo = Repositories.getCurrent();
@@ -35,9 +42,9 @@ export class PlaylistHelper {
     return assetFiles.concat(variantFiles);
   }
 
-  public static getBestFiles(action: Action, allFiles: any[]) {
+  public static getBestFiles<T extends PlaylistBestFileCandidate>(action: Action, allFiles: T[]): T[] {
     if (!action.assetId) {
-      const assetFiles: any[] = [];
+      const assetFiles: T[] = [];
       allFiles.forEach(f => {
         if (f.resourceId === action.resourceId && f.assetId) assetFiles.push(f);
       });
@@ -46,12 +53,12 @@ export class PlaylistHelper {
 
     const preferredFileTypes = ["video/webm", "video/mp4", "image/jpeg", "image/png", "image/gif", "image/bitmap"];
 
-    let availableFiles: any[] = [];
+    let availableFiles: T[] = [];
     if (action.assetId) availableFiles = ArrayHelper.getAll(allFiles, "assetId", action.assetId);
     else availableFiles = ArrayHelper.getAll(allFiles, "resourceId", action.resourceId);
 
     let bestIdx = 999;
-    let bestFile: any = null;
+    let bestFile: T = null;
     availableFiles.forEach(f => {
       const idx = preferredFileTypes.indexOf(f.fileType);
       if (idx > -1 && idx < bestIdx) {

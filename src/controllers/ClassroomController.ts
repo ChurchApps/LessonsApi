@@ -1,7 +1,7 @@
 import { controller, httpPost, httpGet, requestParam, httpDelete } from "inversify-express-utils";
 import express from "express";
 import { LessonsBaseController } from "./LessonsBaseController";
-import { Action, Classroom, Download, ExternalVideo, Lesson, Schedule, Venue } from "../models";
+import { Action, Classroom, Download, ExternalVideo, Lesson, PlaylistFile, PlaylistMessage, PlaylistMessageFile, Schedule, Venue } from "../models";
 import { Permissions } from "../helpers/Permissions";
 import { PlaylistHelper } from "../helpers/PlaylistHelper";
 import { Environment, MauticHelper } from "../helpers";
@@ -21,11 +21,11 @@ export class ClassroomController extends LessonsBaseController {
     const availableVideos = await PlaylistHelper.loadPlaylistVideos(actions);
     await this.logDownload(venue.lessonId, venue.name, currentSchedule.churchId, ipAddress);
 
-    const messages: any[] = [];
+    const messages: PlaylistMessage[] = [];
 
     sections.forEach(s => {
       const sectionActions: Action[] = ArrayHelper.getAll(actions, "sectionId", s.id);
-      const itemFiles: any[] = [];
+      const itemFiles: PlaylistMessageFile[] = [];
       sectionActions.forEach(a => {
         if (a.externalVideoId || a.actionType === "Add-on") {
           let video: ExternalVideo = ArrayHelper.getOne(availableVideos, "id", a.externalVideoId);
@@ -37,10 +37,10 @@ export class ClassroomController extends LessonsBaseController {
             itemFiles.push({ name: video.name, url: resolution === "1080" ? video.play1080 : video.play720, seconds, loopVideo: video.loopVideo });
           }
         } else {
-          const files: any[] = PlaylistHelper.getBestFiles(a, availableFiles);
+          const files: PlaylistFile[] = PlaylistHelper.getBestFiles(a, availableFiles);
           files.forEach(file => {
             const contentPath = file.contentPath.indexOf("://") === -1 ? Environment.contentRoot + file.contentPath : file.contentPath;
-            let seconds = parseInt(file?.seconds || 0, 0);
+            let seconds = parseInt(String(file?.seconds || 0), 0);
             const loopVideo = file.loopVideo ? true : false;
             if (!seconds || seconds === 0 || loopVideo) seconds = 3600;
             itemFiles.push({ name: file.resourceName, url: contentPath, seconds, loopVideo });
@@ -72,7 +72,7 @@ export class ClassroomController extends LessonsBaseController {
   }
 
   @httpGet("/player/:churchId")
-  public async getInstructions(@requestParam("churchId") churchId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
+  public async getInstructions(@requestParam("churchId") churchId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<unknown> {
     return this.actionWrapperAnon(req, res, async () => {
       const classroomIds = req.query.classrooms ? req.query.classrooms.toString().split(",") : [];
 
@@ -86,7 +86,7 @@ export class ClassroomController extends LessonsBaseController {
   }
 
   @httpGet("/playlistNew/:classroomId")
-  public async getPlaylistNew(@requestParam("classroomId") classroomId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
+  public async getPlaylistNew(@requestParam("classroomId") classroomId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<unknown> {
     return this.actionWrapperAnon(req, res, async () => {
       let resolution: "720" | "1080" = "720";
       if (req.query.resolution && req.query.resolution === "1080") resolution = "1080";
@@ -109,7 +109,7 @@ export class ClassroomController extends LessonsBaseController {
   }
 
   @httpGet("/playlist/:classroomId")
-  public async getPlaylist(@requestParam("classroomId") classroomId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
+  public async getPlaylist(@requestParam("classroomId") classroomId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<unknown> {
     return this.actionWrapperAnon(req, res, async () => {
       let resolution: "720" | "1080" = "720";
       if (req.query.resolution && req.query.resolution === "1080") resolution = "1080";
@@ -124,14 +124,14 @@ export class ClassroomController extends LessonsBaseController {
   }
 
   @httpGet("/")
-  public async getAll(req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
+  public async getAll(req: express.Request<{}, {}, null>, res: express.Response): Promise<unknown> {
     return this.actionWrapper(req, res, async au => {
       return await this.repositories.classroom.loadByChurchId(au.churchId);
     });
   }
 
   @httpGet("/person")
-  public async getForPerson(req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
+  public async getForPerson(req: express.Request<{}, {}, null>, res: express.Response): Promise<unknown> {
     return this.actionWrapper(req, res, async au => {
       if (!au.groupIds || au.groupIds.length === 0) return [];
       return await this.repositories.classroom.loadForPerson(au.churchId, au.groupIds);
@@ -140,7 +140,7 @@ export class ClassroomController extends LessonsBaseController {
 
   // Temporary route to load classrooms as feed categories for ChurchAppsPlayer. It'll be based on user going forward.
   @httpGet("/public/tree/:churchId")
-  public async getPublicTree(@requestParam("churchId") churchId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
+  public async getPublicTree(@requestParam("churchId") churchId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<unknown> {
     return this.actionWrapperAnon(req, res, async () => {
       const classRooms = await this.repositories.classroom.loadByChurchId(churchId);
 
@@ -154,21 +154,21 @@ export class ClassroomController extends LessonsBaseController {
   }
 
   @httpGet("/public/church/:churchId")
-  public async getForChurch(@requestParam("churchId") churchId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
+  public async getForChurch(@requestParam("churchId") churchId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<unknown> {
     return this.actionWrapperAnon(req, res, async () => {
       return await this.repositories.classroom.loadByChurchId(churchId);
     });
   }
 
   @httpGet("/:id")
-  public async get(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
+  public async get(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<unknown> {
     return this.actionWrapperAnon(req, res, async () => {
       return await this.repositories.classroom.load(id);
     });
   }
 
   @httpPost("/")
-  public async save(req: express.Request<{}, {}, Classroom[]>, res: express.Response): Promise<any> {
+  public async save(req: express.Request<{}, {}, Classroom[]>, res: express.Response): Promise<unknown> {
     return this.actionWrapper(req, res, async au => {
       if (!au.checkAccess(Permissions.schedules.edit)) return this.json({}, 401);
       else {
@@ -184,7 +184,7 @@ export class ClassroomController extends LessonsBaseController {
   }
 
   @httpDelete("/:id")
-  public async delete(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
+  public async delete(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<unknown> {
     return this.actionWrapper(req, res, async au => {
       if (!au.checkAccess(Permissions.schedules.edit)) return this.json({}, 401);
       else {

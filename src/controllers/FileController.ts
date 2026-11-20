@@ -11,7 +11,7 @@ import { ownsContent } from "../helpers/ContentOwnership";
 @controller("/files")
 export class FileController extends LessonsBaseController {
   @httpGet("/cleanup")
-  public async getCleanup(req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
+  public async getCleanup(req: express.Request<{}, {}, null>, res: express.Response): Promise<unknown> {
     return this.actionWrapper(req, res, async au => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
       const existing = await this.repositories.file.loadForChurch(au.churchId);
@@ -62,14 +62,14 @@ export class FileController extends LessonsBaseController {
   }
 
   @httpGet("/:id")
-  public async get(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
+  public async get(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<unknown> {
     return this.actionWrapper(req, res, async au => {
       return await this.repositories.file.load(au.churchId, id);
     });
   }
 
   @httpGet("/")
-  public async getAll(req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
+  public async getAll(req: express.Request<{}, {}, null>, res: express.Response): Promise<unknown> {
     return this.actionWrapper(req, res, async au => {
       return await this.repositories.file.loadForChurch(au.churchId);
     });
@@ -77,7 +77,7 @@ export class FileController extends LessonsBaseController {
 
   // Known bug - This post accepts multiple File modals but only a single file upload.  It's not a problem because the app restricts users to one upload at a time (for now).
   @httpPost("/")
-  public async save(req: express.Request<{}, {}, File[]>, res: express.Response): Promise<any> {
+  public async save(req: express.Request<{}, {}, File[]>, res: express.Response): Promise<unknown> {
     return this.actionWrapper(req, res, async au => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
       else {
@@ -101,7 +101,7 @@ export class FileController extends LessonsBaseController {
   }
 
   @httpPost("/postUrl/content/:contentType/:contentId")
-  public async getUploadUrManual(@requestParam("contentType") contentType: string, @requestParam("contentId") contentId: string, req: express.Request<{}, {}, { fileName: string }>, res: express.Response): Promise<any> {
+  public async getUploadUrManual(@requestParam("contentType") contentType: string, @requestParam("contentId") contentId: string, req: express.Request<{}, {}, { fileName: string }>, res: express.Response): Promise<unknown> {
     return this.actionWrapper(req, res, async au => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
       else if (contentId && !(await ownsContent(this.repositories, au.churchId, contentType, contentId))) return this.json({}, 401);
@@ -114,7 +114,7 @@ export class FileController extends LessonsBaseController {
   }
 
   @httpPost("/postUrl")
-  public async getUploadUrl(req: express.Request<{}, {}, { resourceId: string; fileName: string }>, res: express.Response): Promise<any> {
+  public async getUploadUrl(req: express.Request<{}, {}, { resourceId: string; fileName: string }>, res: express.Response): Promise<unknown> {
     return this.actionWrapper(req, res, async au => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
       else {
@@ -128,7 +128,7 @@ export class FileController extends LessonsBaseController {
   }
 
   @httpDelete("/:id")
-  public async delete(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
+  public async delete(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<unknown> {
     return this.actionWrapper(req, res, async au => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
       else {

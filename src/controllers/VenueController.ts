@@ -1,7 +1,7 @@
 import { controller, httpPost, httpGet, requestParam, httpDelete } from "inversify-express-utils";
 import express from "express";
 import { LessonsBaseController } from "./LessonsBaseController";
-import { Venue, Section, Action, Role, ExternalVideo, Lesson, Download } from "../models";
+import { Venue, Section, Action, Role, ExternalVideo, Lesson, Download, PlanItem, PlaylistFile, PlaylistMessage, PlaylistMessageFile, VenueActionsSection, VenueActionSummary } from "../models";
 import { Permissions } from "../helpers/Permissions";
 import { ArrayHelper } from "@churchapps/apihelper";
 import { DurationHelper, Environment } from "../helpers";
@@ -12,7 +12,7 @@ import { LibraryHelper } from "../helpers/LibraryHelper";
 @controller("/venues")
 export class VenueController extends LessonsBaseController {
   @httpGet("/timeline")
-  public async getPosts(req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
+  public async getPosts(req: express.Request<{}, {}, null>, res: express.Response): Promise<unknown> {
     return this.actionWrapper(req, res, async _au => {
       const venueIds = req.query.venueIds ? req.query.venueIds.toString().split(",") : [];
       return await this.repositories.venue.loadTimeline(venueIds);
@@ -26,7 +26,7 @@ export class VenueController extends LessonsBaseController {
   }
 
   @httpGet("/playlistNew/:venueId")
-  public async getPlaylistNew(@requestParam("venueId") venueId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
+  public async getPlaylistNew(@requestParam("venueId") venueId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<unknown> {
     return this.actionWrapperAnon(req, res, async () => {
       const venue: Venue = await this.repositories.venue.loadPublic(venueId);
       if (!venue) return this.json({}, 404);
@@ -46,7 +46,7 @@ export class VenueController extends LessonsBaseController {
   }
 
   @httpGet("/playlist/:venueId")
-  public async getPlaylist(@requestParam("venueId") venueId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
+  public async getPlaylist(@requestParam("venueId") venueId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<unknown> {
     return this.actionWrapperAnon(req, res, async () => {
       const venue: Venue = await this.repositories.venue.loadPublic(venueId);
       if (!venue) return this.json({}, 404);
@@ -62,11 +62,11 @@ export class VenueController extends LessonsBaseController {
       const ipAddress = (req.headers["x-forwarded-for"] || req.socket.remoteAddress).toString().split(",")[0];
       await this.logDownload(venue.lessonId, venue.name, venue.churchId, ipAddress);
 
-      const messages: any[] = [];
+      const messages: PlaylistMessage[] = [];
 
       sections.forEach(s => {
         const sectionActions: Action[] = ArrayHelper.getAll(actions, "sectionId", s.id);
-        const itemFiles: any[] = [];
+        const itemFiles: PlaylistMessageFile[] = [];
         sectionActions.forEach(a => {
           if (a.externalVideoId || a.actionType === "Add-on") {
             let video: ExternalVideo = ArrayHelper.getOne(availableVideos, "id", a.externalVideoId);
@@ -80,11 +80,11 @@ export class VenueController extends LessonsBaseController {
               }
             }
           } else {
-            const files: any[] = PlaylistHelper.getBestFiles(a, availableFiles);
+            const files: PlaylistFile[] = PlaylistHelper.getBestFiles(a, availableFiles);
             files.forEach(file => {
               const contentPath = file.contentPath.indexOf("://") === -1 ? Environment.contentRoot + file.contentPath : file.contentPath;
               const thumbnail = file.thumbPath ? (file.thumbPath.indexOf("://") === -1 ? Environment.contentRoot + file.thumbPath : file.thumbPath) : null;
-              let seconds = parseInt(file.seconds, 0);
+              let seconds = parseInt(String(file.seconds), 0);
               const loopVideo = file.loopVideo ? true : false;
               if (!seconds || seconds === 0 || loopVideo) seconds = 3600;
               itemFiles.push({ name: file.resourceName, url: contentPath, seconds, loopVideo, thumbnail });
@@ -99,14 +99,14 @@ export class VenueController extends LessonsBaseController {
   }
 
   @httpGet("/:id")
-  public async get(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
+  public async get(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<unknown> {
     return this.actionWrapper(req, res, async au => {
       return await this.repositories.venue.load(au.churchId, id);
     });
   }
 
   @httpGet("/public/feed/:id")
-  public async getPublicFeed(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
+  public async getPublicFeed(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<unknown> {
     return this.actionWrapperAnon(req, res, async () => {
       const venue = await this.repositories.venue.loadPublic(id);
       if (!venue) return this.json({}, 404);
@@ -126,7 +126,7 @@ export class VenueController extends LessonsBaseController {
   }
 
   @httpGet("/public/images")
-  public async getPublicImages(req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
+  public async getPublicImages(req: express.Request<{}, {}, null>, res: express.Response): Promise<unknown> {
     return this.actionWrapperAnon(req, res, async () => {
       const ids = req.query.ids ? req.query.ids.toString().split(",") : [];
       return await this.repositories.venue.loadPublicImages(ids);
@@ -134,7 +134,7 @@ export class VenueController extends LessonsBaseController {
   }
 
   @httpGet("/public/:id")
-  public async getPublic(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
+  public async getPublic(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<unknown> {
     return this.actionWrapperAnon(req, res, async () => {
       const venue = await this.repositories.venue.loadPublic(id);
       if (!venue) return this.json({}, 404);
@@ -147,7 +147,7 @@ export class VenueController extends LessonsBaseController {
   }
 
   @httpGet("/public/actions/:id")
-  public async getPublicActions(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
+  public async getPublicActions(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<unknown> {
     return this.actionWrapperAnon(req, res, async () => {
       const venue = await this.repositories.venue.loadPublic(id);
       if (!venue) return this.json({}, 404);
@@ -156,11 +156,11 @@ export class VenueController extends LessonsBaseController {
       const actions = await this.repositories.action.loadByLessonId(venue.lessonId);
       const durationData = await DurationHelper.loadDurationData(actions, venue.churchId, this.repositories);
 
-      const result = { venueName: venue.name, sections: [] as any[] };
+      const result = { venueName: venue.name, sections: [] as VenueActionsSection[] };
 
       sections.forEach(section => {
         const sectionRoles = ArrayHelper.getAll(roles, "sectionId", section.id);
-        const sectionActions: any[] = [];
+        const sectionActions: VenueActionSummary[] = [];
 
         sectionRoles.forEach(role => {
           ArrayHelper.getAll(actions, "roleId", role.id).forEach((action: Action) => {
@@ -184,7 +184,7 @@ export class VenueController extends LessonsBaseController {
   }
 
   @httpGet("/public/lesson/:lessonId")
-  public async getPublicForLesson(@requestParam("lessonId") lessonId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
+  public async getPublicForLesson(@requestParam("lessonId") lessonId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<unknown> {
     return this.actionWrapperAnon(req, res, async () => {
       const venues = await this.repositories.venue.loadPublicByLessonId(lessonId);
       const sections = await this.repositories.section.loadByLessonId(lessonId);
@@ -196,7 +196,7 @@ export class VenueController extends LessonsBaseController {
   }
 
   @httpGet("/lesson/:lessonId")
-  public async getForLesson(@requestParam("lessonId") lessonId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
+  public async getForLesson(@requestParam("lessonId") lessonId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<unknown> {
     return this.actionWrapper(req, res, async au => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
       else return await this.repositories.venue.loadByLessonId(au.churchId, lessonId);
@@ -204,14 +204,14 @@ export class VenueController extends LessonsBaseController {
   }
 
   @httpGet("/names/classroom/:classroomId")
-  public async getNameByClassroom(@requestParam("classroomId") classroomId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
+  public async getNameByClassroom(@requestParam("classroomId") classroomId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<unknown> {
     return this.actionWrapper(req, res, async au => {
       return await this.repositories.venue.loadNamesForClassroom(au.churchId, classroomId);
     });
   }
 
   @httpGet("/")
-  public async getAll(req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
+  public async getAll(req: express.Request<{}, {}, null>, res: express.Response): Promise<unknown> {
     return this.actionWrapper(req, res, async au => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
       else return await this.repositories.venue.loadAll(au.churchId);
@@ -219,7 +219,7 @@ export class VenueController extends LessonsBaseController {
   }
 
   @httpPost("/")
-  public async save(req: express.Request<{}, {}, Venue[]>, res: express.Response): Promise<any> {
+  public async save(req: express.Request<{}, {}, Venue[]>, res: express.Response): Promise<unknown> {
     return this.actionWrapper(req, res, async au => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
       else {
@@ -239,7 +239,7 @@ export class VenueController extends LessonsBaseController {
   }
 
   @httpDelete("/:id")
-  public async delete(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
+  public async delete(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<unknown> {
     return this.actionWrapper(req, res, async au => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
       else {
@@ -252,7 +252,7 @@ export class VenueController extends LessonsBaseController {
   }
 
   @httpGet("/public/planItems/:id")
-  public async getPublicPlanItems(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
+  public async getPublicPlanItems(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<unknown> {
     return this.actionWrapperAnon(req, res, async () => {
       const venue = await this.repositories.venue.loadPublic(id);
       if (!venue) return this.json({}, 404);
@@ -262,7 +262,7 @@ export class VenueController extends LessonsBaseController {
       const actions = await this.repositories.action.loadByLessonId(venue.lessonId);
       const durationData = await DurationHelper.loadDurationData(actions, venue.churchId, this.repositories);
 
-      const lessonHeader: any = {
+      const lessonHeader: PlanItem = {
         id: venue.id,
         churchId: venue.churchId,
         planId: venue.id,

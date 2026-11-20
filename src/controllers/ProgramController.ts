@@ -9,7 +9,7 @@ import { LibraryHelper } from "../helpers/LibraryHelper";
 @controller("/programs")
 export class ProgramController extends LessonsBaseController {
   @httpGet("/public/tree")
-  public async getPublicTree(req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
+  public async getPublicTree(req: express.Request<{}, {}, null>, res: express.Response): Promise<unknown> {
     return this.actionWrapperAnon(req, res, async () => {
       const result = await LibraryHelper.loadLibrary();
       return result;
@@ -17,35 +17,35 @@ export class ProgramController extends LessonsBaseController {
   }
 
   @httpGet("/public/slug/:slug")
-  public async getPublicBySlug(@requestParam("slug") slug: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
+  public async getPublicBySlug(@requestParam("slug") slug: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<unknown> {
     return this.actionWrapperAnon(req, res, async () => {
       return (await this.repositories.program.loadPublicBySlug(slug)) ?? {};
     });
   }
 
   @httpGet("/public/:id")
-  public async getPublic(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
+  public async getPublic(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<unknown> {
     return this.actionWrapperAnon(req, res, async () => {
       return await this.repositories.program.loadPublic(id);
     });
   }
 
   @httpGet("/public")
-  public async getPublicAll(req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
+  public async getPublicAll(req: express.Request<{}, {}, null>, res: express.Response): Promise<unknown> {
     return this.actionWrapperAnon(req, res, async () => {
       return await this.repositories.program.loadPublicAll();
     });
   }
 
   @httpGet("/:id")
-  public async get(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
+  public async get(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<unknown> {
     return this.actionWrapper(req, res, async au => {
       return await this.repositories.program.load(au.churchId, id);
     });
   }
 
   @httpGet("/provider/:providerId")
-  public async getForProvider(@requestParam("providerId") providerId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
+  public async getForProvider(@requestParam("providerId") providerId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<unknown> {
     return this.actionWrapper(req, res, async au => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
       else return await this.repositories.program.loadByProviderId(au.churchId, providerId);
@@ -53,7 +53,7 @@ export class ProgramController extends LessonsBaseController {
   }
 
   @httpGet("/")
-  public async getAll(req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
+  public async getAll(req: express.Request<{}, {}, null>, res: express.Response): Promise<unknown> {
     return this.actionWrapper(req, res, async au => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
       else return await this.repositories.program.loadAll(au.churchId);
@@ -61,7 +61,7 @@ export class ProgramController extends LessonsBaseController {
   }
 
   @httpPost("/")
-  public async save(req: express.Request<{}, {}, Program[]>, res: express.Response): Promise<any> {
+  public async save(req: express.Request<{}, {}, Program[]>, res: express.Response): Promise<unknown> {
     return this.actionWrapper(req, res, async au => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
       else {
@@ -95,7 +95,7 @@ export class ProgramController extends LessonsBaseController {
   }
 
   @httpDelete("/:id")
-  public async delete(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
+  public async delete(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<unknown> {
     return this.actionWrapper(req, res, async au => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
       else if (!(await this.repositories.program.load(au.churchId, id))) return this.json({}, 404);

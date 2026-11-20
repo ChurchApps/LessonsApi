@@ -1,3 +1,4 @@
+import { DeleteResult } from "kysely";
 import { getDb } from "../db";
 import { ExternalVideo } from "../models";
 import { UniqueIdHelper } from "../helpers";
@@ -91,7 +92,7 @@ export class ExternalVideoRepository {
     return await getDb().selectFrom("externalVideos").selectAll().where("id", "=", id).executeTakeFirst() as ExternalVideo;
   }
 
-  public async delete(churchId: string, id: string): Promise<any> {
+  public async delete(churchId: string, id: string): Promise<DeleteResult[]> {
     return await getDb().deleteFrom("externalVideos").where("id", "=", id).where("churchId", "=", churchId).execute();
   }
 }

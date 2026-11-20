@@ -1,6 +1,6 @@
-import { sql } from "kysely";
+import { DeleteResult, sql } from "kysely";
 import { getDb } from "../db";
-import { Asset } from "../models";
+import { Asset, PlaylistFile } from "../models";
 import { UniqueIdHelper } from "../helpers";
 
 export class AssetRepository {
@@ -46,9 +46,9 @@ export class AssetRepository {
     return await getDb().selectFrom("assets").selectAll().where("id", "=", id).where("churchId", "=", churchId).executeTakeFirst() as Asset;
   }
 
-  public async loadPlaylist(resourceIds: string[]): Promise<any> {
+  public async loadPlaylist(resourceIds: string[]): Promise<PlaylistFile[]> {
     if (resourceIds.length === 0) return [];
-    const result = await sql<any>`
+    const result = await sql<PlaylistFile>`
       SELECT f.contentPath, r.id as resourceId, CONCAT(r.name, ' - ', a.name) as resourceName,
         a.id as assetId, f.fileType, f.seconds
       FROM resources r
@@ -60,7 +60,7 @@ export class AssetRepository {
     return result.rows;
   }
 
-  public async delete(churchId: string, id: string): Promise<any> {
+  public async delete(churchId: string, id: string): Promise<DeleteResult[]> {
     return await getDb().deleteFrom("assets").where("id", "=", id).where("churchId", "=", churchId).execute();
   }
 }

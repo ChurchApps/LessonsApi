@@ -7,7 +7,7 @@ import { Permissions } from "../helpers/Permissions";
 @controller("/yearPlans")
 export class YearPlanController extends LessonsBaseController {
   @httpGet("/public")
-  public async getPublicAll(_req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
+  public async getPublicAll(_req: express.Request<{}, {}, null>, res: express.Response): Promise<unknown> {
     return this.actionWrapperAnon(_req, res, async () => {
       const plans = await this.repositories.yearPlan.loadPublicAll();
       return await this.hydratePlans(plans, true);
@@ -15,7 +15,7 @@ export class YearPlanController extends LessonsBaseController {
   }
 
   @httpGet("/public/:id")
-  public async getPublic(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
+  public async getPublic(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<unknown> {
     return this.actionWrapperAnon(req, res, async () => {
       const plan = await this.repositories.yearPlan.loadPublic(id);
       if (!plan) return this.json({}, 404);
@@ -25,7 +25,7 @@ export class YearPlanController extends LessonsBaseController {
   }
 
   @httpGet("/:id")
-  public async get(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
+  public async get(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<unknown> {
     return this.actionWrapper(req, res, async au => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
       const plan = await this.repositories.yearPlan.load(au.churchId, id);
@@ -36,7 +36,7 @@ export class YearPlanController extends LessonsBaseController {
   }
 
   @httpGet("/")
-  public async getAll(req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
+  public async getAll(req: express.Request<{}, {}, null>, res: express.Response): Promise<unknown> {
     return this.actionWrapper(req, res, async au => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
       const plans = await this.repositories.yearPlan.loadAll(au.churchId);
@@ -45,7 +45,7 @@ export class YearPlanController extends LessonsBaseController {
   }
 
   @httpPost("/")
-  public async save(req: express.Request<{}, {}, YearPlan[]>, res: express.Response): Promise<any> {
+  public async save(req: express.Request<{}, {}, YearPlan[]>, res: express.Response): Promise<unknown> {
     return this.actionWrapper(req, res, async au => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
       const result: YearPlan[] = [];
@@ -66,7 +66,7 @@ export class YearPlanController extends LessonsBaseController {
   }
 
   @httpDelete("/:id")
-  public async delete(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
+  public async delete(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<unknown> {
     return this.actionWrapper(req, res, async au => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
       await this.repositories.yearPlan.delete(au.churchId, id);

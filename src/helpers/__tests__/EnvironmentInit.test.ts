@@ -1,14 +1,14 @@
 const readParameter = jest.fn();
 jest.mock("@churchapps/apihelper", () => ({
   __esModule: true,
-  AwsHelper: { readParameter: (...a: any[]) => readParameter(...a) },
+  AwsHelper: { readParameter: (...a: unknown[]) => readParameter(...a) },
   EnvironmentBase: class EnvironmentBase {
     static connectionString: string;
     static jwtSecret: string;
     static encryptionKey: string;
     static contentRoot: string;
     // apihelper 0.7.1: populateBase reads each secret once and turns any SSM error (throttling included) into "".
-    static async initBase(env: string, options: any) {
+    static async initBase(env: string, options: { appName: string }) {
       EnvironmentBase.connectionString = await readParameter(`/${env}/${options.appName}/connectionString`);
       EnvironmentBase.encryptionKey = await readParameter(`/${env}/encryptionKey`);
       EnvironmentBase.jwtSecret = await readParameter(`/${env}/jwtSecret`);

@@ -9,14 +9,14 @@ import { Permissions } from "../helpers/Permissions";
 @controller("/addOnPlaylists")
 export class AddOnPlaylistController extends LessonsBaseController {
   @httpGet("/:id")
-  public async get(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
+  public async get(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<unknown> {
     return this.actionWrapper(req, res, async () => {
       return await this.repositories.addOnPlaylist.load(id);
     });
   }
 
   @httpPost("/")
-  public async save(req: express.Request<{}, {}, AddOnPlaylist[]>, res: express.Response): Promise<any> {
+  public async save(req: express.Request<{}, {}, AddOnPlaylist[]>, res: express.Response): Promise<unknown> {
     return this.actionWrapper(req, res, async au => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
       else {
@@ -32,7 +32,7 @@ export class AddOnPlaylistController extends LessonsBaseController {
   }
 
   @httpDelete("/:id")
-  public async delete(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
+  public async delete(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<unknown> {
     return this.actionWrapper(req, res, async au => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
       else {

@@ -1,8 +1,8 @@
 import "reflect-metadata";
 jest.mock("../LessonsBaseController", () => ({
   LessonsBaseController: class {
-    repositories: any;
-    json(obj: any, status?: number) { return { obj, status: status ?? 200 }; }
+    repositories: unknown;
+    json(obj: unknown, status?: number) { return { obj, status: status ?? 200 }; }
   }
 }));
 jest.mock("@churchapps/apihelper", () => ({
@@ -26,13 +26,22 @@ import { LessonController } from "../LessonController";
 import { StudyController } from "../StudyController";
 import { ProgramController } from "../ProgramController";
 import { AddOnController } from "../AddOnController";
+import express from "express";
+import { LessonsBaseController } from "../LessonsBaseController";
+import { asRepositories, asRequest, JsonResult, noResponse, RepoMocks, setActionWrapper } from "./controllerTestUtils";
+
+// The controllers under test all save and delete records that carry an image.
+type ImageController = LessonsBaseController & {
+  save: (req: express.Request, res: express.Response) => Promise<unknown>;
+  delete: (id: string, req: express.Request, res: express.Response) => Promise<unknown>;
+};
 
 const image = "data:image/png;base64,AAAA";
 
-function makeController(ControllerClass: any, repos: any) {
+function makeController(ControllerClass: new () => ImageController, repos: RepoMocks) {
   const controller = new ControllerClass();
-  (controller as any).actionWrapper = (_req: any, _res: any, action: any) => action({ churchId: "c1", checkAccess: () => true });
-  (controller as any).repositories = repos;
+  setActionWrapper(controller, { churchId: "c1", checkAccess: () => true });
+  controller.repositories = asRepositories(repos);
   return controller;
 }
 
@@ -40,7 +49,7 @@ function makeController(ControllerClass: any, repos: any) {
 function churchScopedRepo() {
   return {
     load: jest.fn(async (churchId: string, id: string) => (churchId === "c1" && id === "own" ? { id, churchId } : undefined)),
-    save: jest.fn(async (x: any) => x),
+    save: jest.fn(async <T>(x: T) => x),
     delete: jest.fn(async () => {}),
     loadByStudyId: jest.fn(async () => []),
     loadByProgramId: jest.fn(async () => [])
@@ -49,8 +58,8 @@ function churchScopedRepo() {
 
 function addOnRepo() {
   return {
-    load: jest.fn(async (id: string) => ({ own: { id, churchId: "c1" }, victim: { id, churchId: "c2" } } as any)[id]),
-    save: jest.fn(async (x: any) => x),
+    load: jest.fn(async (id: string) => ({ own: { id, churchId: "c1" }, victim: { id, churchId: "c2" } } as Record<string, { id: string; churchId: string }>)[id]),
+    save: jest.fn(async <T>(x: T) => x),
     delete: jest.fn(async () => {})
   };
 }
@@ -81,7 +90,7 @@ describe("image writes only touch the church's own content", () => {
   it.each(cases)("$name save refuses to replace another church's image", async ({ Controller, folder }) => {
     const controller = makeController(Controller, makeRepos());
 
-    const res = await controller.save({ body: [{ id: "victim", image }] }, {});
+    const res = await controller.save(asRequest({ body: [{ id: "victim", image }] }), noResponse) as JsonResult;
 
     expect(res.status).toBe(404);
     expect(FileStorageHelper.store).not.toHaveBeenCalledWith("/" + folder + "/victim.png", expect.anything(), expect.anything());
@@ -90,7 +99,7 @@ describe("image writes only touch the church's own content", () => {
   it.each(cases)("$name save still replaces the church's own image", async ({ Controller, folder }) => {
     const controller = makeController(Controller, makeRepos());
 
-    await controller.save({ body: [{ id: "own", image }] }, {});
+    await controller.save(asRequest({ body: [{ id: "own", image }] }), noResponse);
 
     expect(FileStorageHelper.store).toHaveBeenCalledWith("/" + folder + "/own.png", "image/png", expect.any(Buffer));
   });
@@ -98,7 +107,7 @@ describe("image writes only touch the church's own content", () => {
   it.each(cases.filter((c) => c.name !== "addOn"))("$name delete leaves another church's image alone", async ({ Controller, folder }) => {
     const controller = makeController(Controller, makeRepos());
 
-    const res = await controller.delete("victim", {}, {});
+    const res = await controller.delete("victim", asRequest(), noResponse) as JsonResult;
 
     expect(res.status).toBe(404);
     expect(FileStorageHelper.remove).not.toHaveBeenCalledWith("/" + folder + "/victim.png");
@@ -107,7 +116,7 @@ describe("image writes only touch the church's own content", () => {
   it.each(cases.filter((c) => c.name !== "addOn"))("$name delete still removes the church's own image", async ({ Controller, folder }) => {
     const controller = makeController(Controller, makeRepos());
 
-    await controller.delete("own", {}, {});
+    await controller.delete("own", asRequest(), noResponse);
 
     expect(FileStorageHelper.remove).toHaveBeenCalledWith("/" + folder + "/own.png");
   });

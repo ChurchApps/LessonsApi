@@ -3,6 +3,16 @@ import { AuthenticatedUser } from "@churchapps/apihelper";
 import { Environment } from "./Environment";
 import { Repositories } from "../repositories";
 
+// The parts of Mautic API responses that we read.
+interface MauticRecord {
+  id?: number | string;
+}
+
+interface MauticResponse {
+  companies?: Record<string, MauticRecord>;
+  contact?: MauticRecord;
+}
+
 export class MauticHelper {
   private static lambdaClient: LambdaClient;
 
@@ -38,11 +48,11 @@ export class MauticHelper {
       if (!countRow || !countRow.downloadCount) return;
       // The company church-id field alias written by the membership Api's MauticHelper.register() is "companychurchid"
       const data = await this.request(`/api/companies?search=companychurchid:${churchId}&limit=1`);
-      const companies = Object.values(data?.companies || {}) as any[];
+      const companies = Object.values(data?.companies || {}) as MauticRecord[];
       if (!companies.length) return;
       const companyId = companies[0].id;
       const slugs = lessonId ? await this.loadSlugs(lessonId) : null;
-      const companyFields: any = {
+      const companyFields: Record<string, unknown> = {
         lessons_last_download: new Date(countRow.lastDownload).toISOString(),
         lessons_download_count: countRow.downloadCount
       };
@@ -89,8 +99,8 @@ export class MauticHelper {
     return json?.contact;
   }
 
-  private static async request(path: string, method = "GET", body?: any): Promise<any> {
-    const headers: any = { Authorization: "Basic " + Buffer.from(`${Environment.mauticUser}:${Environment.mauticPassword}`).toString("base64") };
+  private static async request(path: string, method = "GET", body?: Record<string, unknown>): Promise<MauticResponse> {
+    const headers: Record<string, string> = { Authorization: "Basic " + Buffer.from(`${Environment.mauticUser}:${Environment.mauticPassword}`).toString("base64") };
     if (body) headers["Content-Type"] = "application/json";
     // Off the request path now, but still bound each call so a hung Mautic can't pin the sync Lambda
     const resp = await fetch(Environment.mauticUrl + path, { method, headers, body: body ? JSON.stringify(body) : undefined, signal: AbortSignal.timeout(4000) });

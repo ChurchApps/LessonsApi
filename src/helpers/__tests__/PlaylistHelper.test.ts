@@ -1,17 +1,17 @@
 jest.mock("../../repositories", () => ({ Repositories: { getCurrent: jest.fn() } }));
-jest.mock("../VimeoHelper", () => ({ VimeoHelper: { updateVimeoLinks: jest.fn(async (ev: any) => ev) } }));
+jest.mock("../VimeoHelper", () => ({ VimeoHelper: { updateVimeoLinks: jest.fn(async (ev: ExternalVideo) => ev) } }));
 jest.mock("@churchapps/apihelper", () => ({
   __esModule: true,
   ArrayHelper: {
-    getIds: (items: any[], key: string) => Array.from(new Set(items.filter(i => i[key]).map(i => i[key]))),
-    getAll: (items: any[], key: string, value: any) => items.filter(i => i[key] === value)
+    getIds: (items: Record<string, unknown>[], key: string) => Array.from(new Set(items.filter(i => i[key]).map(i => i[key]))),
+    getAll: (items: Record<string, unknown>[], key: string, value: unknown) => items.filter(i => i[key] === value)
   }
 }));
 
 import { PlaylistHelper } from "../PlaylistHelper";
 import { Repositories } from "../../repositories";
 import { VimeoHelper } from "../VimeoHelper";
-import { Action } from "../../models";
+import { Action, ExternalVideo } from "../../models";
 
 describe("PlaylistHelper.getBestFiles", () => {
   it("prefers webm over mp4 over images", () => {
@@ -60,7 +60,7 @@ describe("PlaylistHelper.loadPlaylistVideos", () => {
     const actions: Action[] = [{ externalVideoId: "v1" }, { addOnId: "ao1" }];
     const videos = await PlaylistHelper.loadPlaylistVideos(actions);
 
-    expect(videos.map((v: any) => v.id)).toEqual(["v1", "v2"]);
+    expect(videos.map(v => v.id)).toEqual(["v1", "v2"]);
     expect(repo.externalVideo.loadByContentTypeIds).toHaveBeenCalledWith("addOn", ["ao1"]);
   });
 

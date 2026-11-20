@@ -1,12 +1,22 @@
-import { sql } from "kysely";
+import { DeleteResult, sql } from "kysely";
 import { getDb } from "../db";
 import { Venue } from "../models";
 import { UniqueIdHelper } from "../helpers";
 
+export interface VenueTimelinePost {
+  postType: string;
+  postId: string;
+  studyName: string;
+  name: string;
+  description: string;
+  image: string;
+  slug: string;
+}
+
 export class VenueRepository {
   public async loadTimeline(venueIds: string[]) {
     if (venueIds.length === 0) return [];
-    const result = await sql<any>`
+    const result = await sql<VenueTimelinePost>`
       SELECT 'venue' as postType, v.id as postId, s.name as studyName, l.name, l.description, l.image,
         CONCAT('/', p.slug, '/', s.slug, '/', l.slug) as slug
       FROM venues v
@@ -85,7 +95,7 @@ export class VenueRepository {
     return await getDb().selectFrom("venues").selectAll().where("churchId", "=", churchId).orderBy("sort").execute() as Venue[];
   }
 
-  public async delete(churchId: string, id: string): Promise<any> {
+  public async delete(churchId: string, id: string): Promise<DeleteResult[]> {
     return await getDb().deleteFrom("venues").where("id", "=", id).where("churchId", "=", churchId).execute();
   }
 }

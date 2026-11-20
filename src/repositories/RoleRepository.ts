@@ -1,3 +1,4 @@
+import { DeleteResult } from "kysely";
 import { getDb } from "../db";
 import { Role } from "../models";
 import { UniqueIdHelper } from "../helpers";
@@ -35,7 +36,7 @@ export class RoleRepository {
     return await getDb().selectFrom("roles").selectAll().where("id", "=", id).executeTakeFirst() as Role;
   }
 
-  public async delete(churchId: string, id: string): Promise<any> {
+  public async delete(churchId: string, id: string): Promise<DeleteResult[]> {
     return await getDb().deleteFrom("roles").where("id", "=", id).where("churchId", "=", churchId).execute();
   }
 }

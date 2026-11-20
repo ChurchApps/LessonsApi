@@ -73,9 +73,9 @@ export class MigrationRunner {
       const applied = (results || []).filter((r) => r.status === "Success").map((r) => r.migrationName);
       const failed = (results || []).find((r) => r.status === "Error")?.migrationName;
       const after = await this.status();
-      return { ok: !error, applied, pending: after.pending, failed, error: error ? (error as any)?.message || String(error) : undefined };
-    } catch (e: any) {
-      return { ok: false, applied: [], pending: [], error: e?.message || String(e) };
+      return { ok: !error, applied, pending: after.pending, failed, error: error ? (error as Error)?.message || String(error) : undefined };
+    } catch (e) {
+      return { ok: false, applied: [], pending: [], error: (e as Error)?.message || String(e) };
     }
   }
 }

@@ -1,12 +1,13 @@
 const axiosGet = jest.fn();
-const save = jest.fn(async (ev: any) => ev);
-jest.mock("axios", () => ({ __esModule: true, default: { get: (...a: any[]) => axiosGet(...a) } }));
+const save = jest.fn(async (ev: ExternalVideo) => ev);
+jest.mock("axios", () => ({ __esModule: true, default: { get: (...a: unknown[]) => axiosGet(...a) } }));
 jest.mock("../Environment", () => ({ Environment: { vimeoToken: "token" } }));
 jest.mock("../../repositories", () => ({ Repositories: { getCurrent: () => ({ externalVideo: { save } }) } }));
 
 import { VimeoHelper } from "../VimeoHelper";
+import { ExternalVideo } from "../../models";
 
-const vimeoResponse = (download: any[]) => ({ data: { duration: 60, download, files: [], pictures: { sizes: [] } } });
+const vimeoResponse = (download: { rendition: string; link?: string; expires?: string }[]) => ({ data: { duration: 60, download, files: [], pictures: { sizes: [] } } });
 const soon = "2026-11-02T10:00:00+00:00";
 const later = "2026-11-02T12:00:00+00:00";
 
@@ -52,7 +53,7 @@ describe("VimeoHelper.updateVimeoLinks", () => {
     const expires = new Date(Date.now() + 90 * 60000).toISOString();
     axiosGet.mockResolvedValue(vimeoResponse([{ rendition: "1080p", link: "https://secret.example/l", expires }]));
 
-    await VimeoHelper.updateVimeoLinks({ id: "ev1", videoId: "v1" } as any);
+    await VimeoHelper.updateVimeoLinks({ id: "ev1", videoId: "v1" } as ExternalVideo);
 
     expect(log).toHaveBeenCalledTimes(1);
     expect(log.mock.calls[0][0]).toMatch(/^VIMEO_REFRESH ev1 (89|90)m$/);

@@ -7,14 +7,14 @@ import { Permissions } from "../helpers/Permissions";
 @controller("/roles")
 export class RoleController extends LessonsBaseController {
   @httpGet("/public/lesson/:lessonId")
-  public async getForLesson(@requestParam("lessonId") lessonId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
+  public async getForLesson(@requestParam("lessonId") lessonId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<unknown> {
     return this.actionWrapperAnon(req, res, async () => {
       return await this.repositories.role.loadByLessonId(lessonId);
     });
   }
 
   @httpGet("/section/:sectionId")
-  public async getForSection(@requestParam("sectionId") sectionId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
+  public async getForSection(@requestParam("sectionId") sectionId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<unknown> {
     return this.actionWrapper(req, res, async au => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
       else return await this.repositories.role.loadBySectionId(au.churchId, sectionId);
@@ -22,14 +22,14 @@ export class RoleController extends LessonsBaseController {
   }
 
   @httpGet("/:id")
-  public async get(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
+  public async get(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<unknown> {
     return this.actionWrapperAnon(req, res, async () => {
       return await this.repositories.role.load(id);
     });
   }
 
   @httpPost("/")
-  public async save(req: express.Request<{}, {}, Role[]>, res: express.Response): Promise<any> {
+  public async save(req: express.Request<{}, {}, Role[]>, res: express.Response): Promise<unknown> {
     return this.actionWrapper(req, res, async au => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
       else {
@@ -53,7 +53,7 @@ export class RoleController extends LessonsBaseController {
   }
 
   @httpDelete("/:id")
-  public async delete(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
+  public async delete(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<unknown> {
     return this.actionWrapper(req, res, async au => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
       else {

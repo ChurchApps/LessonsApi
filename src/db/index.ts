@@ -5,6 +5,13 @@ import { Database } from "./DatabaseTypes";
 
 let db: Kysely<Database> | null = null;
 
+// The parts of mysql2's typeCast field that castField reads.
+interface CastField {
+  type: string;
+  length: number;
+  buffer: () => Buffer;
+}
+
 function parseConnectionString(connectionString: string) {
   const firstSplit = connectionString.replace("mysql://", "").split("@");
   const userPass = firstSplit[0].split(":");
@@ -35,7 +42,7 @@ export function getDb(): Kysely<Database> {
           waitForConnections: true,
           queueLimit: 9999,
           charset: "utf8mb4",
-          typeCast: function castField(field: any, useDefaultTypeCasting: () => unknown) {
+          typeCast: function castField(field: CastField, useDefaultTypeCasting: () => unknown) {
             if ((field.type === "BIT") && (field.length === 1)) {
               try {
                 const bytes = field.buffer();

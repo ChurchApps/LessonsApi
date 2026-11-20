@@ -8,14 +8,14 @@ import { Environment, FileStorageHelper } from "../helpers";
 @controller("/studies")
 export class StudyController extends LessonsBaseController {
   @httpGet("/public/program/:programId")
-  public async getPublicForProgram(@requestParam("programId") programId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
+  public async getPublicForProgram(@requestParam("programId") programId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<unknown> {
     return this.actionWrapperAnon(req, res, async () => {
       return await this.repositories.study.loadPublicByProgramId(programId);
     });
   }
 
   @httpGet("/public/programs")
-  public async getPublicByPrograms(req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
+  public async getPublicByPrograms(req: express.Request<{}, {}, null>, res: express.Response): Promise<unknown> {
     return this.actionWrapperAnon(req, res, async () => {
       if (!req.query.ids) return [];
       const ids = req.query.ids.toString().split(",");
@@ -24,13 +24,13 @@ export class StudyController extends LessonsBaseController {
   }
 
   @httpGet("/public/slug/:programId/:slug")
-  public async getPublicBySlug(@requestParam("programId") programId: string, @requestParam("slug") slug: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
+  public async getPublicBySlug(@requestParam("programId") programId: string, @requestParam("slug") slug: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<unknown> {
     return this.actionWrapperAnon(req, res, async () => {
       return (await this.repositories.study.loadPublicBySlug(programId, slug)) ?? {};
     });
   }
   @httpGet("/public/ids")
-  public async getPublicByIds(req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
+  public async getPublicByIds(req: express.Request<{}, {}, null>, res: express.Response): Promise<unknown> {
     return this.actionWrapperAnon(req, res, async () => {
       const ids = req.query.ids.toString().split(",");
       return await this.repositories.study.loadPublicByIds(ids);
@@ -38,28 +38,28 @@ export class StudyController extends LessonsBaseController {
   }
 
   @httpGet("/public/:id")
-  public async getPublic(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
+  public async getPublic(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<unknown> {
     return this.actionWrapperAnon(req, res, async () => {
       return await this.repositories.study.loadPublic(id);
     });
   }
 
   @httpGet("/public")
-  public async getPublicAll(req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
+  public async getPublicAll(req: express.Request<{}, {}, null>, res: express.Response): Promise<unknown> {
     return this.actionWrapperAnon(req, res, async () => {
       return await this.repositories.study.loadPublicAll();
     });
   }
 
   @httpGet("/:id")
-  public async get(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
+  public async get(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<unknown> {
     return this.actionWrapper(req, res, async au => {
       return await this.repositories.study.load(au.churchId, id);
     });
   }
 
   @httpGet("/program/:programId")
-  public async getForProgram(@requestParam("programId") programId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
+  public async getForProgram(@requestParam("programId") programId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<unknown> {
     return this.actionWrapper(req, res, async au => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
       else return await this.repositories.study.loadByProgramId(au.churchId, programId);
@@ -67,7 +67,7 @@ export class StudyController extends LessonsBaseController {
   }
 
   @httpGet("/")
-  public async getForAll(req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
+  public async getForAll(req: express.Request<{}, {}, null>, res: express.Response): Promise<unknown> {
     return this.actionWrapper(req, res, async au => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
       else return await this.repositories.study.loadAll(au.churchId);
@@ -75,7 +75,7 @@ export class StudyController extends LessonsBaseController {
   }
 
   @httpPost("/")
-  public async save(req: express.Request<{}, {}, Study[]>, res: express.Response): Promise<any> {
+  public async save(req: express.Request<{}, {}, Study[]>, res: express.Response): Promise<unknown> {
     return this.actionWrapper(req, res, async au => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
       else {
@@ -114,7 +114,7 @@ export class StudyController extends LessonsBaseController {
   }
 
   @httpDelete("/:id")
-  public async delete(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
+  public async delete(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<unknown> {
     return this.actionWrapper(req, res, async au => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
       else if (!(await this.repositories.study.load(au.churchId, id))) return this.json({}, 404);

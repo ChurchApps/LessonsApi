@@ -1,4 +1,21 @@
-import { Action, ExternalVideo, File, Lesson, Section, Study, Venue } from "../models";
+import { Action, ExternalVideo, Lesson, PlaylistFile, Program, Section, Study, Venue } from "../models";
+
+interface LibraryNode {
+  id: string;
+  name: string;
+  description: string;
+  image: string;
+  apiUrl?: string;
+  children?: LibraryNode[];
+}
+
+interface PlaylistSlide {
+  id: string;
+  seconds: number;
+  type: string;
+  url: string;
+  loop?: boolean;
+}
 import { Repositories } from "../repositories";
 import { ArrayHelper, Environment } from ".";
 import { PlaylistHelper } from "./PlaylistHelper";
@@ -13,8 +30,8 @@ export class LibraryHelper {
 
     const result = { treeLabels: ["Program", "Study", "Lesson", "Playlist"], playlists: [] };
 
-    programs.forEach((program: any) => {
-      const programNode = { id: program.id, name: program.name, description: program.description, image: program.image, children: [] };
+    programs.forEach((program: Program) => {
+      const programNode: LibraryNode = { id: program.id, name: program.name, description: program.description, image: program.image, children: [] };
       this.appendStudies(studies, lessons, venues, programNode);
       result.playlists.push(programNode);
     });
@@ -22,36 +39,36 @@ export class LibraryHelper {
     return result;
   };
 
-  private static appendStudies = (allStudies: Study[], allLessons: Lesson[], allVenues: Venue[], programNode: any) => {
-    allStudies.forEach((study: any) => {
+  private static appendStudies = (allStudies: Study[], allLessons: Lesson[], allVenues: Venue[], programNode: LibraryNode) => {
+    allStudies.forEach((study: Study) => {
       if (study.programId === programNode.id) {
-        const studyNode = { id: study.id, name: study.name, description: study.description, image: study.image, children: [] };
+        const studyNode: LibraryNode = { id: study.id, name: study.name, description: study.description, image: study.image, children: [] };
         this.appendLessons(allLessons, allVenues, studyNode);
         programNode.children.push(studyNode);
       }
     });
   };
 
-  private static appendLessons = (allLessons: Lesson[], allVenues: Venue[], studyNode: any) => {
-    allLessons.forEach((lesson: any) => {
+  private static appendLessons = (allLessons: Lesson[], allVenues: Venue[], studyNode: LibraryNode) => {
+    allLessons.forEach((lesson: Lesson) => {
       if (lesson.studyId === studyNode.id) {
-        const lessonNode = { id: lesson.id, name: lesson.name, description: lesson.description, image: lesson.image, children: [] };
+        const lessonNode: LibraryNode = { id: lesson.id, name: lesson.name, description: lesson.description, image: lesson.image, children: [] };
         this.appendVenues(allVenues, lessonNode);
         studyNode.children.push(lessonNode);
       }
     });
   };
 
-  private static appendVenues = (allVenues: Venue[], lessonNode: any) => {
-    allVenues.forEach((venue: any) => {
+  private static appendVenues = (allVenues: Venue[], lessonNode: LibraryNode) => {
+    allVenues.forEach((venue: Venue) => {
       if (venue.lessonId === lessonNode.id) {
-        const venueNode = { id: venue.id, name: venue.name, description: "", image: lessonNode.image, apiUrl: "/venues/playlistNew/" + venue.id };
+        const venueNode: LibraryNode = { id: venue.id, name: venue.name, description: "", image: lessonNode.image, apiUrl: "/venues/playlistNew/" + venue.id };
         lessonNode.children.push(venueNode);
       }
     });
   };
 
-  static getPlaylist = async (venue: Venue, _lesson: Lesson, sections: Section[], actions: Action[], availableFiles: File[], availableVideos: ExternalVideo[], stream: boolean, resolution: string) => {
+  static getPlaylist = async (venue: Venue, _lesson: Lesson, sections: Section[], actions: Action[], availableFiles: PlaylistFile[], availableVideos: ExternalVideo[], stream: boolean, resolution: string) => {
     const result = { id: venue.id, name: venue.name, prefetch: false, playOrder: "sequential", messages: [] };
 
     sections.forEach(s => {
@@ -68,21 +85,21 @@ export class LibraryHelper {
     return result;
   };
 
-  static getFileMessage = (action: Action, availableFiles: File[]) => {
-    const result: any[] = [];
-    const files: any[] = PlaylistHelper.getBestFiles(action, availableFiles);
+  static getFileMessage = (action: Action, availableFiles: PlaylistFile[]) => {
+    const result: { name: string; thumbnail: string; slides: PlaylistSlide[] }[] = [];
+    const files: PlaylistFile[] = PlaylistHelper.getBestFiles(action, availableFiles);
     if (!files || files.length === 0) return result;
 
     const cp = files[0].contentPath.indexOf("://") === -1 ? Environment.contentRoot + files[0].contentPath : files[0].contentPath;
-    const message = { name: action.content, thumbnail: files[0].thumbnail || cp, slides: [] };
+    const message = { name: action.content, thumbnail: files[0].thumbnail || cp, slides: [] as PlaylistSlide[] };
 
     files.forEach(file => {
       const contentPath = file.contentPath.indexOf("://") === -1 ? Environment.contentRoot + file.contentPath : file.contentPath;
-      let seconds = parseInt(file.seconds, 0);
+      let seconds = parseInt(String(file.seconds), 0);
       const loopVideo = file.loopVideo ? true : false;
       if (!seconds || seconds === 0 || loopVideo) seconds = 3600;
 
-      const slide: any = { id: file.id, seconds, type: file.fileType.split("/")[0], url: contentPath };
+      const slide: PlaylistSlide = { id: file.id, seconds, type: file.fileType.split("/")[0], url: contentPath };
       if (loopVideo) slide.loop = true;
       message.slides.push(slide);
     });

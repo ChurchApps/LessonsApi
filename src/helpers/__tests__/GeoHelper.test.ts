@@ -1,4 +1,4 @@
-const save = jest.fn(async (d: any) => d);
+const save = jest.fn(async (d: IpDetail) => d);
 const loadPendingLookup = jest.fn(async () => ["10.63.25.57", "127.0.0.1", "8.8.8.8"]);
 jest.mock("../../repositories", () => ({ Repositories: { getCurrent: () => ({ ipDetails: { loadPendingLookup, save } }) } }));
 jest.mock("../Environment", () => ({ Environment: { ipGeoKey: "test-key" } }));
@@ -15,6 +15,7 @@ jest.mock("axios", () => ({
 
 import Axios from "axios";
 import { GeoHelper } from "../GeoHelper";
+import { IpDetail } from "../../models";
 
 // zipBundles timer, prod: 9,404 "GeoHelper.lookupMissing failed ... 423" lines in 7 days, all for the same
 // five private addresses (10.x, 127.0.0.1) retried every 5 minutes. Those can never resolve; skip them quietly.

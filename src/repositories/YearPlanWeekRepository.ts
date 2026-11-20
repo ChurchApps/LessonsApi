@@ -1,3 +1,4 @@
+import { DeleteResult } from "kysely";
 import { getDb } from "../db";
 import { YearPlanWeek } from "../models";
 import { UniqueIdHelper } from "../helpers";
@@ -75,7 +76,7 @@ export class YearPlanWeekRepository {
     return saved;
   }
 
-  public async delete(churchId: string, id: string): Promise<any> {
+  public async delete(churchId: string, id: string): Promise<DeleteResult[]> {
     return await getDb().deleteFrom("yearPlanWeeks").where("id", "=", id).where("churchId", "=", churchId).execute();
   }
 }

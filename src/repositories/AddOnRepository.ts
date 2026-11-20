@@ -1,3 +1,4 @@
+import { DeleteResult } from "kysely";
 import { getDb } from "../db";
 import { AddOn } from "../models";
 import { UniqueIdHelper } from "../helpers";
@@ -53,7 +54,7 @@ export class AddOnRepository {
     return await getDb().selectFrom("addOns").selectAll().where("id", "=", id).executeTakeFirst() as AddOn;
   }
 
-  public async delete(churchId: string, id: string): Promise<any> {
+  public async delete(churchId: string, id: string): Promise<DeleteResult[]> {
     return await getDb().deleteFrom("addOns").where("id", "=", id).where("churchId", "=", churchId).execute();
   }
 }

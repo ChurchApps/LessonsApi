@@ -10,7 +10,7 @@ export class LessonFeedHelper {
     let resources: Resource[] = null;
     let addOns: AddOn[] = null;
     let externalVideos: ExternalVideo[] = null;
-    const promises: Promise<any>[] = [];
+    const promises: Promise<unknown>[] = [];
     promises.push(this.getVenues(lesson.id).then(v => (venues = v)));
     promises.push(this.getBundles(lesson.id).then(b => (bundles = b)));
     promises.push(this.getResources(lesson.id).then(r => (resources = r)));

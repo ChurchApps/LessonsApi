@@ -7,7 +7,7 @@ import { Permissions } from "../helpers/Permissions";
 @controller("/studyCategories")
 export class StudyCategoryController extends LessonsBaseController {
   @httpGet("/categoryNames/:programId")
-  public async getCategoryNames(@requestParam("programId") programId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
+  public async getCategoryNames(@requestParam("programId") programId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<unknown> {
     return this.actionWrapper(req, res, async au => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
       else {
@@ -24,14 +24,14 @@ export class StudyCategoryController extends LessonsBaseController {
   }
 
   @httpGet("/public/program/:programId")
-  public async getPublicForProgram(@requestParam("programId") programId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
+  public async getPublicForProgram(@requestParam("programId") programId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<unknown> {
     return this.actionWrapperAnon(req, res, async () => {
       return this.repositories.studyCategory.loadPublicByProgram(programId);
     });
   }
 
   @httpGet("/:programId")
-  public async getByCategoryName(@requestParam("programId") programId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
+  public async getByCategoryName(@requestParam("programId") programId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<unknown> {
     return this.actionWrapper(req, res, async au => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
       else {
@@ -42,7 +42,7 @@ export class StudyCategoryController extends LessonsBaseController {
   }
 
   @httpPost("/")
-  public async save(req: express.Request<{}, {}, StudyCategory[]>, res: express.Response): Promise<any> {
+  public async save(req: express.Request<{}, {}, StudyCategory[]>, res: express.Response): Promise<unknown> {
     return this.actionWrapper(req, res, async au => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
       else {
@@ -85,7 +85,7 @@ export class StudyCategoryController extends LessonsBaseController {
   }
 
   @httpDelete("/:id")
-  public async delete(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
+  public async delete(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<unknown> {
     return this.actionWrapper(req, res, async au => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
       else {

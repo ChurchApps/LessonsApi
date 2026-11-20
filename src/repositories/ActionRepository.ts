@@ -1,4 +1,4 @@
-import { sql } from "kysely";
+import { DeleteResult, sql } from "kysely";
 import { getDb } from "../db";
 import { Action } from "../models";
 import { UniqueIdHelper } from "../helpers";
@@ -43,7 +43,7 @@ export class ActionRepository {
   }
 
   public async loadPlaylistActions(venueId: string, churchId: string): Promise<Action[]> {
-    const result = await sql<any>`
+    const result = await sql<Action>`
       SELECT a.*, s.id as sectionId
       FROM sections s
       INNER JOIN roles r ON r.sectionId=s.id
@@ -74,7 +74,7 @@ export class ActionRepository {
     return await getDb().selectFrom("actions").selectAll().where("id", "=", id).executeTakeFirst() as Action;
   }
 
-  public async delete(churchId: string, id: string): Promise<any> {
+  public async delete(churchId: string, id: string): Promise<DeleteResult[]> {
     return await getDb().deleteFrom("actions").where("id", "=", id).where("churchId", "=", churchId).execute();
   }
 }

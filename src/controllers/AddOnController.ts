@@ -1,7 +1,10 @@
 import { controller, httpPost, httpGet, requestParam, httpDelete } from "inversify-express-utils";
 import express from "express";
 import { LessonsBaseController } from "./LessonsBaseController";
-import { AddOn } from "../models";
+import { AddOn, ExternalVideo } from "../models";
+
+// Add-ons as these endpoints return them, with the video duration (and video) attached.
+type AddOnWithVideo = AddOn & { seconds?: number; video?: ExternalVideo };
 import { Permissions } from "../helpers/Permissions";
 import { FileStorageHelper } from "@churchapps/apihelper";
 import { Environment } from "../helpers";
@@ -9,15 +12,15 @@ import { Environment } from "../helpers";
 @controller("/addOns")
 export class AddOnController extends LessonsBaseController {
   @httpGet("/public")
-  public async loadPublic(req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
+  public async loadPublic(req: express.Request<{}, {}, null>, res: express.Response): Promise<unknown> {
     return this.actionWrapperAnon(req, res, async () => {
-      const addOns = await this.repositories.addOn.loadPublic();
+      const addOns: AddOnWithVideo[] = await this.repositories.addOn.loadPublic();
       // Load video durations for all add-ons
-      const addOnIds = addOns.map((a: any) => a.id).filter(Boolean);
+      const addOnIds = addOns.map(a => a.id).filter(Boolean);
       if (addOnIds.length > 0) {
         const videos = await this.repositories.externalVideo.loadByContentTypeIds("addon", addOnIds);
-        addOns.forEach((addOn: any) => {
-          const video = videos.find((v: any) => v.contentId === addOn.id);
+        addOns.forEach(addOn => {
+          const video = videos.find(v => v.contentId === addOn.id);
           if (video) {
             addOn.seconds = video.seconds;
           }
@@ -28,16 +31,16 @@ export class AddOnController extends LessonsBaseController {
   }
 
   @httpGet("/public/:id")
-  public async loadPublicById(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
+  public async loadPublicById(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<unknown> {
     return this.actionWrapperAnon(req, res, async () => {
-      const addOn = await this.repositories.addOn.load(id);
+      const addOn: AddOnWithVideo = await this.repositories.addOn.load(id);
       if (!addOn) return null;
 
       // Load video for this add-on
       const videos = await this.repositories.externalVideo.loadByContentTypeIds("addon", [id]);
       if (videos.length > 0) {
-        (addOn as any).video = videos[0];
-        (addOn as any).seconds = videos[0].seconds;
+        addOn.video = videos[0];
+        addOn.seconds = videos[0].seconds;
       }
 
       // Load file if fileId is set
@@ -53,14 +56,14 @@ export class AddOnController extends LessonsBaseController {
   }
 
   @httpGet("/:id")
-  public async get(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
+  public async get(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<unknown> {
     return this.actionWrapper(req, res, async () => {
       return await this.repositories.addOn.load(id);
     });
   }
 
   @httpGet("/")
-  public async getAll(req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
+  public async getAll(req: express.Request<{}, {}, null>, res: express.Response): Promise<unknown> {
     return this.actionWrapper(req, res, async au => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
       else return await this.repositories.addOn.loadAll(au.churchId);
@@ -68,7 +71,7 @@ export class AddOnController extends LessonsBaseController {
   }
 
   @httpPost("/")
-  public async save(req: express.Request<{}, {}, AddOn[]>, res: express.Response): Promise<any> {
+  public async save(req: express.Request<{}, {}, AddOn[]>, res: express.Response): Promise<unknown> {
     return this.actionWrapper(req, res, async au => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
       else {
@@ -97,7 +100,7 @@ export class AddOnController extends LessonsBaseController {
   }
 
   @httpDelete("/:id")
-  public async delete(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
+  public async delete(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<unknown> {
     return this.actionWrapper(req, res, async au => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
       else {

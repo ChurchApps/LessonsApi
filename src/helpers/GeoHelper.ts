@@ -1,6 +1,6 @@
 import { Repositories } from "../repositories";
 import { IpDetail } from "../models";
-import Axios from "axios";
+import Axios, { AxiosError } from "axios";
 import { Environment } from "./Environment";
 import { IpHelper } from "./IpHelper";
 
@@ -27,7 +27,8 @@ export class GeoHelper {
         await Repositories.getCurrent().ipDetails.save(detail);
         // small delay to avoid hammering the API
         await new Promise(r => setTimeout(r, 200));
-      } catch (err: any) {
+      } catch (e) {
+        const err = e as AxiosError;
         const status = err?.response?.status;
         if (status === 429) {
           console.warn("GeoHelper.lookupMissing rate limited (429). Pausing remaining lookups until next run.");

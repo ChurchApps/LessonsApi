@@ -1,9 +1,9 @@
-import { S3Client, HeadObjectCommand, GetObjectCommand, ObjectCannedACL } from "@aws-sdk/client-s3";
+import { S3Client, HeadObjectCommand, GetObjectCommand, GetObjectCommandOutput, ObjectCannedACL } from "@aws-sdk/client-s3";
 import { Upload } from "@aws-sdk/lib-storage";
 import { Repositories } from "../repositories/Repositories";
 import { File, Variant, Bundle, Asset } from "../models";
 import { Environment, FilesHelper } from ".";
-import { Stream } from "stream";
+import { Readable, Stream } from "stream";
 import Archiver from "archiver";
 import { ArrayHelper, FileStorageHelper } from "@churchapps/apihelper";
 
@@ -17,7 +17,8 @@ export class ZipHelper {
       const command = new HeadObjectCommand({ Bucket: Environment.s3Bucket, Key: key });
       await Promise.race([this.S3().send(command), new Promise((_, reject) => setTimeout(() => reject(new Error("S3 HeadObject timeout")), 10000))]);
       return true;
-    } catch (err: any) {
+    } catch (e) {
+      const err = e as Error;
       if (err.name === "NotFound") return false;
       // A single unreadable file shouldn't block the entire bundle zip — log and skip.
       console.warn(`Skipping file ${key} due to S3 error:`, err.message);
@@ -25,8 +26,8 @@ export class ZipHelper {
     }
   }
 
-  static async zipFiles(zipKey: string, files: { name: string; key: string; stream?: any }[]) {
-    const verifiedFiles: { name: string; key: string; stream?: any }[] = [];
+  static async zipFiles(zipKey: string, files: { name: string; key: string; stream?: Readable }[]) {
+    const verifiedFiles: { name: string; key: string; stream?: Readable }[] = [];
     for (const f of files) {
       if (await this.checkFileExists(f.key)) verifiedFiles.push(f);
     }
@@ -39,7 +40,7 @@ export class ZipHelper {
           console.debug(`Fetching file: ${f.key}`);
           try {
             const response = await Promise.race([this.S3().send(new GetObjectCommand(params)), new Promise((_, reject) => setTimeout(() => reject(new Error("S3 GetObject timeout")), 30000))]);
-            f.stream = (response as any).Body;
+            f.stream = (response as GetObjectCommandOutput).Body as Readable;
           } catch (error) {
             console.error(`Failed to fetch file ${f.key} for zip ${zipKey}:`, error);
             throw error;
@@ -136,8 +137,8 @@ export class ZipHelper {
         console.error(`Failed to process bundle ${bundle.id} (${bundle.name}):`, {
           bundleId: bundle.id,
           churchId: bundle.churchId,
-          error: (error as any).message,
-          stack: (error as any).stack,
+          error: (error as Error).message,
+          stack: (error as Error).stack,
           processingTime: Date.now() - bundleStartTime
         });
         // Leave pendingUpdate=true so the next cron run retries.
@@ -256,8 +257,8 @@ export class ZipHelper {
         bundleId: bundle.id,
         bundleName: bundle.name,
         churchId: bundle.churchId,
-        error: (error as any).message,
-        stack: (error as any).stack
+        error: (error as Error).message,
+        stack: (error as Error).stack
       });
       throw error; // Re-throw to be handled by zipPendingBundles
     }

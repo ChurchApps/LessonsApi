@@ -8,7 +8,7 @@ import { HubspotHelper } from "../helpers/HubspotHelper";
 @controller("/downloads")
 export class DownloadController extends LessonsBaseController {
   @httpPost("/")
-  public async save(req: express.Request<{}, {}, Download[]>, res: express.Response): Promise<any> {
+  public async save(req: express.Request<{}, {}, Download[]>, res: express.Response): Promise<unknown> {
     return this.actionWrapper(req, res, async au => {
       const promises: Promise<Download>[] = [];
       req.body.forEach(download => {
@@ -42,7 +42,7 @@ export class DownloadController extends LessonsBaseController {
   }
 
   @httpGet("/:programId/geo")
-  public async geoData(@requestParam("programId") programId: string, req: express.Request, res: express.Response): Promise<any> {
+  public async geoData(@requestParam("programId") programId: string, req: express.Request, res: express.Response): Promise<unknown> {
     return this.actionWrapper(req, res, async au => {
       const program = await this.repositories.program.load(au.churchId, programId);
       if (!program) return this.denyAccess(["Access denied"]);
@@ -57,7 +57,7 @@ export class DownloadController extends LessonsBaseController {
   }
 
   @httpGet("/:programId/studies")
-  public async programStudies(@requestParam("programId") programId: string, req: express.Request, res: express.Response): Promise<any> {
+  public async programStudies(@requestParam("programId") programId: string, req: express.Request, res: express.Response): Promise<unknown> {
     return this.actionWrapper(req, res, async au => {
       const program = await this.repositories.program.load(au.churchId, programId);
       if (!program) return this.denyAccess(["Access denied"]);
@@ -72,7 +72,7 @@ export class DownloadController extends LessonsBaseController {
   }
 
   @httpGet("/:programId/churches")
-  public async programChurches(@requestParam("programId") programId: string, req: express.Request, res: express.Response): Promise<any> {
+  public async programChurches(@requestParam("programId") programId: string, req: express.Request, res: express.Response): Promise<unknown> {
     return this.actionWrapper(req, res, async au => {
       const program = await this.repositories.program.load(au.churchId, programId);
       if (!program) return this.denyAccess(["Access denied"]);
