@@ -1,6 +1,7 @@
 import { controller, httpGet } from "inversify-express-utils";
 import express from "express";
 import { LessonsBaseController } from "./LessonsBaseController";
+import { Program } from "../models";
 
 interface SearchDocument {
   id: string;
@@ -22,7 +23,7 @@ interface SearchDocument {
 @controller("/search")
 export class SearchController extends LessonsBaseController {
   @httpGet("/export")
-  public async export(req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
+  public async export(req: express.Request<{}, {}, null>, res: express.Response): Promise<unknown> {
     return this.actionWrapperAnon(req, res, async () => {
       const documents: SearchDocument[] = [];
 
@@ -33,8 +34,7 @@ export class SearchController extends LessonsBaseController {
       const studies = await this.repositories.study.loadPublicAll();
 
       // Create maps for lookups
-      const programMap = new Map(programs.map((p: any) => [p.id, p]));
-      const studyMap = new Map(studies.map((s: any) => [s.id, s]));
+      const programMap = new Map<string, Program>(programs.map(p => [p.id, p]));
 
       // Load study categories for each program
       const studyCategoryMap = new Map<string, string[]>();
@@ -47,7 +47,7 @@ export class SearchController extends LessonsBaseController {
             }
             studyCategoryMap.get(cat.studyId)!.push(cat.categoryName);
           }
-        } catch (e) {
+        } catch {
           // Some programs may not have categories
         }
       }
@@ -74,7 +74,7 @@ export class SearchController extends LessonsBaseController {
 
       // Add studies as searchable documents
       for (const study of studies) {
-        const program: any = programMap.get(study.programId);
+        const program = programMap.get(study.programId);
         const categories = studyCategoryMap.get(study.id) || [];
 
         documents.push({
@@ -99,7 +99,7 @@ export class SearchController extends LessonsBaseController {
       for (const study of studies) {
         try {
           const lessons = await this.repositories.lesson.loadPublicByStudyId(study.id);
-          const program: any = programMap.get(study.programId);
+          const program = programMap.get(study.programId);
           const categories = studyCategoryMap.get(study.id) || [];
 
           for (const lesson of lessons) {
@@ -120,7 +120,7 @@ export class SearchController extends LessonsBaseController {
               lessonCount: 0
             });
           }
-        } catch (e) {
+        } catch {
           // Some studies may not have lessons
         }
       }

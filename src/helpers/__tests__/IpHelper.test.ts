@@ -20,6 +20,6 @@ describe("IpHelper.isPublic", () => {
     expect(IpHelper.isPublic("2001:4860:4860::8888")).toBe(true);
     expect(IpHelper.isPublic("")).toBe(false);
     expect(IpHelper.isPublic("not-an-ip")).toBe(false);
-    expect(IpHelper.isPublic(undefined as any)).toBe(false);
+    expect(IpHelper.isPublic(undefined)).toBe(false);
   });
 });

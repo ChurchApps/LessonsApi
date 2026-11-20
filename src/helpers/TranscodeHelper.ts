@@ -4,6 +4,16 @@ import { File, Variant, Resource } from "../models";
 import { Environment, FilesHelper } from ".";
 import { AwsHelper } from "@churchapps/apihelper";
 
+// The SNS event lambda.js passes in, and the Elastic Transcoder job message inside it (only the fields we read).
+interface TranscodePingbackEvent {
+  Records: { Sns: { Message: string } }[];
+}
+
+interface TranscodeJobMessage {
+  outputKeyPrefix: string;
+  outputs: { key: string; duration: number }[];
+}
+
 export class TranscodeHelper {
   static zeroPad(num: number, places: number) {
     return String(num).padStart(places, "0");
@@ -31,10 +41,10 @@ export class TranscodeHelper {
     }
   }
 
-  static async handlePingback(data: any): Promise<void> {
+  static async handlePingback(data: TranscodePingbackEvent): Promise<void> {
     try {
       const messageString = data.Records[0].Sns.Message;
-      const message: any = JSON.parse(messageString);
+      const message: TranscodeJobMessage = JSON.parse(messageString);
       const webmPath = message.outputKeyPrefix;
       const parts = webmPath.split("/");
       const resourceId = parts[3];

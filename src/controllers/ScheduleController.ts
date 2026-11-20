@@ -7,21 +7,21 @@ import { Permissions } from "../helpers/Permissions";
 @controller("/schedules")
 export class ScheduleController extends LessonsBaseController {
   @httpGet("/classroom/:classroomId")
-  public async getAll(@requestParam("classroomId") classroomId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
+  public async getAll(@requestParam("classroomId") classroomId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<unknown> {
     return this.actionWrapper(req, res, async au => {
       return await this.repositories.schedule.loadByChurchIdClassroomId(au.churchId, classroomId);
     });
   }
 
   @httpGet("/public/classroom/:classroomId")
-  public async getPublicClassroom(@requestParam("classroomId") classroomId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
+  public async getPublicClassroom(@requestParam("classroomId") classroomId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<unknown> {
     return this.actionWrapperAnon(req, res, async () => {
       return await this.repositories.schedule.loadByClassroomId(classroomId);
     });
   }
 
   @httpGet("/:id")
-  public async get(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
+  public async get(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<unknown> {
     return this.actionWrapper(req, res, async au => {
       const schedule = await this.repositories.schedule.load(id);
       if (!schedule || schedule.churchId !== au.churchId) return this.json({}, 404);
@@ -30,7 +30,7 @@ export class ScheduleController extends LessonsBaseController {
   }
 
   @httpPost("/")
-  public async save(req: express.Request<{}, {}, Schedule[]>, res: express.Response): Promise<any> {
+  public async save(req: express.Request<{}, {}, Schedule[]>, res: express.Response): Promise<unknown> {
     return this.actionWrapper(req, res, async au => {
       if (!au.checkAccess(Permissions.schedules.edit)) return this.json({}, 401);
       else {
@@ -52,7 +52,7 @@ export class ScheduleController extends LessonsBaseController {
   }
 
   @httpDelete("/:id")
-  public async delete(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
+  public async delete(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<unknown> {
     return this.actionWrapper(req, res, async au => {
       if (!au.checkAccess(Permissions.schedules.edit)) return this.json({}, 401);
       else {

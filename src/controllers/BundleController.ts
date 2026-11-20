@@ -10,7 +10,7 @@ import { ZipHelper } from "../helpers/ZipHelper";
 @controller("/bundles")
 export class BundleController extends LessonsBaseController {
   @httpGet("/zip")
-  public async zipAll(req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
+  public async zipAll(req: express.Request<{}, {}, null>, res: express.Response): Promise<unknown> {
     return this.actionWrapper(req, res, async au => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
       await ZipHelper.zipPendingBundles(au.churchId);
@@ -19,7 +19,7 @@ export class BundleController extends LessonsBaseController {
   }
 
   @httpGet("/queue/health")
-  public async getQueueHealth(req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
+  public async getQueueHealth(req: express.Request<{}, {}, null>, res: express.Response): Promise<unknown> {
     return this.actionWrapper(req, res, async au => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
 
@@ -53,7 +53,7 @@ export class BundleController extends LessonsBaseController {
   }
 
   @httpPost("/queue/clear-stuck")
-  public async clearStuckBundles(req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
+  public async clearStuckBundles(req: express.Request<{}, {}, null>, res: express.Response): Promise<unknown> {
     return this.actionWrapper(req, res, async au => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
 
@@ -77,7 +77,7 @@ export class BundleController extends LessonsBaseController {
   }
 
   @httpGet("/available")
-  public async getAvailable(req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
+  public async getAvailable(req: express.Request<{}, {}, null>, res: express.Response): Promise<unknown> {
     return this.actionWrapper(req, res, async au => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
       else return await this.repositories.bundle.loadAvailable(au.churchId, req.query.programId.toString(), req.query.studyId.toString());
@@ -85,7 +85,7 @@ export class BundleController extends LessonsBaseController {
   }
 
   @httpGet("/:id")
-  public async get(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
+  public async get(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<unknown> {
     return this.actionWrapper(req, res, async au => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
       else return await this.repositories.bundle.load(au.churchId, id);
@@ -93,7 +93,7 @@ export class BundleController extends LessonsBaseController {
   }
 
   @httpGet("/content/:contentType/:contentId")
-  public async getForContent(@requestParam("contentType") contentType: string, @requestParam("contentId") contentId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
+  public async getForContent(@requestParam("contentType") contentType: string, @requestParam("contentId") contentId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<unknown> {
     return this.actionWrapper(req, res, async au => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
       else return await this.repositories.bundle.loadByContentTypeId(au.churchId, contentType, contentId);
@@ -101,7 +101,7 @@ export class BundleController extends LessonsBaseController {
   }
 
   @httpPost("/")
-  public async save(req: express.Request<{}, {}, Bundle[]>, res: express.Response): Promise<any> {
+  public async save(req: express.Request<{}, {}, Bundle[]>, res: express.Response): Promise<unknown> {
     return this.actionWrapper(req, res, async au => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
       else {
@@ -123,7 +123,7 @@ export class BundleController extends LessonsBaseController {
   }
 
   @httpPost("/:id/rezip")
-  public async rezip(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
+  public async rezip(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<unknown> {
     return this.actionWrapper(req, res, async au => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
       await ZipHelper.setBundlePending(au.churchId, id);
@@ -132,7 +132,7 @@ export class BundleController extends LessonsBaseController {
   }
 
   @httpDelete("/:id")
-  public async delete(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
+  public async delete(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<unknown> {
     return this.actionWrapper(req, res, async au => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
       else {
@@ -146,7 +146,7 @@ export class BundleController extends LessonsBaseController {
   }
 
   private async deleteResource(churchId: string, resourceId: string) {
-    const promises: Promise<any>[] = [];
+    const promises: Promise<unknown>[] = [];
     promises.push(
       this.repositories.asset.loadByResourceId(churchId, resourceId).then(assets =>
         Promise.all(assets.map(async a => {

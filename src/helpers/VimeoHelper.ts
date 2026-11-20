@@ -1,7 +1,21 @@
-import Axios from "axios";
+import Axios, { AxiosResponse } from "axios";
 import { Environment } from "./Environment";
 import { ExternalVideo } from "../models";
 import { Repositories } from "../repositories";
+
+// The parts of Vimeo's GET /videos/:id response that we read.
+interface VimeoLink {
+  rendition?: string;
+  link?: string;
+  expires?: string;
+}
+
+interface VimeoVideoResponse {
+  duration?: number;
+  pictures?: { sizes?: { width?: number; link_with_play_button?: string }[] };
+  files?: VimeoLink[];
+  download?: VimeoLink[];
+}
 
 export class VimeoHelper {
   public static async updateVimeoLinks(ev: ExternalVideo) {
@@ -26,7 +40,7 @@ export class VimeoHelper {
   }
 
   public static async getVideoDetails(videoId: string) {
-    const resp = await Axios.get("https://api.vimeo.com/videos/" + videoId, this.getAxiosConfig());
+    const resp = await Axios.get<VimeoVideoResponse>("https://api.vimeo.com/videos/" + videoId, this.getAxiosConfig());
     const result = {
       duration: resp.data.duration,
       download720p: this.getDownloadDetails(resp, "720p"),
@@ -41,34 +55,34 @@ export class VimeoHelper {
     return result;
   }
 
-  private static getPictureDetails(resp: any, width: number) {
+  private static getPictureDetails(resp: AxiosResponse<VimeoVideoResponse>, width: number) {
     let result = "";
-    resp.data.pictures.sizes?.forEach((s: any) => {
+    resp.data.pictures.sizes?.forEach(s => {
       if (s.width === width) result = s.link_with_play_button;
     });
     return result;
   }
 
-  private static getFileDetails(resp: any, rendition: string) {
+  private static getFileDetails(resp: AxiosResponse<VimeoVideoResponse>, rendition: string) {
     let result = "";
-    resp.data.files?.forEach((f: any) => {
+    resp.data.files?.forEach(f => {
       if (f.rendition === rendition) result = f.link;
     });
     return result;
   }
 
-  private static getDownloadDetails(resp: any, rendition: string) {
+  private static getDownloadDetails(resp: AxiosResponse<VimeoVideoResponse>, rendition: string) {
     let result = "";
-    resp.data.download?.forEach((f: any) => {
+    resp.data.download?.forEach(f => {
       if (f.rendition === rendition) result = f.link;
     });
     return result;
   }
 
   // Any download link we keep can serve a request, so a video with no 720p must not look expired.
-  private static getDownloadExpiration(resp: any) {
+  private static getDownloadExpiration(resp: AxiosResponse<VimeoVideoResponse>) {
     const kept = ["720p", "1080p", "4k"];
-    const expires = (resp.data.download || []).filter((f: any) => kept.includes(f.rendition) && f.expires).map((f: any) => new Date(f.expires).getTime());
+    const expires = (resp.data.download || []).filter((f: VimeoLink) => kept.includes(f.rendition) && f.expires).map((f: VimeoLink) => new Date(f.expires).getTime());
     return new Date(expires.length > 0 ? Math.min(...expires) : Date.now());
   }
 }

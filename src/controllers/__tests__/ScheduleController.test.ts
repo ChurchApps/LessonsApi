@@ -1,17 +1,19 @@
 import "reflect-metadata";
 jest.mock("../LessonsBaseController", () => ({
   LessonsBaseController: class {
-    repositories: any;
-    json(obj: any, status?: number) { return { obj, status: status ?? 200 }; }
+    repositories: unknown;
+    json(obj: unknown, status?: number) { return { obj, status: status ?? 200 }; }
   }
 }));
 
 import { ScheduleController } from "../ScheduleController";
+import { Schedule } from "../../models";
+import { asRepositories, asRequest, JsonResult, noResponse, RepoMocks, setActionWrapper, TestUser } from "./controllerTestUtils";
 
-function makeController(au: any, repos: any) {
+function makeController(au: TestUser, repos: RepoMocks) {
   const controller = new ScheduleController();
-  (controller as any).actionWrapper = (_req: any, _res: any, action: any) => action(au);
-  (controller as any).repositories = repos;
+  setActionWrapper(controller, au);
+  controller.repositories = asRepositories(repos);
   return controller;
 }
 
@@ -20,7 +22,7 @@ describe("ScheduleController.get", () => {
     const repos = { schedule: { load: jest.fn(async () => ({ id: "s1", churchId: "OTHER" })) } };
     const controller = makeController({ churchId: "c1" }, repos);
 
-    const res = await (controller as any).get("s1", {}, {});
+    const res = await controller.get("s1", asRequest(), noResponse) as JsonResult;
 
     expect(res.status).toBe(404);
   });
@@ -30,14 +32,14 @@ describe("ScheduleController.get", () => {
     const repos = { schedule: { load: jest.fn(async () => schedule) } };
     const controller = makeController({ churchId: "c1" }, repos);
 
-    expect(await (controller as any).get("s1", {}, {})).toEqual(schedule);
+    expect(await controller.get("s1", asRequest(), noResponse)).toEqual(schedule);
   });
 
   it("404s for a missing schedule", async () => {
     const repos = { schedule: { load: jest.fn(async () => undefined) } };
     const controller = makeController({ churchId: "c1" }, repos);
 
-    const res = await (controller as any).get("nope", {}, {});
+    const res = await controller.get("nope", asRequest(), noResponse) as JsonResult;
 
     expect(res.status).toBe(404);
   });
@@ -45,14 +47,14 @@ describe("ScheduleController.get", () => {
 
 describe("ScheduleController.save", () => {
   it("stamps churchId from the auth context", async () => {
-    const saved: any[] = [];
+    const saved: Schedule[] = [];
     const repos = {
-      schedule: { save: jest.fn(async (s: any) => { saved.push(s); return s; }) },
+      schedule: { save: jest.fn(async (s: Schedule) => { saved.push(s); return s; }) },
       classroom: { load: jest.fn(async (id: string) => ({ id, churchId: "c1" })) }
     };
     const controller = makeController({ churchId: "c1", checkAccess: () => true }, repos);
 
-    await (controller as any).save({ body: [{ churchId: "SPOOFED", classroomId: "cl1", venueId: "v1" }] }, {});
+    await controller.save(asRequest({ body: [{ churchId: "SPOOFED", classroomId: "cl1", venueId: "v1" }] }), noResponse);
 
     expect(saved[0].churchId).toBe("c1");
   });
@@ -61,7 +63,7 @@ describe("ScheduleController.save", () => {
     const repos = { schedule: { save: jest.fn() } };
     const controller = makeController({ churchId: "c1", checkAccess: () => false }, repos);
 
-    const res = await (controller as any).save({ body: [{}] }, {});
+    const res = await controller.save(asRequest({ body: [{}] }), noResponse) as JsonResult;
 
     expect(res.status).toBe(401);
     expect(repos.schedule.save).not.toHaveBeenCalled();

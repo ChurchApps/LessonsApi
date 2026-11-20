@@ -2,6 +2,8 @@ jest.mock("axios", () => ({ get: jest.fn() }));
 jest.mock("dns/promises", () => ({ lookup: jest.fn() }));
 
 import axios from "axios";
+import { LookupAddress, LookupOptions } from "dns";
+import { LookupFunction } from "net";
 import dns from "dns/promises";
 import { assertSafeProviderUrl, fetchProviderJson, providerHostname, safeProviderLookup } from "../ProviderUrlHelper";
 
@@ -97,7 +99,7 @@ describe("fetchProviderJson", () => {
     lookup.mockResolvedValueOnce([{ address: "203.0.113.10", family: 4 }]);
     lookup.mockResolvedValue([{ address: "169.254.169.254", family: 4 }]);
     // Stand in for the socket: dial using the agent's lookup rather than a second bare resolve.
-    axiosGet.mockImplementation((url: string, config: any) => new Promise((resolve, reject) => {
+    axiosGet.mockImplementation((url: string, config: { httpsAgent: { options: { lookup: LookupFunction } } }) => new Promise((resolve, reject) => {
       config.httpsAgent.options.lookup(new URL(url).hostname, { all: true, family: 0 }, (err: Error) => (err ? reject(err) : resolve({ data: {} })));
     }));
     await expect(fetchProviderJson("https://rebind.example/feed")).rejects.toThrow("not allowed");
@@ -107,8 +109,8 @@ describe("fetchProviderJson", () => {
 describe("safeProviderLookup", () => {
   beforeEach(() => lookup.mockReset());
 
-  function callLookup(hostname: string, options: any) {
-    return new Promise<any>((resolve, reject) => {
+  function callLookup(hostname: string, options: LookupOptions) {
+    return new Promise<{ address: string | LookupAddress[]; family?: number }>((resolve, reject) => {
       safeProviderLookup(hostname, options, (err, address, family) => (err ? reject(err) : resolve({ address, family })));
     });
   }

@@ -1,3 +1,4 @@
+import { DeleteResult } from "kysely";
 import { getDb } from "../db";
 import { Resource } from "../models";
 import { UniqueIdHelper } from "../helpers";
@@ -52,7 +53,7 @@ export class ResourceRepository {
     return await getDb().selectFrom("resources").selectAll().where("id", "=", id).executeTakeFirst() as Resource;
   }
 
-  public async loadNeedingWebm(): Promise<any[]> {
+  public async loadNeedingWebm() {
     return await getDb().selectFrom("files as f")
       .innerJoin("variants as v", "v.fileId", "f.id")
       .innerJoin("resources as r", "r.id", "v.resourceId")
@@ -61,10 +62,10 @@ export class ResourceRepository {
       .select(["r.churchId", "r.id", "r.name", "f.contentPath"])
       .where("f.contentPath", "like", "%.mp4%")
       .where("v2.id", "is", null)
-      .execute() as any[];
+      .execute();
   }
 
-  public async delete(churchId: string, id: string): Promise<any> {
+  public async delete(churchId: string, id: string): Promise<DeleteResult[]> {
     return await getDb().deleteFrom("resources").where("id", "=", id).where("churchId", "=", churchId).execute();
   }
 }

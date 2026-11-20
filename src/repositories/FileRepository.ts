@@ -1,4 +1,4 @@
-import { sql } from "kysely";
+import { DeleteResult, sql } from "kysely";
 import { getDb } from "../db";
 import { File } from "../models";
 import { UniqueIdHelper } from "../helpers";
@@ -60,11 +60,11 @@ export class FileRepository {
     return await getDb().selectFrom("files").selectAll().execute() as File[];
   }
 
-  public async delete(churchId: string, id: string): Promise<any> {
+  public async delete(churchId: string, id: string): Promise<DeleteResult[]> {
     return await getDb().deleteFrom("files").where("id", "=", id).where("churchId", "=", churchId).execute();
   }
 
-  public async cleanUp(churchId: string): Promise<any> {
+  public async cleanUp(churchId: string): Promise<DeleteResult[]> {
     const referenced = getDb().selectFrom("bundles").select("fileId").where("fileId", "is not", null)
       .unionAll(getDb().selectFrom("assets").select("fileId").where("fileId", "is not", null))
       .unionAll(getDb().selectFrom("variants").select("fileId").where("fileId", "is not", null));

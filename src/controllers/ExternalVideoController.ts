@@ -9,7 +9,7 @@ import { ownsContent } from "../helpers/ContentOwnership";
 @controller("/externalVideos")
 export class ExternalVideoController extends LessonsBaseController {
   @httpGet("/download/:id")
-  public async downloadRedirect(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
+  public async downloadRedirect(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<unknown> {
     return this.actionWrapperAnon(req, res, async () => {
       let result = await this.repositories.externalVideo.loadPublic(id);
       if (!result) return this.json({}, 404);
@@ -21,7 +21,7 @@ export class ExternalVideoController extends LessonsBaseController {
   }
 
   @httpGet("/public/:id")
-  public async getPublic(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
+  public async getPublic(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<unknown> {
     return this.actionWrapperAnon(req, res, async () => {
       let result = await this.repositories.externalVideo.loadPublic(id);
       if (!result) return this.json({}, 404);
@@ -31,7 +31,7 @@ export class ExternalVideoController extends LessonsBaseController {
   }
 
   @httpGet("/:id")
-  public async get(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
+  public async get(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<unknown> {
     return this.actionWrapper(req, res, async au => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
       else {
@@ -42,7 +42,7 @@ export class ExternalVideoController extends LessonsBaseController {
   }
 
   @httpGet("/content/:contentType/:contentId")
-  public async getForContent(@requestParam("contentType") contentType: string, @requestParam("contentId") contentId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
+  public async getForContent(@requestParam("contentType") contentType: string, @requestParam("contentId") contentId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<unknown> {
     return this.actionWrapper(req, res, async au => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
       else return await this.repositories.externalVideo.loadByContentTypeId(au.churchId, contentType, contentId);
@@ -50,7 +50,7 @@ export class ExternalVideoController extends LessonsBaseController {
   }
 
   @httpPost("/")
-  public async save(req: express.Request<{}, {}, ExternalVideo[]>, res: express.Response): Promise<any> {
+  public async save(req: express.Request<{}, {}, ExternalVideo[]>, res: express.Response): Promise<unknown> {
     return this.actionWrapper(req, res, async au => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
       else {
@@ -86,7 +86,7 @@ export class ExternalVideoController extends LessonsBaseController {
   }
 
   @httpDelete("/:id")
-  public async delete(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
+  public async delete(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<unknown> {
     return this.actionWrapper(req, res, async au => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
       else {

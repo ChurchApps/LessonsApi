@@ -1,15 +1,15 @@
 import "reflect-metadata";
 jest.mock("../LessonsBaseController", () => ({
   LessonsBaseController: class {
-    repositories: any;
-    json(obj: any, status?: number) { return { obj, status: status ?? 200 }; }
+    repositories: unknown;
+    json(obj: unknown, status?: number) { return { obj, status: status ?? 200 }; }
   }
 }));
 jest.mock("@churchapps/apihelper", () => ({
   __esModule: true,
   ArrayHelper: {
-    getAll: (items: any[], key: string, value: any) => items.filter(i => i[key] === value),
-    getOne: (items: any[], key: string, value: any) => items.find(i => i[key] === value)
+    getAll: (items: Record<string, unknown>[], key: string, value: unknown) => items.filter(i => i[key] === value),
+    getOne: (items: Record<string, unknown>[], key: string, value: unknown) => items.find(i => i[key] === value)
   }
 }));
 jest.mock("../../helpers", () => ({ __esModule: true, Environment: { contentRoot: "" }, DurationHelper: {} }));
@@ -27,20 +27,22 @@ jest.mock("../../helpers/PlaylistHelper", () => ({
 }));
 
 import { VenueController } from "../VenueController";
+import { PlaylistMessage } from "../../models";
+import { asRepositories, asRequest, noResponse, setActionWrapperAnon } from "./controllerTestUtils";
 
 // #1430: browse mode advanced off a looping title clip after one pass because this feed sent its real length.
-const playlistFiles = async (query: any) => {
-  const controller: any = new VenueController();
-  controller.actionWrapperAnon = (_req: any, _res: any, action: any) => action();
+const playlistFiles = async (query: Record<string, string>) => {
+  const controller = new VenueController();
+  setActionWrapperAnon(controller);
   controller.logDownload = jest.fn();
-  controller.repositories = {
+  controller.repositories = asRepositories({
     venue: { loadPublic: async () => ({ id: "v1", churchId: "c1", lessonId: "l1", name: "Venue" }) },
     lesson: { loadPublic: async () => ({ id: "l1" }) },
     section: { loadForPlaylist: async () => [{ id: "s1", name: "Section" }] },
     action: { loadPlaylistActions: async () => [{ sectionId: "s1", externalVideoId: "loop" }, { sectionId: "s1", externalVideoId: "once" }] }
-  };
-  const req = { query, headers: {}, socket: { remoteAddress: "127.0.0.1" } };
-  return (await controller.getPlaylist("v1", req, {})).messages[0].files;
+  });
+  const req = asRequest({ query, headers: {}, socket: { remoteAddress: "127.0.0.1" } });
+  return (await controller.getPlaylist("v1", req, noResponse) as { messages: PlaylistMessage[] }).messages[0].files;
 };
 
 describe.each([["download", {}], ["web", { mode: "web" }]])("venue playlist external videos, %s mode", (_name, query) => {

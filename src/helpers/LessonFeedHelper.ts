@@ -10,7 +10,7 @@ export class LessonFeedHelper {
     let resources: Resource[] = null;
     let addOns: AddOn[] = null;
     let externalVideos: ExternalVideo[] = null;
-    const promises: Promise<any>[] = [];
+    const promises: Promise<unknown>[] = [];
     promises.push(this.getVenues(lesson.id).then(v => (venues = v)));
     promises.push(this.getBundles(lesson.id).then(b => (bundles = b)));
     promises.push(this.getResources(lesson.id).then(r => (resources = r)));
@@ -157,7 +157,7 @@ export class LessonFeedHelper {
     return result;
   }
 
-  private static convertFiles(action: Action, bundles: Bundle[], resources: Resource[], externalVideos: ExternalVideo[], addOns: AddOn[], download: boolean) {
+  private static convertFiles(action: Action, _bundles: Bundle[], resources: Resource[], externalVideos: ExternalVideo[], addOns: AddOn[], download: boolean) {
     const result: FeedFile[] = [];
     const externalVideoId = action.externalVideoId;
 

@@ -1,3 +1,4 @@
+import { DeleteResult } from "kysely";
 import { getDb } from "../db";
 import { AddOnPlaylist } from "../models";
 import { UniqueIdHelper } from "../helpers";
@@ -23,7 +24,7 @@ export class AddOnPlaylistRepository {
     return await getDb().selectFrom("addOnPlaylists").selectAll().where("id", "=", id).executeTakeFirst() as AddOnPlaylist;
   }
 
-  public async delete(churchId: string, id: string): Promise<any> {
+  public async delete(churchId: string, id: string): Promise<DeleteResult[]> {
     return await getDb().deleteFrom("addOnPlaylists").where("id", "=", id).where("churchId", "=", churchId).execute();
   }
 }

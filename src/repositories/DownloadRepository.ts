@@ -1,4 +1,4 @@
-import { sql } from "kysely";
+import { DeleteResult, sql } from "kysely";
 import { getDb } from "../db";
 import { Download } from "../models";
 import { UniqueIdHelper } from "../helpers";
@@ -70,7 +70,7 @@ export class DownloadRepository {
     return await getDb().selectFrom("downloads").selectAll().where("id", "=", id).executeTakeFirst() as Download;
   }
 
-  public async geo(programId: string, startDate: Date, endDate: Date): Promise<any[]> {
+  public async geo(programId: string, startDate: Date, endDate: Date) {
     return await getDb().selectFrom("downloads as d")
       .innerJoin("ipDetails as ip", "ip.ipAddress", "d.ipAddress")
       .innerJoin("lessons as l", "l.id", "d.lessonId")
@@ -84,7 +84,7 @@ export class DownloadRepository {
       .execute();
   }
 
-  public async countsByStudy(programId: string, startDate: Date, endDate: Date): Promise<any[]> {
+  public async countsByStudy(programId: string, startDate: Date, endDate: Date) {
     return await getDb().selectFrom("downloads as d")
       .innerJoin("lessons as l", "l.id", "d.lessonId")
       .innerJoin("studies as s", "s.id", "l.studyId")
@@ -99,7 +99,7 @@ export class DownloadRepository {
       .execute();
   }
 
-  public async uniqueChurches(programId: string, startDate: Date, endDate: Date): Promise<any[]> {
+  public async uniqueChurches(programId: string, startDate: Date, endDate: Date) {
     return await getDb().selectFrom("downloads as d")
       .innerJoin("lessons as l", "l.id", "d.lessonId")
       .innerJoin("studies as s", "s.id", "l.studyId")
@@ -113,7 +113,7 @@ export class DownloadRepository {
       .execute();
   }
 
-  public async delete(churchId: string, id: string): Promise<any> {
+  public async delete(churchId: string, id: string): Promise<DeleteResult[]> {
     return await getDb().deleteFrom("downloads").where("id", "=", id).where("churchId", "=", churchId).execute();
   }
 }

@@ -1,6 +1,6 @@
-import { sql } from "kysely";
+import { DeleteResult, sql } from "kysely";
 import { getDb } from "../db";
-import { Variant } from "../models";
+import { PlaylistFile, Variant } from "../models";
 import { UniqueIdHelper } from "../helpers";
 
 export class VariantRepository {
@@ -62,9 +62,9 @@ export class VariantRepository {
     return await getDb().selectFrom("variants").selectAll().where("id", "=", id).where("churchId", "=", churchId).executeTakeFirst() as Variant;
   }
 
-  public async loadPlaylist(resourceIds: string[]): Promise<any> {
+  public async loadPlaylist(resourceIds: string[]): Promise<PlaylistFile[]> {
     if (resourceIds.length === 0) return [];
-    const result = await sql<any>`
+    const result = await sql<PlaylistFile>`
       SELECT f.contentPath, r.id as resourceId, r.name as resourceName, '' as assetId,
         f.fileType, f.seconds, r.loopVideo
       FROM resources r
@@ -75,7 +75,7 @@ export class VariantRepository {
     return result.rows;
   }
 
-  public async delete(churchId: string, id: string): Promise<any> {
+  public async delete(churchId: string, id: string): Promise<DeleteResult[]> {
     return await getDb().deleteFrom("variants").where("id", "=", id).where("churchId", "=", churchId).execute();
   }
 }

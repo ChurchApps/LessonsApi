@@ -10,10 +10,21 @@ import { ActionRepository } from "../ActionRepository";
 
 const mockedGetDb = getDb as jest.Mock;
 
-const selectChain = (wheres: any[]) => {
-  const chain: any = {
+// The slice of Kysely's query builder these mocks stand in for.
+interface QueryChain {
+  where?: (...args: unknown[]) => QueryChain;
+  selectAll?: () => QueryChain;
+  select?: () => QueryChain;
+  orderBy?: () => QueryChain;
+  limit?: () => QueryChain;
+  unionAll?: () => QueryChain;
+  execute?: () => Promise<unknown>;
+}
+
+const selectChain = (wheres: unknown[][]) => {
+  const chain: QueryChain = {
     selectAll: () => chain,
-    where: (...args: any[]) => { wheres.push(args); return chain; },
+    where: (...args: unknown[]) => { wheres.push(args); return chain; },
     orderBy: () => chain,
     execute: () => Promise.resolve([])
   };
@@ -24,7 +35,7 @@ describe("venue content reads scope by churchId", () => {
   afterEach(() => jest.restoreAllMocks());
 
   it("loadBySectionId filters on churchId and sectionId", async () => {
-    const wheres: any[] = [];
+    const wheres: unknown[][] = [];
     mockedGetDb.mockReturnValue({ selectFrom: () => selectChain(wheres) });
 
     await new RoleRepository().loadBySectionId("c1", "sec1");
@@ -34,7 +45,7 @@ describe("venue content reads scope by churchId", () => {
   });
 
   it("loadByRoleId filters on churchId and roleId", async () => {
-    const wheres: any[] = [];
+    const wheres: unknown[][] = [];
     mockedGetDb.mockReturnValue({ selectFrom: () => selectChain(wheres) });
 
     await new ActionRepository().loadByRoleId("c1", "r1");

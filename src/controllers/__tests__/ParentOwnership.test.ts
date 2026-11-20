@@ -1,8 +1,8 @@
 import "reflect-metadata";
 jest.mock("../LessonsBaseController", () => ({
   LessonsBaseController: class {
-    repositories: any;
-    json(obj: any, status?: number) { return { obj, status: status ?? 200 }; }
+    repositories: unknown;
+    json(obj: unknown, status?: number) { return { obj, status: status ?? 200 }; }
   }
 }));
 jest.mock("@churchapps/apihelper", () => ({
@@ -34,12 +34,19 @@ import { ScheduleController } from "../ScheduleController";
 import { SectionController } from "../SectionController";
 import { VariantController } from "../VariantController";
 import { VenueController } from "../VenueController";
+import express from "express";
+import { LessonsBaseController } from "../LessonsBaseController";
+import { asRepositories, asRequest, JsonResult, noResponse, RepoMocks, setActionWrapper } from "./controllerTestUtils";
+
+// Every controller under test saves an array of child records.
+type SavingController = LessonsBaseController & { save: (req: express.Request, res: express.Response) => Promise<unknown> };
+type SaveRepoName = "action" | "role" | "section" | "venue" | "lesson" | "study" | "asset" | "resource" | "variant" | "schedule";
 
 const au = { churchId: "c1", checkAccess: () => true };
 
 // c1 owns program p1, study st1, lesson l1, venue v1, section s1, role r1, resource res1, bundle b1, classroom cl1; everything ending in "Other" belongs to c2.
 function makeRepos() {
-  const save = jest.fn(async (x: any) => x);
+  const save = jest.fn(async <T>(x: T) => x);
   return {
     program: { load: jest.fn(async (churchId: string, id: string) => (churchId === "c1" && id === "p1" ? { id, churchId } : undefined)) },
     study: { load: jest.fn(async (churchId: string, id: string) => (churchId === "c1" && id === "st1" ? { id, churchId } : undefined)), save },
@@ -57,14 +64,14 @@ function makeRepos() {
   };
 }
 
-function make<T>(Ctor: new () => T, repos: any): any {
-  const controller: any = new Ctor();
-  controller.actionWrapper = (_req: any, _res: any, action: any) => action(au);
-  controller.repositories = repos;
+function make<T extends SavingController>(Ctor: new () => T, repos: RepoMocks): T {
+  const controller = new Ctor();
+  setActionWrapper(controller, au);
+  controller.repositories = asRepositories(repos);
   return controller;
 }
 
-const cases: [string, any, string, any, any][] = [
+const cases: [string, new () => SavingController, SaveRepoName, Record<string, string>, Record<string, string>][] = [
   ["action under another church's role", ActionController, "action", { roleId: "rOther", lessonId: "l1" }, { roleId: "r1", lessonId: "l1" }],
   ["action under another church's lesson", ActionController, "action", { roleId: "r1", lessonId: "lOther" }, { roleId: "r1", lessonId: "l1" }],
   ["role under another church's section", RoleController, "role", { sectionId: "sOther", lessonId: "l1" }, { sectionId: "s1", lessonId: "l1" }],
@@ -83,14 +90,14 @@ const cases: [string, any, string, any, any][] = [
 describe("lesson children must hang off the caller's own parents", () => {
   it.each(cases)("refuses a save of an %s", async (_name, Ctor, repoName, foreign) => {
     const repos = makeRepos();
-    const res = await make(Ctor, repos).save({ body: [{ ...foreign }] }, {});
+    const res = await make(Ctor, repos).save(asRequest({ body: [{ ...foreign }] }), noResponse) as JsonResult;
     expect(res.status).toBe(404);
-    expect((repos as any)[repoName].save).not.toHaveBeenCalled();
+    expect(repos[repoName].save).not.toHaveBeenCalled();
   });
 
   it.each(cases)("still saves when the %s is replaced by an owned parent", async (_name, Ctor, repoName, _foreign, owned) => {
     const repos = makeRepos();
-    await make(Ctor, repos).save({ body: [{ ...owned }] }, {});
-    expect((repos as any)[repoName].save).toHaveBeenCalledWith(expect.objectContaining({ ...owned, churchId: "c1" }));
+    await make(Ctor, repos).save(asRequest({ body: [{ ...owned }] }), noResponse);
+    expect(repos[repoName].save).toHaveBeenCalledWith(expect.objectContaining({ ...owned, churchId: "c1" }));
   });
 });

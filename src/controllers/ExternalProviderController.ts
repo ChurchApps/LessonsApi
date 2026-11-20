@@ -9,7 +9,7 @@ import { fetchProviderJson } from "../helpers/ProviderUrlHelper";
 @controller("/externalProviders")
 export class ExternalProviderController extends LessonsBaseController {
   @httpGet("/playlist/:externalProviderId/:programId/:studyId/:lessonId/:venueId")
-  public async getExternalPlaylist(@requestParam("externalProviderId") externalProviderId: string, @requestParam("programId") programId: string, @requestParam("studyId") studyId: string, @requestParam("lessonId") lessonId: string, @requestParam("venueId") venueId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
+  public async getExternalPlaylist(@requestParam("externalProviderId") externalProviderId: string, @requestParam("programId") programId: string, @requestParam("studyId") studyId: string, @requestParam("lessonId") lessonId: string, @requestParam("venueId") venueId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<unknown> {
     return this.actionWrapperAnon(req, res, async () => {
       const data = await ExternalProviderHelper.loadExternalData(externalProviderId, programId, studyId, lessonId, venueId);
       return ExternalProviderHelper.convertToMessages(data);
@@ -17,7 +17,7 @@ export class ExternalProviderController extends LessonsBaseController {
   }
 
   @httpGet("/:id/lessons")
-  public async getPublicLessons(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
+  public async getPublicLessons(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<unknown> {
     return this.actionWrapperAnon(req, res, async () => {
       const ep = await this.repositories.externalProvider.loadPublic(id);
       return await fetchProviderJson(ep.apiUrl);
@@ -25,7 +25,7 @@ export class ExternalProviderController extends LessonsBaseController {
   }
 
   @httpGet("/:id/venue/:venueId")
-  public async getPublicExternal(@requestParam("id") id: string, @requestParam("venueId") venueId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
+  public async getPublicExternal(@requestParam("id") id: string, @requestParam("venueId") venueId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<unknown> {
     return this.actionWrapperAnon(req, res, async () => {
       const lessonData = await ExternalProviderHelper.loadExternalDataById(id, venueId);
       return lessonData;
@@ -33,7 +33,7 @@ export class ExternalProviderController extends LessonsBaseController {
   }
 
   @httpGet("/:id/venue/:venueId/planItems")
-  public async getPublicPlanItems(@requestParam("id") id: string, @requestParam("venueId") venueId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
+  public async getPublicPlanItems(@requestParam("id") id: string, @requestParam("venueId") venueId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<unknown> {
     return this.actionWrapperAnon(req, res, async () => {
       const { data, venueName } = await ExternalProviderHelper.loadExternalDataWithVenueName(id, venueId);
       return ExternalProviderHelper.convertToPlanItems(data, venueName);
@@ -41,7 +41,7 @@ export class ExternalProviderController extends LessonsBaseController {
   }
 
   @httpGet("/:id/venue/:venueId/actions")
-  public async getPublicActions(@requestParam("id") id: string, @requestParam("venueId") venueId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
+  public async getPublicActions(@requestParam("id") id: string, @requestParam("venueId") venueId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<unknown> {
     return this.actionWrapperAnon(req, res, async () => {
       const { data, venueName } = await ExternalProviderHelper.loadExternalDataWithVenueName(id, venueId);
       return ExternalProviderHelper.convertToActions(data, venueName);
@@ -49,21 +49,21 @@ export class ExternalProviderController extends LessonsBaseController {
   }
 
   @httpGet("/:id")
-  public async get(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
+  public async get(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<unknown> {
     return this.actionWrapper(req, res, async au => {
       return await this.repositories.externalProvider.load(au.churchId, id);
     });
   }
 
   @httpGet("/")
-  public async getAll(req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
+  public async getAll(req: express.Request<{}, {}, null>, res: express.Response): Promise<unknown> {
     return this.actionWrapper(req, res, async au => {
       return await this.repositories.externalProvider.loadAll(au.churchId);
     });
   }
 
   @httpPost("/")
-  public async save(req: express.Request<{}, {}, Provider[]>, res: express.Response): Promise<any> {
+  public async save(req: express.Request<{}, {}, Provider[]>, res: express.Response): Promise<unknown> {
     return this.actionWrapper(req, res, async au => {
       if (!au.checkAccess(Permissions.schedules.edit)) return this.json({}, 401);
       else {
@@ -79,7 +79,7 @@ export class ExternalProviderController extends LessonsBaseController {
   }
 
   @httpDelete("/:id")
-  public async delete(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
+  public async delete(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<unknown> {
     return this.actionWrapper(req, res, async au => {
       if (!au.checkAccess(Permissions.schedules.edit)) return this.json({}, 401);
       else {

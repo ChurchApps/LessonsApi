@@ -1,3 +1,4 @@
+import { DeleteResult } from "kysely";
 import { getDb } from "../db";
 import { StudyCategory } from "../models";
 import { UniqueIdHelper } from "../helpers";
@@ -41,7 +42,7 @@ export class StudyCategoryRepository {
     return await getDb().selectFrom("studyCategories").select("categoryName").where("programId", "=", programId).groupBy("categoryName").orderBy("categoryName").execute() as StudyCategory[];
   }
 
-  public async delete(churchId: string, id: string): Promise<any> {
+  public async delete(churchId: string, id: string): Promise<DeleteResult[]> {
     return await getDb().deleteFrom("studyCategories").where("id", "=", id)
       .where("programId", "in", getDb().selectFrom("programs").select("id").where("churchId", "=", churchId)).execute();
   }

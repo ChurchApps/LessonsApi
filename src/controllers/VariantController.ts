@@ -9,7 +9,7 @@ import { TranscodeHelper } from "../helpers/TranscodeHelper";
 @controller("/variants")
 export class VariantController extends LessonsBaseController {
   @httpGet("/createWebms")
-  public async createWebms(req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
+  public async createWebms(req: express.Request<{}, {}, null>, res: express.Response): Promise<unknown> {
     return this.actionWrapper(req, res, async au => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
       const items = await this.repositories.resource.loadNeedingWebm();
@@ -25,7 +25,7 @@ export class VariantController extends LessonsBaseController {
   }
 
   @httpGet("/:id")
-  public async get(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
+  public async get(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<unknown> {
     return this.actionWrapper(req, res, async au => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
       else return await this.repositories.variant.load(au.churchId, id);
@@ -33,7 +33,7 @@ export class VariantController extends LessonsBaseController {
   }
 
   @httpGet("/resourceId/:resourceId")
-  public async getForResource(@requestParam("resourceId") resourceId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
+  public async getForResource(@requestParam("resourceId") resourceId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<unknown> {
     return this.actionWrapper(req, res, async au => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
       else return await this.repositories.variant.loadByResourceId(au.churchId, resourceId);
@@ -41,7 +41,7 @@ export class VariantController extends LessonsBaseController {
   }
 
   @httpGet("/content/:contentType/:contentId")
-  public async getForContent(@requestParam("contentType") contentType: string, @requestParam("contentId") contentId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
+  public async getForContent(@requestParam("contentType") contentType: string, @requestParam("contentId") contentId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<unknown> {
     return this.actionWrapper(req, res, async au => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
       else return await this.repositories.variant.loadByContentTypeId(au.churchId, contentType, contentId);
@@ -49,7 +49,7 @@ export class VariantController extends LessonsBaseController {
   }
 
   @httpPost("/")
-  public async save(req: express.Request<{}, {}, Variant[]>, res: express.Response): Promise<any> {
+  public async save(req: express.Request<{}, {}, Variant[]>, res: express.Response): Promise<unknown> {
     return this.actionWrapper(req, res, async au => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
       else {
@@ -75,7 +75,7 @@ export class VariantController extends LessonsBaseController {
   }
 
   @httpDelete("/:id")
-  public async delete(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
+  public async delete(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<unknown> {
     return this.actionWrapper(req, res, async au => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
       else {

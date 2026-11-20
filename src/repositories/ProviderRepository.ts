@@ -1,4 +1,4 @@
-import { sql } from "kysely";
+import { DeleteResult, sql } from "kysely";
 import { getDb } from "../db";
 import { Provider } from "../models";
 import { UniqueIdHelper } from "../helpers";
@@ -21,7 +21,7 @@ export class ProviderRepository {
   }
 
   public async loadStats(): Promise<Provider> {
-    const result = await sql<any>`
+    const result = await sql<Provider>`
       SELECT
         (SELECT count(*) FROM providers) as providers,
         (SELECT count(*) FROM studies WHERE live=1) as studies,
@@ -46,7 +46,7 @@ export class ProviderRepository {
     return await getDb().selectFrom("providers").selectAll().execute() as Provider[];
   }
 
-  public async delete(churchId: string, id: string): Promise<any> {
+  public async delete(churchId: string, id: string): Promise<DeleteResult[]> {
     return await getDb().deleteFrom("providers").where("id", "=", id).where("churchId", "=", churchId).execute();
   }
 }

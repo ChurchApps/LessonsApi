@@ -1,3 +1,4 @@
+import type { PublicObjectSearchRequest, SimplePublicObjectInput } from "@hubspot/api-client/lib/codegen/crm/companies";
 import { Environment } from ".";
 
 
@@ -13,15 +14,15 @@ export class HubspotHelper {
 
   static lookupCompanByChurchId = async (churchId: string) => {
     const client = await this.getClient();
-    const req: any = { filterGroups: [{ filters: [{ propertyName: "church_id", operator: "EQ", value: churchId }] }], limit: 1 };
+    const req = { filterGroups: [{ filters: [{ propertyName: "church_id", operator: "EQ", value: churchId }] }], limit: 1 } as PublicObjectSearchRequest;
     const response = await client.crm.companies.searchApi.doSearch(req);
     return response.results[0];
   };
 
-  static setProperties = async (companyId: string, properties: any) => {
+  static setProperties = async (companyId: string, properties: Record<string, unknown>) => {
     const client = await this.getClient();
     try {
-      const response = await client.crm.companies.basicApi.update(companyId, { properties });
+      const response = await client.crm.companies.basicApi.update(companyId, { properties } as SimplePublicObjectInput);
       return response;
     } catch (error) {
       console.log(error);

@@ -1,4 +1,4 @@
-import { sql } from "kysely";
+import { DeleteResult, sql } from "kysely";
 import { getDb } from "../db";
 import { Section } from "../models";
 import { UniqueIdHelper } from "../helpers";
@@ -33,7 +33,7 @@ export class SectionRepository {
   }
 
   public async loadForPlaylist(churchId: string, venueId: string, classRoomChurchId: string): Promise<Section[]> {
-    const result = await sql<any>`
+    const result = await sql<Section>`
       SELECT s.* FROM sections s
       LEFT JOIN customizations sectionSort
         ON sectionSort.churchId=${classRoomChurchId}
@@ -62,7 +62,7 @@ export class SectionRepository {
     return await getDb().selectFrom("sections").selectAll().where("id", "=", id).executeTakeFirst() as Section;
   }
 
-  public async delete(churchId: string, id: string): Promise<any> {
+  public async delete(churchId: string, id: string): Promise<DeleteResult[]> {
     return await getDb().deleteFrom("sections").where("id", "=", id).where("churchId", "=", churchId).execute();
   }
 

@@ -1,31 +1,33 @@
 import "reflect-metadata";
 jest.mock("../LessonsBaseController", () => ({
   LessonsBaseController: class {
-    repositories: any;
-    json(obj: any, status?: number) { return { obj, status: status ?? 200 }; }
+    repositories: unknown;
+    json(obj: unknown, status?: number) { return { obj, status: status ?? 200 }; }
   }
 }));
 
 import { YearPlanController } from "../YearPlanController";
+import { YearPlan, YearPlanWeek } from "../../models";
+import { asRepositories, asRequest, JsonResult, noResponse, RepoMocks, setActionWrapper, setActionWrapperAnon, TestUser } from "./controllerTestUtils";
 
-function makeController(au: any, repos: any) {
+function makeController(au: TestUser, repos: RepoMocks) {
   const controller = new YearPlanController();
-  (controller as any).actionWrapper = (_req: any, _res: any, action: any) => action(au);
-  (controller as any).actionWrapperAnon = (_req: any, _res: any, action: any) => action();
-  (controller as any).repositories = repos;
+  setActionWrapper(controller, au);
+  setActionWrapperAnon(controller);
+  controller.repositories = asRepositories(repos);
   return controller;
 }
 
 describe("YearPlanController.save", () => {
   it("stamps churchId and replaces weeks", async () => {
-    const savedPlans: any[] = [];
+    const savedPlans: YearPlan[] = [];
     const repos = {
-      yearPlan: { save: jest.fn(async (p: any) => { savedPlans.push({ ...p }); return { ...p, id: p.id || "yp1" }; }) },
-      yearPlanWeek: { replaceForPlan: jest.fn(async (_churchId: string, planId: string, weeks: any[]) => weeks.map((w, i) => ({ ...w, id: "w" + i, yearPlanId: planId }))) }
+      yearPlan: { save: jest.fn(async (p: YearPlan) => { savedPlans.push({ ...p }); return { ...p, id: p.id || "yp1" }; }) },
+      yearPlanWeek: { replaceForPlan: jest.fn(async (_churchId: string, planId: string, weeks: YearPlanWeek[]) => weeks.map((w, i) => ({ ...w, id: "w" + i, yearPlanId: planId }))) }
     };
     const controller = makeController({ churchId: "c1", checkAccess: () => true }, repos);
 
-    const res = await (controller as any).save({ body: [{ churchId: "SPOOFED", name: "Ark Year", startMonth: 1, weeks: [{ week: 1, lessonId: "l1", anchor: "easter" }] }] }, {});
+    const res = await controller.save(asRequest({ body: [{ churchId: "SPOOFED", name: "Ark Year", startMonth: 1, weeks: [{ week: 1, lessonId: "l1", anchor: "easter" }] }] }), noResponse) as YearPlan[];
 
     expect(savedPlans[0].churchId).toBe("c1");
     expect(savedPlans[0].startMonth).toBe(1);
@@ -41,7 +43,7 @@ describe("YearPlanController.save", () => {
     };
     const controller = makeController({ churchId: "c1", checkAccess: () => true }, repos);
 
-    const res = await (controller as any).save({ body: [{ id: "other", weeks: [{ week: 1 }] }] }, {});
+    const res = await controller.save(asRequest({ body: [{ id: "other", weeks: [{ week: 1 }] }] }), noResponse) as JsonResult;
 
     expect(res.status).toBe(404);
     expect(repos.yearPlan.save).not.toHaveBeenCalled();
@@ -52,7 +54,7 @@ describe("YearPlanController.save", () => {
     const repos = { yearPlan: { save: jest.fn() } };
     const controller = makeController({ churchId: "c1", checkAccess: () => false }, repos);
 
-    const res = await (controller as any).save({ body: [{}] }, {});
+    const res = await controller.save(asRequest({ body: [{}] }), noResponse) as JsonResult;
 
     expect(res.status).toBe(401);
     expect(repos.yearPlan.save).not.toHaveBeenCalled();
@@ -64,7 +66,7 @@ describe("YearPlanController.get", () => {
     const repos = { yearPlan: { load: jest.fn(async () => undefined) } };
     const controller = makeController({ churchId: "c1", checkAccess: () => true }, repos);
 
-    const res = await (controller as any).get("yp1", {}, {});
+    const res = await controller.get("yp1", asRequest(), noResponse) as JsonResult;
 
     expect(res.status).toBe(404);
   });
@@ -93,7 +95,7 @@ describe("YearPlanController.hydratePlans", () => {
     };
     const controller = makeController({ churchId: "c1", checkAccess: () => true }, repos);
 
-    const res = await (controller as any).getPublicAll({}, {});
+    const res = await controller.getPublicAll(asRequest(), noResponse) as YearPlan[];
 
     expect(res[0].startMonth).toBe(1);
     expect(res[0].weeks[0].anchor).toBe("easter");

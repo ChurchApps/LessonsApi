@@ -9,14 +9,14 @@ import { LessonFeedHelper } from "../helpers/LessonFeedHelper";
 @controller("/actions")
 export class ActionController extends LessonsBaseController {
   @httpGet("/public/lesson/:lessonId")
-  public async getForLesson(@requestParam("lessonId") lessonId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
+  public async getForLesson(@requestParam("lessonId") lessonId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<unknown> {
     return this.actionWrapperAnon(req, res, async () => {
       return await this.repositories.action.loadByLessonId(lessonId);
     });
   }
 
   @httpGet("/role/:roleId")
-  public async getForRole(@requestParam("roleId") roleId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
+  public async getForRole(@requestParam("roleId") roleId: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<unknown> {
     return this.actionWrapper(req, res, async au => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
       else return await this.repositories.action.loadByRoleId(au.churchId, roleId);
@@ -24,7 +24,7 @@ export class ActionController extends LessonsBaseController {
   }
 
   @httpGet("/public/feed/:id")
-  public async getPublicFeed(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
+  public async getPublicFeed(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<unknown> {
     return this.actionWrapperAnon(req, res, async () => {
       // Load the action
       const action = await this.repositories.action.load(id);
@@ -72,7 +72,7 @@ export class ActionController extends LessonsBaseController {
   }
 
   @httpGet("/:id")
-  public async get(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
+  public async get(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<unknown> {
     return this.actionWrapper(req, res, async au => {
       const action = await this.repositories.action.load(id);
       if (!action || action.churchId !== au.churchId) return this.json({}, 404);
@@ -81,7 +81,7 @@ export class ActionController extends LessonsBaseController {
   }
 
   @httpPost("/")
-  public async save(req: express.Request<{}, {}, Action[]>, res: express.Response): Promise<any> {
+  public async save(req: express.Request<{}, {}, Action[]>, res: express.Response): Promise<unknown> {
     return this.actionWrapper(req, res, async au => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
       else {
@@ -109,7 +109,7 @@ export class ActionController extends LessonsBaseController {
   }
 
   @httpDelete("/:id")
-  public async delete(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<any> {
+  public async delete(@requestParam("id") id: string, req: express.Request<{}, {}, null>, res: express.Response): Promise<unknown> {
     return this.actionWrapper(req, res, async au => {
       if (!au.checkAccess(Permissions.lessons.edit)) return this.json({}, 401);
       else {

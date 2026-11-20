@@ -10,7 +10,7 @@ import cors from "cors";
 import { slowRequestLogger } from "./helpers/SlowRequestLogger";
 
 // Kysely mysql2 driver returns BigInt for ResultSetHeader fields; serialize to string
-(BigInt.prototype as any).toJSON = function () { return this.toString(); };
+(BigInt.prototype as BigInt & { toJSON: () => string }).toJSON = function () { return this.toString(); };
 
 export const init = async () => {
   dotenv.config({ quiet: true });
@@ -29,7 +29,7 @@ export const init = async () => {
       })
     );
 
-    expApp.options("*", (req, res) => {
+    expApp.options("*", (_req, res) => {
       res.header("Access-Control-Allow-Origin", "*");
       res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, PATCH, OPTIONS");
       res.header("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With, Accept, Origin");
@@ -37,7 +37,7 @@ export const init = async () => {
     });
 
     // In Lambda, @codegenie/serverless-express stages body directly; run custom handler before body-parser to avoid "stream is not readable" error
-    expApp.use((req, res, next) => {
+    expApp.use((req, _res, next) => {
       const contentType = req.headers["content-type"] || "";
       let handled = false;
 
@@ -76,7 +76,7 @@ export const init = async () => {
         handled = true;
       }
 
-      if (handled) (req as any)._body = true;
+      if (handled) (req as express.Request & { _body?: boolean })._body = true;
       next();
     });
 
@@ -91,7 +91,7 @@ export const init = async () => {
   };
 
   app.setErrorConfig((expApp) => {
-    expApp.use((error: any, req: express.Request, res: express.Response, _next: express.NextFunction) => {
+    expApp.use((error: Error & { statusCode?: number; status?: number }, req: express.Request, res: express.Response, _next: express.NextFunction) => {
       console.error("Global error handler:", error);
       const statusCode = error.statusCode || error.status || 500;
       const message = error.message || "Internal Server Error";

@@ -2,13 +2,14 @@ jest.mock("../../repositories", () => ({ Repositories: { getCurrent: jest.fn() }
 jest.mock("@churchapps/apihelper", () => ({
   __esModule: true,
   ArrayHelper: {
-    getIds: (items: any[], key: string) => Array.from(new Set(items.filter(i => i[key]).map(i => i[key]))),
-    getAll: (items: any[], key: string, value: any) => items.filter(i => i[key] === value),
-    getOne: (items: any[], key: string, value: any) => (items || []).find((i: any) => i[key] === value)
+    getIds: (items: Record<string, unknown>[], key: string) => Array.from(new Set(items.filter(i => i[key]).map(i => i[key]))),
+    getAll: (items: Record<string, unknown>[], key: string, value: unknown) => items.filter(i => i[key] === value),
+    getOne: (items: Record<string, unknown>[], key: string, value: unknown) => (items || []).find(i => i[key] === value)
   }
 }));
 
 import { LessonFeedHelper } from "../LessonFeedHelper";
+import { Lesson, Program, Study, Venue } from "../../models";
 
 const takeHome = {
   bottomLine: "God keeps His promises.",
@@ -19,10 +20,10 @@ const takeHome = {
 
 function convert(lessonOverrides: Record<string, unknown> = {}) {
   return LessonFeedHelper.convertToFeed(
-    { id: "l1", title: "The Rainbow", description: "Catalog copy about Noah.", image: "https://img", ...lessonOverrides } as any,
-    { name: "The Beginning", slug: "the-beginning" } as any,
-    { name: "Gospel of Mark", slug: "gospel-of-mark", aboutSection: "A study." } as any,
-    { id: "v1", name: "Kids", sections: [] } as any,
+    { id: "l1", title: "The Rainbow", description: "Catalog copy about Noah.", image: "https://img", ...lessonOverrides } as Lesson,
+    { name: "The Beginning", slug: "the-beginning" } as Study,
+    { name: "Gospel of Mark", slug: "gospel-of-mark", aboutSection: "A study." } as Program,
+    { id: "v1", name: "Kids", sections: [] } as Venue,
     [],
     [],
     [],

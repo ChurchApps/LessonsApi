@@ -5,7 +5,7 @@ jest.mock("../ProviderUrlHelper", () => ({
 }));
 jest.mock("@churchapps/apihelper", () => ({
   __esModule: true,
-  ArrayHelper: { getOne: (items: any[], key: string, value: any) => (items || []).find((i: any) => i[key] === value) }
+  ArrayHelper: { getOne: (items: Record<string, unknown>[], key: string, value: unknown) => (items || []).find(i => i[key] === value) }
 }));
 
 import { ExternalProviderHelper } from "../ExternalProviderHelper";
